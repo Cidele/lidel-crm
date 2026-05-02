@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL CRM - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
+        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 22px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; }
+        .card .number { font-size: 36px; font-weight: bold; color: #4f46e5; }
+        .card .label { color: #666; font-size: 13px; margin-top: 5px; }
+        .filters { background: white; border-radius: 15px; padding: 15px 25px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .filters label { font-weight: bold; color: #333; }
+        input[type="date"] { padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+        .btn { padding: 8px 20px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .chart-box { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .section { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px; background: #f9f9f9; color: #666; font-size: 13px; }
+        td { padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🚀 LIDEL CRM</h1>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="parceiros.html">Parceiros</a>
+            <a href="vendedores.html">Vendedores</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="relatorios.html">Relatórios</a>
+            <a href="sac.html">SAC</a>
+            <a href="indicacao.html">Indicação</a>
+            <a href="consumo.html">Consumo</a>
+            <a href="notificacoes.html">Notificações</a>
+            <a href="saude.html">Saúde</a>
+            <a href="assinaturas.html">Assinaturas</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filters">
+            <label>De:</label>
+            <input type="date" id="dataInicio">
+            <label>Até:</label>
+            <input type="date" id="dataFim">
+            <button class="btn" onclick="atualizarDashboard()">Filtrar</button>
+        </div>
+
+        <div class="cards">
+            <div class="card"><div class="number" id="totalClientes">0</div><div class="label">👥 Clientes</div></div>
+            <div class="card"><div class="number" id="vendasPeriodo">R$ 0</div><div class="label">💰 Vendas no Período</div></div>
+            <div class="card"><div class="number" id="cashbackAtivo">R$ 0</div><div class="label">🎁 Cashback Ativo</div></div>
+            <div class="card"><div class="number" id="totalParceiros">0</div><div class="label">🤝 Parceiros</div></div>
+        </div>
+
+        <div class="charts">
+            <div class="chart-box">
+                <h3>Vendas por Dia</h3>
+                <canvas id="graficoVendas" height="200"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>Cashback Gerado vs. Resgatado</h3>
+                <canvas id="graficoCashback" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Últimas Vendas</h2>
+            <table>
+                <thead><tr><th>Cliente</th><th>Valor</th><th>Cashback</th><th>Data</th></tr></thead>
+                <tbody id="tv"><tr><td colspan="4" style="text-align:center">Carregando...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let graficoVendas, graficoCashback;
+        const hoje = new Date();
+        const mesPassado = new Date();
+        mesPassado.setMonth(hoje.getMonth() - 1);
+        document.getElementById('dataInicio').value = mesPassado.toISOString().split('T')[0];
+        document.getElementById('dataFim').value = hoje.toISOString().split('T')[0];
+
+        async function atualizarDashboard() {
+            const inicio = document.getElementById('dataInicio').value;
+            const fim = document.getElementById('dataFim').value;
+
+            const { count: totalCli } = await s.from('clients').select('*', { count: 'exact', head: true }).eq('company_id', COMPANY_ID);
+            document.getElementById('totalClientes').textContent = totalCli || 0;
+
+            const { count: totalPar } = await s.from('partners').select('*', { count: 'exact', head: true }).eq('company_id', COMPANY_ID);
+            document.getElementById('totalParceiros').textContent = totalPar || 0;
+
+            const { data: cashAtivo } = await s.from('clients').select('cashback_balance').eq('company_id', COMPANY_ID).gt('cashback_balance', 0);
+            const totalCash = cashAtivo ? cashAtivo.reduce((a, c) => a + c.cashback_balance, 0) : 0;
+            document.getElementById('cashbackAtivo').textContent = 'R$ ' + totalCash.toFixed(2);
+
+            let query = s.from('sales').select('id, total_amount, cashback_generated, sale_date').eq('company_id', COMPANY_ID);
+            if (inicio) query = query.gte('sale_date', inicio);
+            if (fim) query = query.lte('sale_date', fim + 'T23:59:59');
+            const { data: vendas, error: erroVendas } = await query.order('sale_date', { ascending: false });
+
+            if (erroVendas) { console.error(erroVendas); return; }
+
+            const totalVendas = vendas ? vendas.reduce((a, v) => a + v.total_amount, 0) : 0;
+            document.getElementById('vendasPeriodo').textContent = 'R$ ' + totalVendas.toFixed(2);
+
+            const vendasPorDia = {};
+            vendas?.forEach(v => {
+                const dia = v.sale_date.split('T')[0];
+                vendasPorDia[dia] = (vendasPorDia[dia] || 0) + v.total_amount;
+            });
+            const labels = Object.keys(vendasPorDia).sort();
+            const dataVendas = labels.map(d => vendasPorDia[d]);
+
+            if (graficoVendas) graficoVendas.destroy();
+            const ctxVendas = document.getElementById('graficoVendas').getContext('2d');
+            graficoVendas = new Chart(ctxVendas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Vendas (R$)',
+                        data: dataVendas,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79,70,229,0.1)',
+                        fill: true
+                    }]
+                },
+                options: { plugins: { legend: { display: false } } }
+            });
+
+            const cashbackGerado = vendas ? vendas.reduce((a, v) => a + v.cashback_generated, 0) : 0;
+            const cashbackResgatado = cashbackGerado - totalCash;
+            if (graficoCashback) graficoCashback.destroy();
+            const ctxCashback = document.getElementById('graficoCashback').getContext('2d');
+            graficoCashback = new Chart(ctxCashback, {
+                type: 'bar',
+                data: {
+                    labels: ['Gerado', 'Resgatado'],
+                    datasets: [{
+                        label: 'Cashback (R$)',
+                        data: [cashbackGerado, cashbackResgatado > 0 ? cashbackResgatado : 0],
+                        backgroundColor: ['#4f46e5', '#ec4899']
+                    }]
+                },
+                options: { plugins: { legend: { display: false } } }
+            });
+
+            const { data: ultimas } = await s.from('sales')
+                .select('final_amount, cashback_generated, sale_date, clients!inner(name)')
+                .eq('company_id', COMPANY_ID)
+                .order('sale_date', { ascending: false })
+                .limit(10);
+            const tb = document.getElementById('tv');
+            if (ultimas && ultimas.length) {
+                tb.innerHTML = ultimas.map(v => `
+                    <tr>
+                        <td>${v.clients?.name || 'N/D'}</td>
+                        <td>R$ ${v.final_amount.toFixed(2)}</td>
+                        <td style="color:green">R$ ${v.cashback_generated.toFixed(2)}</td>
+                        <td>${new Date(v.sale_date).toLocaleDateString('pt-BR')}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tb.innerHTML = '<tr><td colspan="4">Nenhuma venda</td></tr>';
+            }
+        }
+
+        atualizarDashboard();
+    </script>
+</body>
+</html>

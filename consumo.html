@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Histórico de Consumo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 22px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
+        h2 { color: #4f46e5; }
+        input, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; box-sizing: border-box; }
+        button { background: #4f46e5; color: white; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #a5b4fc; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #4f46e5; color: white; padding: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .lembrete { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>📋 Histórico de Consumo</h1>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="parceiros.html">Parceiros</a>
+            <a href="vendedores.html">Vendedores</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="relatorios.html">Relatórios</a>
+            <a href="sac.html">SAC</a>
+            <a href="indicacao.html">Indicação</a>
+            <a href="consumo.html">Consumo</a>
+            <a href="notificacoes.html">Notificações</a>
+            <a href="saude.html">Saúde</a>
+            <a href="assinaturas.html">Assinaturas</a>
+        </div>
+    </div>
+
+    <div class="container" id="conteudo">
+        <p>Carregando...</p>
+    </div>
+
+    <script>
+        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const clientId = urlParams.get('id');
+
+        if (!clientId) {
+            document.getElementById('conteudo').innerHTML = '<p>Cliente não especificado. Acesse pela lista de clientes.</p>';
+        } else {
+            carregarPagina(clientId);
+        }
+
+        async function carregarPagina(cliId) {
+            const { data: client } = await s.from('clients').select('name').eq('id', cliId).single();
+            const nomeCliente = client?.name || 'Cliente';
+
+            const { data: historico } = await s.from('consumption_history')
+                .select('*').eq('client_id', cliId).order('consumed_at', { ascending: false });
+
+            let tabelaHTML = '';
+            if (historico && historico.length > 0) {
+                tabelaHTML = historico.map(h => {
+                    let lembreteHTML = '';
+                    if (h.duration) {
+                        const dias = parseInt(h.duration);
+                        if (!isNaN(dias) && dias > 0) {
+                            const dataConsumo = new Date(h.consumed_at);
+                            const dataRecompra = new Date(dataConsumo);
+                            dataRecompra.setDate(dataConsumo.getDate() + dias);
+                            const hoje = new Date();
+                            const diffDays = Math.ceil((dataRecompra - hoje) / (1000 * 60 * 60 * 24));
+                            if (diffDays <= 7 && diffDays >= 0) {
+                                lembreteHTML = `<div class="lembrete">🔔 Recomprar em ${diffDays} dia(s)! (${dataRecompra.toLocaleDateString('pt-BR')})</div>`;
+                            } else if (diffDays < 0) {
+                                lembreteHTML = `<div class="lembrete" style="background:#fee2e2;border-color:#dc2626">⚠️ Recompra atrasada há ${Math.abs(diffDays)} dias</div>`;
+                            }
+                        }
+                    }
+                    return `
+                        <tr>
+                            <td>${h.product_name}${lembreteHTML}</td>
+                            <td>${h.quantity || '-'}</td>
+                            <td>${new Date(h.consumed_at).toLocaleDateString('pt-BR')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tabelaHTML = '<tr><td colspan="3">Nenhum registro.</td></tr>';
+            }
+
+            document.getElementById('conteudo').innerHTML = `
+                <h2>📦 ${nomeCliente}</h2>
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:20px">
+                    <h3>Adicionar Consumo</h3>
+                    <input type="text" id="produto" placeholder="Produto/Alimento *">
+                    <input type="text" id="quantidade" placeholder="Quantidade (ex: 3 latas)">
+                    <input type="text" id="duracao" placeholder="Duração em dias (ex: 15)">
+                    <input type="date" id="dataConsumo">
+                    <button id="btnConsumo" onclick="adicionarConsumo('${cliId}')">Registrar</button>
+                </div>
+                <h3>Histórico</h3>
+                <table>
+                    <thead><tr><th>Produto</th><th>Qtd</th><th>Data</th></tr></thead>
+                    <tbody id="tabelaHistorico">${tabelaHTML}</tbody>
+                </table>
+            `;
+        }
+
+        async function adicionarConsumo(cliId) {
+            const produto = document.getElementById('produto').value.trim();
+            const quantidade = document.getElementById('quantidade').value.trim();
+            const duracao = document.getElementById('duracao').value.trim();
+            const data = document.getElementById('dataConsumo').value;
+            const btn = document.getElementById('btnConsumo');
+
+            if (!produto || !data) {
+                alert('Preencha produto e data.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Salvando…';
+
+            await s.from('consumption_history').insert([{
+                client_id: cliId,
+                product_name: produto,
+                quantity: quantidade || null,
+                duration: duracao || null,
+                consumed_at: data
+            }]);
+
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

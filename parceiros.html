@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Parceiros</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; padding: 20px; margin: 0; }
+        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 22px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; }
+        input, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; box-sizing: border-box; }
+        button { background: #4f46e5; color: white; font-weight: bold; cursor: pointer; border: none; }
+        button:disabled { background: #a5b4fc; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; margin-top: 20px; }
+        th { background: #4f46e5; color: white; padding: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🤝 Parceiros</h1>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="parceiros.html">Parceiros</a>
+            <a href="vendedores.html">Vendedores</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="relatorios.html">Relatórios</a>
+            <a href="sac.html">SAC</a>
+            <a href="indicacao.html">Indicação</a>
+            <a href="consumo.html">Consumo</a>
+            <a href="notificacoes.html">Notificações</a>
+            <a href="saude.html">Saúde</a>
+            <a href="assinaturas.html">Assinaturas</a>
+        </div>
+    </div>
+
+    <div style="background:white;padding:20px;border-radius:10px;margin-bottom:20px">
+        <input id="nomeParceiro" placeholder="Nome">
+        <input id="idprof" placeholder="CRN/CRM">
+        <input id="foneParceiro" placeholder="Telefone">
+        <input id="emailParceiro" placeholder="Email">
+        <button id="btnCadastrar" onclick="adicionar()">Cadastrar Parceiro</button>
+    </div>
+    <table><thead><tr><th>Nome</th><th>ID Prof.</th><th>Telefone</th><th>Comissão</th></tr></thead><tbody id="listaParceiros"></tbody></table>
+    <script>
+        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function carregar(){
+            const {data} = await s.from('partners').select('*').eq('company_id', COMPANY_ID).order('name');
+            document.getElementById('listaParceiros').innerHTML = (data||[]).map(p => `<tr><td>${p.name}</td><td>${p.professional_identifier||'-'}</td><td>${p.phone}</td><td>R$ ${(p.cashback_accumulated||0).toFixed(2)}</td></tr>`).join('');
+        }
+        async function adicionar(){
+            const btn = document.getElementById('btnCadastrar');
+            const n = document.getElementById('nomeParceiro').value.trim();
+            const f = document.getElementById('foneParceiro').value.trim();
+            if(!n||!f) return;
+            btn.disabled = true;
+            btn.textContent = 'Salvando…';
+            await s.from('partners').insert([{company_id: COMPANY_ID, name: n, phone: f, professional_identifier: document.getElementById('idprof').value, email: document.getElementById('emailParceiro').value}]);
+            btn.disabled = false;
+            btn.textContent = 'Cadastrar Parceiro';
+            carregar();
+        }
+        carregar();
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Saúde Financeira</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 22px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        h2 { color: #4f46e5; margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .score-circle { width: 150px; height: 150px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; margin: 20px auto; font-size: 42px; font-weight: bold; color: #4f46e5; border: 8px solid #4f46e5; }
+        .metricas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .metrica { background: #f9fafb; border-radius: 10px; padding: 15px; text-align: center; }
+        .metrica .valor { font-size: 28px; font-weight: bold; }
+        .metrica .label { font-size: 12px; color: #666; margin-top: 5px; }
+        .alerta { padding: 12px; border-radius: 8px; margin: 8px 0; display: flex; align-items: center; gap: 10px; }
+        .alerta.red { background: #fee2e2; color: #991b1b; }
+        .alerta.yellow { background: #fef3c7; color: #92400e; }
+        .alerta.green { background: #d1fae5; color: #065f46; }
+        .treinamento { background: #ede9fe; border-radius: 10px; padding: 15px; margin: 10px 0; }
+        button { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>📊 Saúde Financeira</h1>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="parceiros.html">Parceiros</a>
+            <a href="vendedores.html">Vendedores</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="relatorios.html">Relatórios</a>
+            <a href="sac.html">SAC</a>
+            <a href="indicacao.html">Indicação</a>
+            <a href="consumo.html">Consumo</a>
+            <a href="notificacoes.html">Notificações</a>
+            <a href="saude.html">Saúde</a>
+            <a href="assinaturas.html">Assinaturas</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Índice de Saúde -->
+        <div class="card" style="text-align:center">
+            <h2>Índice de Saúde da Empresa</h2>
+            <div class="score-circle" id="indiceScore">--</div>
+            <p id="indiceLabel" style="color:#666"></p>
+        </div>
+
+        <!-- Métricas detalhadas -->
+        <div class="card">
+            <h2>📈 Métricas</h2>
+            <div class="metricas" id="metricasContainer"></div>
+        </div>
+
+        <!-- Alertas -->
+        <div class="card">
+            <h2>🚨 Alertas</h2>
+            <div id="alertasContainer"></div>
+        </div>
+
+        <!-- Sugestões de treinamento -->
+        <div class="card">
+            <h2>📚 Treinamentos Recomendados</h2>
+            <div id="treinamentosContainer"></div>
+        </div>
+
+        <!-- Relatório rápido -->
+        <div class="card">
+            <h2>📝 Relatório Semanal</h2>
+            <div id="relatorioContainer"></div>
+            <button onclick="gerarRelatorio()" style="margin-top:15px">Gerar Relatório</button>
+        </div>
+    </div>
+
+    <script>
+        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let metricasCalculadas = {};
+
+        async function calcularMetricas() {
+            const { data: vendas } = await s.from('sales').select('total_amount, cashback_generated, sale_date, client_id, partner_id').eq('company_id', COMPANY_ID);
+            const { data: clientes } = await s.from('clients').select('id, name, cashback_balance, last_purchase_at, email, birthday_day, indicated_by_client_id').eq('company_id', COMPANY_ID);
+            const { data: parceiros } = await s.from('partners').select('id, cashback_accumulated').eq('company_id', COMPANY_ID);
+            const { data: usuarios } = await s.from('users').select('id, name, role').eq('company_id', COMPANY_ID);
+
+            const totalVendas = vendas ? vendas.length : 0;
+            const totalClientes = clientes ? clientes.length : 0;
+
+            // a) Taxa de resgate de cashback
+            const cashbackGerado = vendas ? vendas.reduce((s, v) => s + v.cashback_generated, 0) : 0;
+            const cashbackAtivo = clientes ? clientes.reduce((s, c) => s + (c.cashback_balance || 0), 0) : 0;
+            const cashbackResgatado = cashbackGerado - cashbackAtivo;
+            const taxaResgate = cashbackGerado > 0 ? (cashbackResgatado / cashbackGerado) * 100 : 0;
+
+            // b) Frequência de compra
+            let frequencia = 0;
+            if (vendas && vendas.length > 1) {
+                const datas = vendas.map(v => new Date(v.sale_date)).sort((a, b) => a - b);
+                let somaDias = 0;
+                for (let i = 1; i < datas.length; i++) {
+                    somaDias += (datas[i] - datas[i-1]) / (1000 * 60 * 60 * 24);
+                }
+                frequencia = somaDias / (datas.length - 1);
+            }
+
+            // c) Indicações geradas
+            const indicacoes = clientes ? clientes.filter(c => c.indicated_by_client_id).length : 0;
+
+            // d) Parceiros ativos
+            const parceirosAtivos = parceiros ? parceiros.filter(p => p.cashback_accumulated > 0).length : 0;
+
+            // e) NPS médio
+            const vendasComNPS = vendas ? vendas.filter(v => v.nps_score !== null) : [];
+            const mediaNPS = vendasComNPS.length > 0 ? vendasComNPS.reduce((s, v) => s + v.nps_score, 0) / vendasComNPS.length : 0;
+
+            // f) Cadastros completos
+            const cadastrosCompletos = clientes ? clientes.filter(c => c.email && c.birthday_day).length : 0;
+            const percentualCompletos = totalClientes > 0 ? (cadastrosCompletos / totalClientes) * 100 : 0;
+
+            // Pesos
+            const pesos = { taxaResgate: 25, frequencia: 20, indicacoes: 15, parceirosAtivos: 15, nps: 15, cadastrosCompletos: 10 };
+
+            // Normalização
+            const scoreResgate = Math.min(taxaResgate, 100);
+            const scoreFrequencia = Math.max(0, 100 - (frequencia > 30 ? 100 : frequencia * 3.33));
+            const scoreIndicacoes = Math.min((indicacoes / Math.max(totalClientes, 1)) * 100, 100);
+            const scoreParceiros = Math.min((parceirosAtivos / Math.max(parceiros?.length || 1, 1)) * 100, 100);
+            const scoreNPS = Math.min((mediaNPS / 10) * 100, 100);
+            const scoreCadastros = percentualCompletos;
+
+            const indice = (
+                scoreResgate * pesos.taxaResgate / 100 +
+                scoreFrequencia * pesos.frequencia / 100 +
+                scoreIndicacoes * pesos.indicacoes / 100 +
+                scoreParceiros * pesos.parceirosAtivos / 100 +
+                scoreNPS * pesos.nps / 100 +
+                scoreCadastros * pesos.cadastrosCompletos / 100
+            );
+
+            metricasCalculadas = {
+                indice, scoreResgate, scoreFrequencia, scoreIndicacoes, scoreParceiros, scoreNPS, scoreCadastros,
+                taxaResgate, frequencia, indicacoes, parceirosAtivos, mediaNPS, cadastrosCompletos, totalClientes, totalVendas
+            };
+
+            // Exibir índice
+            const scoreEl = document.getElementById('indiceScore');
+            scoreEl.textContent = Math.round(indice);
+            scoreEl.style.borderColor = indice >= 60 ? '#065f46' : indice >= 40 ? '#d97706' : '#dc2626';
+            scoreEl.style.color = scoreEl.style.borderColor;
+            document.getElementById('indiceLabel').textContent = indice >= 60 ? 'Empresa saudável 🎉' : indice >= 40 ? 'Atenção necessária ⚠️' : 'Crítico 🚨';
+
+            // Métricas detalhadas
+            document.getElementById('metricasContainer').innerHTML = `
+                <div class="metrica"><div class="valor" style="color:#4f46e5">${totalClientes}</div><div class="label">Total de Clientes</div></div>
+                <div class="metrica"><div class="valor" style="color:#4f46e5">${totalVendas}</div><div class="label">Total de Vendas</div></div>
+                <div class="metrica"><div class="valor">${taxaResgate.toFixed(1)}%</div><div class="label">Taxa de Resgate de Cashback</div></div>
+                <div class="metrica"><div class="valor">${frequencia.toFixed(1)} dias</div><div class="label">Frequência Média de Compra</div></div>
+                <div class="metrica"><div class="valor">${indicacoes}</div><div class="label">Indicações Geradas</div></div>
+                <div class="metrica"><div class="valor">${parceirosAtivos}</div><div class="label">Parceiros Ativos</div></div>
+                <div class="metrica"><div class="valor">${mediaNPS.toFixed(1)}</div><div class="label">NPS Médio</div></div>
+                <div class="metrica"><div class="valor">${cadastrosCompletos}/${totalClientes}</div><div class="label">Cadastros Completos</div></div>
+            `;
+
+            // Alertas
+            let alertasHTML = '';
+            if (taxaResgate < 30) alertasHTML += `<div class="alerta red">⚠️ Taxa de resgate de cashback está abaixo de 30%. Treine os vendedores.</div>`;
+            else if (taxaResgate < 50) alertasHTML += `<div class="alerta yellow">📉 Taxa de resgate em ${taxaResgate.toFixed(1)}%. Considere campanhas extras.</div>`;
+            else alertasHTML += `<div class="alerta green">✅ Taxa de resgate saudável (${taxaResgate.toFixed(1)}%).</div>`;
+
+            const agora = new Date();
+            const clientesInativos = clientes ? clientes.filter(c => c.last_purchase_at && (agora - new Date(c.last_purchase_at)) > 30 * 24 * 60 * 60 * 1000).length : 0;
+            if (clientesInativos > 0) alertasHTML += `<div class="alerta red">🕒 ${clientesInativos} clientes sem compra há mais de 30 dias.</div>`;
+
+            const vendedoresAtivos = usuarios ? usuarios.filter(u => u.role === 'seller') : [];
+            if (vendedoresAtivos.length === 0) alertasHTML += `<div class="alerta yellow">👤 Nenhum vendedor cadastrado.</div>`;
+
+            document.getElementById('alertasContainer').innerHTML = alertasHTML || '<p>Tudo em ordem.</p>';
+
+            // Treinamentos
+            let treinosHTML = '';
+            if (scoreResgate < 50) treinosHTML += `<div class="treinamento">🎓 Treinamento: "Como comunicar o cashback ao cliente".</div>`;
+            if (scoreFrequencia < 50) treinosHTML += `<div class="treinamento">📅 Treinamento: "Follow‑up pós‑venda".</div>`;
+            if (scoreIndicacoes < 30) treinosHTML += `<div class="treinamento">🎫 Treinamento: "Ativando o programa de indicação".</div>`;
+            if (scoreCadastros < 50) treinosHTML += `<div class="treinamento">📋 Treinamento: "Cadastro completo do cliente".</div>`;
+            if (!treinosHTML) treinosHTML = '<p>Nenhum treinamento crítico.</p>';
+            document.getElementById('treinamentosContainer').innerHTML = treinosHTML;
+
+            // Relatório semanal
+            gerarRelatorio();
+        }
+
+        function gerarRelatorio() {
+            const m = metricasCalculadas;
+            if (!m.indice) return;
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            document.getElementById('relatorioContainer').innerHTML = `
+                <p>📅 Relatório gerado em ${hoje}</p>
+                <ul>
+                    <li>Índice de Saúde: <strong>${Math.round(m.indice)}</strong></li>
+                    <li>Taxa de resgate: <strong>${m.taxaResgate.toFixed(1)}%</strong></li>
+                    <li>Frequência média: <strong>${m.frequencia.toFixed(1)} dias</strong></li>
+                    <li>Indicações geradas: <strong>${m.indicacoes}</strong></li>
+                    <li>Parceiros ativos: <strong>${m.parceirosAtivos}</strong></li>
+                    <li>NPS médio: <strong>${m.mediaNPS.toFixed(1)}</strong></li>
+                    <li>Cadastros completos: <strong>${m.cadastrosCompletos}</strong></li>
+                </ul>
+            `;
+        }
+
+        calcularMetricas();
+    </script>
+</body>
+</html>

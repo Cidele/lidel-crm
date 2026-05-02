@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Suporte</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 22px; }
+        .navbar a { color: white; margin-left: 20px; text-decoration: none; font-size: 14px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .chat-box { background: white; border-radius: 20px; padding: 20px; height: 400px; overflow-y: auto; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .msg { margin: 10px 0; display: flex; }
+        .msg.bot { justify-content: flex-start; }
+        .msg.user { justify-content: flex-end; }
+        .msg .bubble { max-width: 70%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.4; }
+        .bot .bubble { background: #e8e8e8; color: #333; }
+        .user .bubble { background: #4f46e5; color: white; }
+        .input-area { display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; }
+        button { background: #4f46e5; color: white; border: none; border-radius: 10px; padding: 12px 20px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>💬 Suporte</h1>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="parceiros.html">Parceiros</a>
+            <a href="vendedores.html">Vendedores</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="relatorios.html">Relatórios</a>
+            <a href="sac.html">SAC</a>
+            <a href="indicacao.html">Indicação</a>
+            <a href="consumo.html">Consumo</a>
+            <a href="notificacoes.html">Notificações</a>
+            <a href="saude.html">Saúde</a>
+            <a href="assinaturas.html">Assinaturas</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="chat-box" id="chatBox"><div class="msg bot"><div class="bubble">👋 Olá! Pergunte sobre cashback, indicações, parceiros ou suporte técnico.</div></div></div>
+        <div class="input-area"><input type="text" id="mensagem" placeholder="Digite sua dúvida..." onkeypress="if(event.key==='Enter')enviarMensagem()"><button onclick="enviarMensagem()">Enviar</button></div>
+    </div>
+    <script>
+        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let regras=[];
+        async function carregarRegras(){const{data}=await s.from('chat_automations').select('*').eq('company_id',COMPANY_ID);if(data)regras=data}
+        function adicionarBubble(txt,tipo){const c=document.getElementById('chatBox');const d=document.createElement('div');d.className='msg '+tipo;d.innerHTML=`<div class="bubble">${txt}</div>`;c.appendChild(d);c.scrollTop=c.scrollHeight}
+        async function enviarMensagem(){const input=document.getElementById('mensagem');const msg=input.value.trim();if(!msg)return;adicionarBubble(msg,'user');input.value='';const resp=buscarResposta(msg);setTimeout(()=>{adicionarBubble(resp,'bot')},500)}
+        function buscarResposta(texto){const t=texto.toLowerCase();for(const r of regras)for(const p of r.trigger_words)if(t.includes(p.toLowerCase()))return r.auto_reply;return '📩 Mensagem enviada ao suporte. Responderemos em até 2 horas.'}
+        carregarRegras();
+    </script>
+</body>
+</html>

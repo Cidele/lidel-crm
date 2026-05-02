@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Indicação</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 22px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center; }
+        h2 { color: #4f46e5; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        button { background: #4f46e5; color: white; font-weight: bold; cursor: pointer; border: none; }
+        button:disabled { background: #a5b4fc; cursor: not-allowed; }
+        .msg { margin-top: 15px; padding: 10px; border-radius: 8px; display: none; }
+        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
+        .msg.erro { background: #fee2e2; color: #991b1b; display: block; }
+        .qr-code { margin: 10px 0; }
+        .qr-code img { display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎫 Indicação</h1>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="clientes.html">Clientes</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="parceiros.html">Parceiros</a>
+            <a href="vendedores.html">Vendedores</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="relatorios.html">Relatórios</a>
+            <a href="sac.html">SAC</a>
+            <a href="indicacao.html">Indicação</a>
+            <a href="consumo.html">Consumo</a>
+            <a href="notificacoes.html">Notificações</a>
+            <a href="saude.html">Saúde</a>
+            <a href="assinaturas.html">Assinaturas</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🎫 Indicação LIDEL</h2>
+        <p>Ganhe <strong>3% de cashback</strong> usando um código de amigo!</p>
+        <input type="text" id="codigo" placeholder="Código de indicação (ex: UNBOX-ABCD1234)">
+        <input type="text" id="nome" placeholder="Seu nome completo">
+        <input type="tel" id="telefone" placeholder="Seu telefone">
+        <button onclick="usarCodigo()">Quero meu cashback!</button>
+        <div id="msg" class="msg"></div>
+        <div class="qr-code" id="qrCodePlaceholder"></div>
+    </div>
+
+    <script>
+        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function usarCodigo() {
+            const cod = document.getElementById('codigo').value.trim();
+            const nom = document.getElementById('nome').value.trim();
+            const tel = document.getElementById('telefone').value.trim();
+            const msg = document.getElementById('msg');
+
+            if (!cod || !nom || !tel) {
+                msg.className = 'msg erro';
+                msg.textContent = 'Preencha todos os campos.';
+                return;
+            }
+
+            const { data: ref, error: refErr } = await s.from('referral_codes')
+                .select('*').eq('code', cod).eq('is_used', false).single();
+            if (refErr || !ref || new Date(ref.expires_at) < new Date()) {
+                msg.className = 'msg erro';
+                msg.textContent = 'Código inválido ou expirado.';
+                return;
+            }
+
+            const { data: novoCli, error: cliErr } = await s.from('clients').insert([{
+                company_id: COMPANY_ID,
+                name: nom,
+                phone: tel,
+                indicated_by_client_id: ref.client_id
+            }]).select().single();
+            if (cliErr) {
+                msg.className = 'msg erro';
+                msg.textContent = 'Erro ao cadastrar: ' + cliErr.message;
+                return;
+            }
+
+            const { data: ultimaVenda } = await s.from('sales')
+                .select('total_amount').eq('client_id', ref.client_id)
+                .order('sale_date', { ascending: false }).limit(1);
+            const valor = ultimaVenda?.[0]?.total_amount || 100;
+            const recompensa = valor * 0.03;
+
+            await s.rpc('add_cashback', { client_id: ref.client_id, amount: recompensa });
+            await s.rpc('add_cashback', { client_id: novoCli.id, amount: recompensa });
+            await s.from('referral_codes').update({
+                is_used: true,
+                used_by_client_id: novoCli.id,
+                used_at: new Date()
+            }).eq('id', ref.id);
+
+            msg.className = 'msg sucesso';
+            msg.innerHTML = '🎉 Código ativado! Você e seu amigo ganharam R$ ' + recompensa.toFixed(2) + ' de cashback!';
+
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(cod)}`;
+            document.getElementById('qrCodePlaceholder').innerHTML = `
+                <p>Código utilizado:</p>
+                <img src="${qrUrl}" alt="QR Code" width="150" height="150">
+                <p><strong>${cod}</strong></p>
+            `;
+        }
+    </script>
+</body>
+</html>
