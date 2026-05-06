@@ -51,27 +51,21 @@
 
     <div class="container">
         <h2>Nova Venda</h2>
-
         <label>Cliente *</label>
-        <select id="cliente"><option value="">Selecione um cliente…</option></select>
-
+        <select id="cliente"><option value="">Selecione um cliente...</option></select>
         <label>Valor da Compra (R$) *</label>
         <input type="number" id="valor" placeholder="0,00" step="0.01" oninput="atualizar()">
-
         <label>Parceiro (opcional)</label>
         <select id="parceiro"><option value="">Nenhum parceiro</option></select>
-
         <div style="margin: 10px 0;">
             <label style="display: inline; margin-right: 5px;">Usar cashback?</label>
             <input type="checkbox" id="usarCashback" onchange="toggleCashback()">
             <span id="cashbackDisponivel" style="font-size:12px; color:#666;"></span>
         </div>
-
         <div class="preview">
             💵 Cashback a gerar: <strong id="cashback">R$ 0,00</strong><br>
             <span id="descontoAplicado" style="display:none;">Desconto do cashback: <strong id="valorDesconto">R$ 0,00</strong></span>
         </div>
-
         <button id="btnRegistrar" onclick="registrar()">✅ Registrar Venda</button>
         <div id="msg" class="msg"></div>
         <div id="codigoGerado" class="codigo-box">
@@ -79,7 +73,6 @@
             <div class="qr-code" id="qrCodeContainer"></div>
             <small>Compartilhe com um amigo! Ambos ganham 3% de cashback.</small>
         </div>
-
         <div id="npsBox" class="nps-box" style="display:none;">
             <p>De 0 a 10, quanto você recomendaria nossa loja?</p>
             <div>
@@ -91,152 +84,96 @@
     </div>
 
     <script>
-        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
-        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
-        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let currentClient = null;
-        let lastSaleId = null;
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc'
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        const COMPANY_ID = localStorage.getItem('lidel_company_id') || 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae'
+        let currentClient = null, lastSaleId = null
 
         async function carregarSelects() {
-            const { data: clientes } = await s.from('clients').select('id, name, cashback_balance, cashback_expires_at').eq('company_id', COMPANY_ID).order('name');
-            const sc = document.getElementById('cliente');
-            sc.innerHTML = '<option value="">Selecione um cliente…</option>';
+            const { data: clientes } = await s.from('clients').select('id, name, cashback_balance, cashback_expires_at').eq('company_id', COMPANY_ID).order('name')
+            const sc = document.getElementById('cliente')
+            sc.innerHTML = '<option value="">Selecione um cliente...</option>'
             if (clientes) clientes.forEach(c => {
-                sc.innerHTML += `<option value="${c.id}" data-cashback="${c.cashback_balance||0}" data-exp="${c.cashback_expires_at||''}">${c.name} (R$ ${(c.cashback_balance||0).toFixed(2)})</option>`;
-            });
-            sc.addEventListener('change', onClienteChange);
-            const { data: parceiros } = await s.from('partners').select('id, name').eq('company_id', COMPANY_ID).order('name');
-            const sp = document.getElementById('parceiro');
-            if (parceiros) parceiros.forEach(p => { sp.innerHTML += `<option value="${p.id}">${p.name}</option>`; });
+                sc.innerHTML += `<option value="${c.id}" data-cashback="${c.cashback_balance||0}" data-exp="${c.cashback_expires_at||''}">${c.name} (R$ ${(c.cashback_balance||0).toFixed(2)})</option>`
+            })
+            sc.addEventListener('change', onClienteChange)
+            const { data: parceiros } = await s.from('partners').select('id, name').eq('company_id', COMPANY_ID).order('name')
+            const sp = document.getElementById('parceiro')
+            if (parceiros) parceiros.forEach(p => { sp.innerHTML += `<option value="${p.id}">${p.name}</option>` })
         }
 
         function onClienteChange() {
-            const opt = document.getElementById('cliente').selectedOptions[0];
+            const opt = document.getElementById('cliente').selectedOptions[0]
             if (opt && opt.dataset.cashback) {
-                const cashback = parseFloat(opt.dataset.cashback);
-                const exp = opt.dataset.exp;
-                let disponivel = cashback > 0 && (!exp || new Date(exp) > new Date());
-                document.getElementById('cashbackDisponivel').textContent = disponivel ? `Saldo disponível: R$ ${cashback.toFixed(2)}` : 'Sem saldo';
-                document.getElementById('usarCashback').checked = false;
-                document.getElementById('descontoAplicado').style.display = 'none';
-                document.getElementById('usarCashback').disabled = !disponivel;
-                currentClient = { id: opt.value, cashback: cashback, exp: exp };
+                const cashback = parseFloat(opt.dataset.cashback)
+                const exp = opt.dataset.exp
+                let disponivel = cashback > 0 && (!exp || new Date(exp) > new Date())
+                document.getElementById('cashbackDisponivel').textContent = disponivel ? `Saldo disponível: R$ ${cashback.toFixed(2)}` : 'Sem saldo'
+                document.getElementById('usarCashback').checked = false
+                document.getElementById('descontoAplicado').style.display = 'none'
+                document.getElementById('usarCashback').disabled = !disponivel
+                currentClient = { id: opt.value, cashback: cashback, exp: exp }
             }
         }
 
-        function toggleCashback() {
-            const usar = document.getElementById('usarCashback').checked;
-            document.getElementById('descontoAplicado').style.display = usar ? 'inline' : 'none';
-            atualizar();
-        }
+        function toggleCashback() { document.getElementById('descontoAplicado').style.display = document.getElementById('usarCashback').checked ? 'inline' : 'none'; atualizar() }
 
         function atualizar() {
-            const valor = parseFloat(document.getElementById('valor').value) || 0;
-            const cashbackGerado = Math.min(valor * 0.14, 150);
-            document.getElementById('cashback').textContent = 'R$ ' + cashbackGerado.toFixed(2);
+            const valor = parseFloat(document.getElementById('valor').value) || 0
+            document.getElementById('cashback').textContent = 'R$ ' + Math.min(valor * 0.14, 150).toFixed(2)
             if (document.getElementById('usarCashback').checked && currentClient && currentClient.cashback > 0) {
-                const maxDesconto = Math.min(currentClient.cashback, valor);
-                document.getElementById('valorDesconto').textContent = 'R$ ' + maxDesconto.toFixed(2);
+                document.getElementById('valorDesconto').textContent = 'R$ ' + Math.min(currentClient.cashback, valor).toFixed(2)
             } else {
-                document.getElementById('valorDesconto').textContent = 'R$ 0,00';
+                document.getElementById('valorDesconto').textContent = 'R$ 0,00'
             }
         }
 
         async function registrar() {
-            const cli = document.getElementById('cliente').value;
-            const val = parseFloat(document.getElementById('valor').value);
-            const par = document.getElementById('parceiro').value || null;
-            const usarCash = document.getElementById('usarCashback').checked;
-            const btn = document.getElementById('btnRegistrar');
-            const msg = document.getElementById('msg');
-
-            if (!cli || !val) {
-                msg.className = 'msg erro';
-                msg.textContent = 'Preencha cliente e valor.';
-                return;
-            }
-
-            let valorFinal = val;
-            let cashbackUsado = 0;
+            const cli = document.getElementById('cliente').value
+            const val = parseFloat(document.getElementById('valor').value)
+            const par = document.getElementById('parceiro').value || null
+            const usarCash = document.getElementById('usarCashback').checked
+            const btn = document.getElementById('btnRegistrar')
+            const msg = document.getElementById('msg')
+            if (!cli || !val) { msg.className = 'msg erro'; msg.textContent = 'Preencha cliente e valor.'; return }
+            let valorFinal = val, cashbackUsado = 0
             if (usarCash && currentClient && currentClient.cashback > 0) {
-                if (new Date(currentClient.exp) < new Date()) {
-                    msg.className = 'msg erro';
-                    msg.textContent = 'Cashback expirado.';
-                    return;
-                }
-                const minimo = currentClient.cashback * 0.25;
-                if (val < minimo) {
-                    msg.className = 'msg erro';
-                    msg.textContent = `Para usar o cashback, a compra deve ser de pelo menos R$ ${minimo.toFixed(2)}.`;
-                    return;
-                }
-                cashbackUsado = Math.min(currentClient.cashback, val);
-                valorFinal = val - cashbackUsado;
+                if (new Date(currentClient.exp) < new Date()) { msg.className = 'msg erro'; msg.textContent = 'Cashback expirado.'; return }
+                const minimo = currentClient.cashback * 0.25
+                if (val < minimo) { msg.className = 'msg erro'; msg.textContent = `Compra mínima para resgate: R$ ${minimo.toFixed(2)}.`; return }
+                cashbackUsado = Math.min(currentClient.cashback, val)
+                valorFinal = val - cashbackUsado
             }
-
-            btn.disabled = true;
-            btn.textContent = 'Registrando…';
-            msg.className = 'msg info';
-            msg.textContent = 'Salvando venda…';
-
-            const cashbackGerado = Math.min(valorFinal * 0.14, 150);
-            const exp = new Date();
-            exp.setDate(exp.getDate() + 45);
-
-            const { data: venda, error } = await s.from('sales').insert([{
-                client_id: cli,
-                company_id: COMPANY_ID,
-                total_amount: val,
-                final_amount: valorFinal,
-                cashback_generated: cashbackGerado,
-                cashback_expires_at: exp.toISOString(),
-                partner_id: par
-            }]).select().single();
-
-            if (error) {
-                msg.className = 'msg erro';
-                msg.textContent = 'Erro: ' + error.message;
-                btn.disabled = false;
-                btn.textContent = '✅ Registrar Venda';
-                return;
-            }
-
-            if (cashbackUsado > 0) {
-                await s.from('clients').update({ cashback_balance: 0, cashback_expires_at: null }).eq('id', cli);
-            }
-            await s.from('clients').update({ cashback_balance: cashbackGerado, cashback_expires_at: exp.toISOString() }).eq('id', cli);
-
-            const { data: codigo } = await s.rpc('gerar_codigo_unboxing', { p_client_id: cli, p_sale_id: venda.id });
+            btn.disabled = true; btn.textContent = 'Registrando...'
+            msg.className = 'msg info'; msg.textContent = 'Salvando venda...'
+            const cashbackGerado = Math.min(valorFinal * 0.14, 150)
+            const exp = new Date(); exp.setDate(exp.getDate() + 45)
+            const { data: venda, error } = await s.from('sales').insert([{ client_id: cli, company_id: COMPANY_ID, total_amount: val, final_amount: valorFinal, cashback_generated: cashbackGerado, cashback_expires_at: exp.toISOString(), partner_id: par }]).select().single()
+            if (error) { msg.className = 'msg erro'; msg.textContent = 'Erro: ' + error.message; btn.disabled = false; btn.textContent = '✅ Registrar Venda'; return }
+            if (cashbackUsado > 0) await s.from('clients').update({ cashback_balance: 0, cashback_expires_at: null }).eq('id', cli)
+            await s.from('clients').update({ cashback_balance: cashbackGerado, cashback_expires_at: exp.toISOString() }).eq('id', cli)
+            const { data: codigo } = await s.rpc('gerar_codigo_unboxing', { p_client_id: cli, p_sale_id: venda.id })
             if (codigo) {
-                document.getElementById('codigoTexto').textContent = codigo;
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(codigo)}`;
-                document.getElementById('qrCodeContainer').innerHTML = `<img src="${qrUrl}" alt="QR Code" width="150" height="150">`;
-                document.getElementById('codigoGerado').style.display = 'block';
+                document.getElementById('codigoTexto').textContent = codigo
+                document.getElementById('qrCodeContainer').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(codigo)}" alt="QR Code" width="150" height="150">`
+                document.getElementById('codigoGerado').style.display = 'block'
             }
-
-            msg.className = 'msg sucesso';
-            msg.innerHTML = '✅ Venda registrada! Cashback gerado: R$ ' + cashbackGerado.toFixed(2);
-            lastSaleId = venda.id;
-            document.getElementById('valor').value = '';
-            document.getElementById('cashback').textContent = 'R$ 0,00';
-            document.getElementById('usarCashback').checked = false;
-            document.getElementById('descontoAplicado').style.display = 'none';
-            btn.disabled = false;
-            btn.textContent = '✅ Registrar Venda';
-
-            document.getElementById('npsBox').style.display = 'block';
+            msg.className = 'msg sucesso'; msg.innerHTML = '✅ Venda registrada! Cashback: R$ ' + cashbackGerado.toFixed(2)
+            lastSaleId = venda.id
+            document.getElementById('valor').value = ''; document.getElementById('cashback').textContent = 'R$ 0,00'
+            document.getElementById('usarCashback').checked = false; document.getElementById('descontoAplicado').style.display = 'none'
+            btn.disabled = false; btn.textContent = '✅ Registrar Venda'
+            document.getElementById('npsBox').style.display = 'block'
         }
 
         async function enviarNPS(nota) {
-            if (lastSaleId) {
-                await s.from('sales').update({ nps_score: nota }).eq('id', lastSaleId);
-            }
-            document.getElementById('npsBox').innerHTML = '<p style="color:green;">Obrigado pela sua avaliação! 🎉</p>';
-            setTimeout(() => { document.getElementById('npsBox').style.display = 'none'; }, 3000);
+            if (lastSaleId) await s.from('sales').update({ nps_score: nota }).eq('id', lastSaleId)
+            document.getElementById('npsBox').innerHTML = '<p style="color:green;">Obrigado pela sua avaliação! 🎉</p>'
+            setTimeout(() => { document.getElementById('npsBox').style.display = 'none' }, 3000)
         }
 
-        carregarSelects();
+        carregarSelects()
     </script>
 </body>
 </html>

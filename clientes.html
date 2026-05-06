@@ -63,17 +63,17 @@
     </div>
 
     <script>
-        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
-        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
-        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let clientes = [];
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc'
+        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        const COMPANY_ID = localStorage.getItem('lidel_company_id') || 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae'
+        let clientes = []
 
         async function carregarLista() {
-            const { data, error } = await s.from('clients').select('*').eq('company_id', COMPANY_ID).order('name');
-            if (error) return;
-            clientes = data || [];
-            renderTabela(clientes);
+            const { data, error } = await s.from('clients').select('*').eq('company_id', COMPANY_ID).order('name')
+            if (error) return
+            clientes = data || []
+            renderTabela(clientes)
         }
 
         function renderTabela(lista) {
@@ -85,56 +85,53 @@
                     <td style="color:green">R$ ${(c.cashback_balance || 0).toFixed(2)}</td>
                     <td><a class="link-consumo" href="consumo.html?id=${c.id}">📋 Consumo</a></td>
                 </tr>
-            `).join('');
+            `).join('')
         }
 
         function filtrar() {
-            const termo = document.getElementById('busca').value.toLowerCase();
-            renderTabela(clientes.filter(c => c.name.toLowerCase().includes(termo) || c.phone.includes(termo)));
+            const termo = document.getElementById('busca').value.toLowerCase()
+            renderTabela(clientes.filter(c => c.name.toLowerCase().includes(termo) || c.phone.includes(termo)))
         }
 
         async function cadastrarCliente() {
-            const btn = document.getElementById('btnSalvar');
-            const msg = document.getElementById('msg');
-            const nome = document.getElementById('nome').value.trim();
-            const fone = document.getElementById('telefone').value.trim();
-            const email = document.getElementById('email').value.trim();
+            const btn = document.getElementById('btnSalvar')
+            const msg = document.getElementById('msg')
+            const nome = document.getElementById('nome').value.trim()
+            const fone = document.getElementById('telefone').value.trim()
+            const email = document.getElementById('email').value.trim()
 
             if (!nome || !fone) {
-                msg.className = 'msg erro';
-                msg.textContent = 'Nome e telefone são obrigatórios.';
-                return;
+                msg.className = 'msg erro'
+                msg.textContent = 'Nome e telefone são obrigatórios.'
+                return
             }
 
-            btn.disabled = true;
-            btn.textContent = 'Salvando…';
-            msg.className = 'msg info';
-            msg.textContent = 'Salvando cliente…';
+            btn.disabled = true
+            btn.textContent = 'Salvando...'
+            msg.className = 'msg info'
+            msg.textContent = 'Salvando cliente...'
 
             const { error } = await s.from('clients').insert([{
-                company_id: COMPANY_ID,
-                name: nome,
-                phone: fone,
-                email: email || null
-            }]);
+                company_id: COMPANY_ID, name: nome, phone: fone, email: email || null
+            }])
 
-            btn.disabled = false;
-            btn.textContent = '💾 Salvar Cliente';
+            btn.disabled = false
+            btn.textContent = '💾 Salvar Cliente'
 
             if (error) {
-                msg.className = 'msg erro';
-                msg.textContent = 'Erro: ' + error.message;
+                msg.className = 'msg erro'
+                msg.textContent = 'Erro: ' + error.message
             } else {
-                msg.className = 'msg sucesso';
-                msg.textContent = 'Cliente cadastrado com sucesso!';
-                document.getElementById('nome').value = '';
-                document.getElementById('telefone').value = '';
-                document.getElementById('email').value = '';
-                carregarLista();
+                msg.className = 'msg sucesso'
+                msg.textContent = 'Cliente cadastrado com sucesso!'
+                document.getElementById('nome').value = ''
+                document.getElementById('telefone').value = ''
+                document.getElementById('email').value = ''
+                carregarLista()
             }
         }
 
-        carregarLista();
+        carregarLista()
     </script>
 </body>
 </html>

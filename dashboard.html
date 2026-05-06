@@ -30,7 +30,7 @@
 </head>
 <body>
     <div class="navbar">
-        <h1>🚀 LIDEL CRM</h1>
+        <h1>LIDEL CRM</h1>
         <div>
             <a href="dashboard.html">Dashboard</a>
             <a href="clientes.html">Clientes</a>
@@ -38,12 +38,12 @@
             <a href="parceiros.html">Parceiros</a>
             <a href="vendedores.html">Vendedores</a>
             <a href="campanhas.html">Campanhas</a>
-            <a href="relatorios.html">Relatórios</a>
+            <a href="relatorios.html">Relatorios</a>
             <a href="sac.html">SAC</a>
-            <a href="indicacao.html">Indicação</a>
+            <a href="indicacao.html">Indicacao</a>
             <a href="consumo.html">Consumo</a>
-            <a href="notificacoes.html">Notificações</a>
-            <a href="saude.html">Saúde</a>
+            <a href="notificacoes.html">Notificacoes</a>
+            <a href="saude.html">Saude</a>
             <a href="assinaturas.html">Assinaturas</a>
         </div>
     </div>
@@ -52,84 +52,78 @@
         <div class="filters">
             <label>De:</label>
             <input type="date" id="dataInicio">
-            <label>Até:</label>
+            <label>Ate:</label>
             <input type="date" id="dataFim">
             <button class="btn" onclick="atualizarDashboard()">Filtrar</button>
         </div>
 
         <div class="cards">
-            <div class="card"><div class="number" id="totalClientes">0</div><div class="label">👥 Clientes</div></div>
-            <div class="card"><div class="number" id="vendasPeriodo">R$ 0</div><div class="label">💰 Vendas no Período</div></div>
-            <div class="card"><div class="number" id="cashbackAtivo">R$ 0</div><div class="label">🎁 Cashback Ativo</div></div>
-            <div class="card"><div class="number" id="totalParceiros">0</div><div class="label">🤝 Parceiros</div></div>
+            <div class="card"><div class="number" id="totalClientes">0</div><div class="label">Clientes</div></div>
+            <div class="card"><div class="number" id="vendasPeriodo">R$0</div><div class="label">Vendas no Periodo</div></div>
+            <div class="card"><div class="number" id="cashbackAtivo">R$0</div><div class="label">Cashback Ativo</div></div>
+            <div class="card"><div class="number" id="totalParceiros">0</div><div class="label">Parceiros</div></div>
         </div>
 
         <div class="charts">
-            <div class="chart-box">
-                <h3>Vendas por Dia</h3>
-                <canvas id="graficoVendas" height="200"></canvas>
-            </div>
-            <div class="chart-box">
-                <h3>Cashback Gerado vs. Resgatado</h3>
-                <canvas id="graficoCashback" height="200"></canvas>
-            </div>
+            <div class="chart-box"><h3>Vendas por Dia</h3><canvas id="graficoVendas" height="200"></canvas></div>
+            <div class="chart-box"><h3>Cashback Gerado x Resgatado</h3><canvas id="graficoCashback" height="200"></canvas></div>
         </div>
 
         <div class="section">
-            <h2>📊 Últimas Vendas</h2>
-            <table>
-                <thead><tr><th>Cliente</th><th>Valor</th><th>Cashback</th><th>Data</th></tr></thead>
-                <tbody id="tv"><tr><td colspan="4" style="text-align:center">Carregando...</td></tr></tbody>
-            </table>
+            <h3>Ultimas Vendas</h3>
+            <table><thead><tr><th>Cliente</th><th>Valor</th><th>Cashback</th><th>Data</th></tr></thead><tbody id="tv"><tr><td colspan="4" style="text-align:center">Carregando...</td></tr></tbody></table>
         </div>
     </div>
 
     <script>
-        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
-        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
-        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let graficoVendas, graficoCashback;
-        const hoje = new Date();
-        const mesPassado = new Date();
-        mesPassado.setMonth(hoje.getMonth() - 1);
-        document.getElementById('dataInicio').value = mesPassado.toISOString().split('T')[0];
-        document.getElementById('dataFim').value = hoje.toISOString().split('T')[0];
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae'
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co'
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc'
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        var graficoVendas, graficoCashback
+        var hoje = new Date()
+        var mesPassado = new Date()
+        mesPassado.setMonth(hoje.getMonth() - 1)
+        document.getElementById('dataInicio').value = mesPassado.toISOString().split('T')[0]
+        document.getElementById('dataFim').value = hoje.toISOString().split('T')[0]
 
         async function atualizarDashboard() {
-            const inicio = document.getElementById('dataInicio').value;
-            const fim = document.getElementById('dataFim').value;
+            var inicio = document.getElementById('dataInicio').value
+            var fim = document.getElementById('dataFim').value
 
-            const { count: totalCli } = await s.from('clients').select('*', { count: 'exact', head: true }).eq('company_id', COMPANY_ID);
-            document.getElementById('totalClientes').textContent = totalCli || 0;
+            var respCli = await s.from('clients').select('*', { count: 'exact', head: true }).eq('company_id', COMPANY_ID)
+            document.getElementById('totalClientes').textContent = respCli.count || 0
 
-            const { count: totalPar } = await s.from('partners').select('*', { count: 'exact', head: true }).eq('company_id', COMPANY_ID);
-            document.getElementById('totalParceiros').textContent = totalPar || 0;
+            var respPar = await s.from('partners').select('*', { count: 'exact', head: true }).eq('company_id', COMPANY_ID)
+            document.getElementById('totalParceiros').textContent = respPar.count || 0
 
-            const { data: cashAtivo } = await s.from('clients').select('cashback_balance').eq('company_id', COMPANY_ID).gt('cashback_balance', 0);
-            const totalCash = cashAtivo ? cashAtivo.reduce((a, c) => a + c.cashback_balance, 0) : 0;
-            document.getElementById('cashbackAtivo').textContent = 'R$ ' + totalCash.toFixed(2);
+            var respCash = await s.from('clients').select('cashback_balance').eq('company_id', COMPANY_ID).gt('cashback_balance', 0)
+            var totalCash = respCash.data ? respCash.data.reduce(function(a, c) { return a + c.cashback_balance }, 0) : 0
+            document.getElementById('cashbackAtivo').textContent = 'R$' + totalCash.toFixed(2)
 
-            let query = s.from('sales').select('id, total_amount, cashback_generated, sale_date').eq('company_id', COMPANY_ID);
-            if (inicio) query = query.gte('sale_date', inicio);
-            if (fim) query = query.lte('sale_date', fim + 'T23:59:59');
-            const { data: vendas, error: erroVendas } = await query.order('sale_date', { ascending: false });
+            var query = s.from('sales').select('id, total_amount, cashback_generated, sale_date').eq('company_id', COMPANY_ID)
+            if (inicio) query = query.gte('sale_date', inicio)
+            if (fim) query = query.lte('sale_date', fim + 'T23:59:59')
+            var respVendas = await query.order('sale_date', { ascending: false })
+            var vendas = respVendas.data
 
-            if (erroVendas) { console.error(erroVendas); return; }
+            if (respVendas.error) { console.error(respVendas.error); return }
 
-            const totalVendas = vendas ? vendas.reduce((a, v) => a + v.total_amount, 0) : 0;
-            document.getElementById('vendasPeriodo').textContent = 'R$ ' + totalVendas.toFixed(2);
+            var totalVendas = vendas ? vendas.reduce(function(a, v) { return a + v.total_amount }, 0) : 0
+            document.getElementById('vendasPeriodo').textContent = 'R$' + totalVendas.toFixed(2)
 
-            const vendasPorDia = {};
-            vendas?.forEach(v => {
-                const dia = v.sale_date.split('T')[0];
-                vendasPorDia[dia] = (vendasPorDia[dia] || 0) + v.total_amount;
-            });
-            const labels = Object.keys(vendasPorDia).sort();
-            const dataVendas = labels.map(d => vendasPorDia[d]);
+            var vendasPorDia = {}
+            if (vendas) {
+                vendas.forEach(function(v) {
+                    var dia = v.sale_date.split('T')[0]
+                    vendasPorDia[dia] = (vendasPorDia[dia] || 0) + v.total_amount
+                })
+            }
+            var labels = Object.keys(vendasPorDia).sort()
+            var dataVendas = labels.map(function(d) { return vendasPorDia[d] })
 
-            if (graficoVendas) graficoVendas.destroy();
-            const ctxVendas = document.getElementById('graficoVendas').getContext('2d');
+            if (graficoVendas) graficoVendas.destroy()
+            var ctxVendas = document.getElementById('graficoVendas').getContext('2d')
             graficoVendas = new Chart(ctxVendas, {
                 type: 'line',
                 data: {
@@ -143,12 +137,12 @@
                     }]
                 },
                 options: { plugins: { legend: { display: false } } }
-            });
+            })
 
-            const cashbackGerado = vendas ? vendas.reduce((a, v) => a + v.cashback_generated, 0) : 0;
-            const cashbackResgatado = cashbackGerado - totalCash;
-            if (graficoCashback) graficoCashback.destroy();
-            const ctxCashback = document.getElementById('graficoCashback').getContext('2d');
+            var cashbackGerado = vendas ? vendas.reduce(function(a, v) { return a + v.cashback_generated }, 0) : 0
+            var cashbackResgatado = cashbackGerado - totalCash
+            if (graficoCashback) graficoCashback.destroy()
+            var ctxCashback = document.getElementById('graficoCashback').getContext('2d')
             graficoCashback = new Chart(ctxCashback, {
                 type: 'bar',
                 data: {
@@ -160,29 +154,32 @@
                     }]
                 },
                 options: { plugins: { legend: { display: false } } }
-            });
+            })
 
-            const { data: ultimas } = await s.from('sales')
+            var respUltimas = await s.from('sales')
                 .select('final_amount, cashback_generated, sale_date, clients!inner(name)')
                 .eq('company_id', COMPANY_ID)
                 .order('sale_date', { ascending: false })
-                .limit(10);
-            const tb = document.getElementById('tv');
+                .limit(10)
+            var ultimas = respUltimas.data
+            var tb = document.getElementById('tv')
             if (ultimas && ultimas.length) {
-                tb.innerHTML = ultimas.map(v => `
-                    <tr>
-                        <td>${v.clients?.name || 'N/D'}</td>
-                        <td>R$ ${v.final_amount.toFixed(2)}</td>
-                        <td style="color:green">R$ ${v.cashback_generated.toFixed(2)}</td>
-                        <td>${new Date(v.sale_date).toLocaleDateString('pt-BR')}</td>
-                    </tr>
-                `).join('');
+                var html = ''
+                ultimas.forEach(function(v) {
+                    html += '<tr>' +
+                        '<td>' + (v.clients ? v.clients.name : 'N/D') + '</td>' +
+                        '<td>R$' + v.final_amount.toFixed(2) + '</td>' +
+                        '<td style="color:green">R$' + v.cashback_generated.toFixed(2) + '</td>' +
+                        '<td>' + new Date(v.sale_date).toLocaleDateString('pt-BR') + '</td>' +
+                        '</tr>'
+                })
+                tb.innerHTML = html
             } else {
-                tb.innerHTML = '<tr><td colspan="4">Nenhuma venda</td></tr>';
+                tb.innerHTML = '<tr><td colspan="4">Nenhuma venda</td></tr>'
             }
         }
 
-        atualizarDashboard();
+        atualizarDashboard()
     </script>
 </body>
 </html>
