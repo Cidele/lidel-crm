@@ -23,18 +23,9 @@
             max-width: 400px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo h1 {
-            color: #4f46e5;
-            font-size: 36px;
-        }
-        .logo p {
-            color: #666;
-            font-size: 14px;
-        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #4f46e5; font-size: 36px; }
+        .logo p { color: #666; font-size: 14px; }
         input {
             width: 100%;
             padding: 12px;
@@ -55,13 +46,7 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        .msg {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            display: none;
-        }
+        .msg { margin-top: 15px; padding: 10px; border-radius: 8px; text-align: center; display: none; }
     </style>
 </head>
 <body>
@@ -93,6 +78,7 @@
             msg.style.color = '#1e40af'
             msg.textContent = 'Autenticando...'
 
+            // 1. AUTENTICAR PRIMEIRO
             var response = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password
@@ -105,8 +91,8 @@
                 return
             }
 
+            // 2. DEPOIS BUSCAR O PERFIL
             if (response.data && response.data.user) {
-                // Buscar dados do usuario
                 var userResponse = await supabase
                     .from('users')
                     .select('company_id, role')
