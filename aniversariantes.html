@@ -12,10 +12,13 @@
         .navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
         .container { max-width: 700px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
         h2 { color: #0055FF; }
-        select, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin: 5px; }
+        select, input, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin: 5px 0; box-sizing: border-box; }
+        .busca-row { display: flex; gap: 10px; align-items: center; }
+        .busca-row select { width: auto; }
+        .busca-row input { flex: 1; }
         button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #0055FF; color: white; padding: 12px; }
+        th { background: #0055FF; color: white; padding: 12px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
     </style>
 </head>
@@ -26,23 +29,26 @@
             <a href="dashboard.html">Dashboard</a>
             <a href="vendas.html">💰 Vender</a>
             <a href="clientes.html">Clientes</a>
+            <a href="aniversariantes.html">🎂 Aniversariantes</a>
         </div>
     </div>
     <div class="container">
-        <h2>Filtrar por</h2>
-        <select id="tipo">
-            <option value="dia">Aniversariantes do Dia</option>
-            <option value="mes">Aniversariantes do Mês</option>
-        </select>
-        <select id="tabela">
-            <option value="clients">Clientes</option>
-            <option value="partners">Parceiros</option>
-            <option value="users">Vendedores</option>
-        </select>
-        <button onclick="buscar()">🔍 Buscar</button>
+        <h2>Aniversariantes</h2>
+        <div class="busca-row">
+            <select id="tabela" onchange="buscar()">
+                <option value="clients">Clientes</option>
+                <option value="partners">Parceiros</option>
+                <option value="users">Vendedores</option>
+            </select>
+            <select id="periodo" onchange="buscar()">
+                <option value="mes">Este mês</option>
+                <option value="hoje">Hoje</option>
+            </select>
+            <input type="text" id="buscaNome" placeholder="🔍 Buscar por nome..." oninput="buscar()">
+        </div>
         <table>
             <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Aniversário</th></tr></thead>
-            <tbody id="resultados"></tbody>
+            <tbody id="resultados"><tr><td colspan="4">Carregando...</td></tr></tbody>
         </table>
     </div>
     <script>
@@ -53,7 +59,8 @@
 
         async function buscar() {
             var tabela = document.getElementById('tabela').value;
-            var tipo = document.getElementById('tipo').value;
+            var periodo = document.getElementById('periodo').value;
+            var buscaNome = document.getElementById('buscaNome').value.trim().toLowerCase();
             var hoje = new Date();
             var diaAtual = hoje.getDate();
             var mesAtual = hoje.getMonth() + 1;
@@ -62,10 +69,15 @@
                 .select('name, phone, email, birthday_day, birthday_month')
                 .eq('company_id', COMPANY_ID);
 
-            if (tipo === 'dia') {
-                query = query.eq('birthday_day', diaAtual).eq('birthday_month', mesAtual);
-            } else {
-                query = query.eq('birthday_month', mesAtual);
+            // Filtra aniversariantes do mês (sempre)
+            query = query.eq('birthday_month', mesAtual);
+            if (periodo === 'hoje') {
+                query = query.eq('birthday_day', diaAtual);
+            }
+
+            // Se houver busca por nome, filtra
+            if (buscaNome) {
+                query = query.ilike('name', '%' + buscaNome + '%');
             }
 
             var { data, error } = await query.order('birthday_day');
