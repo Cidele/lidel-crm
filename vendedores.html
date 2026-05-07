@@ -45,20 +45,23 @@
     </div>
     <table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Função</th></tr></thead><tbody id="listaVendedores"></tbody></table>
     <script>
-        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
-        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
-        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function carregar(){
-            const {data} = await s.from('users').select('*').eq('company_id', COMPANY_ID).order('name');
-            document.getElementById('listaVendedores').innerHTML = (data||[]).map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone||'-'}</td><td>${u.role}</td></tr>`).join('');
+            var resp = await s.from('users').select('*').eq('company_id', COMPANY_ID).order('name');
+            document.getElementById('listaVendedores').innerHTML = (resp.data||[]).map(function(u) {
+                return '<tr><td>' + u.name + '</td><td>' + u.email + '</td><td>' + (u.phone||'-') + '</td><td>' + u.role + '</td></tr>';
+            }).join('');
         }
+
         async function adicionarVendedor(){
-            const btn = document.getElementById('btnSalvarVend');
-            const n = document.getElementById('nomeVendedor').value;
-            const e = document.getElementById('emailVendedor').value;
-            const f = document.getElementById('foneVendedor').value.trim();
+            var btn = document.getElementById('btnSalvarVend');
+            var n = document.getElementById('nomeVendedor').value;
+            var e = document.getElementById('emailVendedor').value;
+            var f = document.getElementById('foneVendedor').value.trim();
             if(!n||!e) return;
             btn.disabled = true;
             btn.textContent = 'Salvando…';
@@ -67,6 +70,7 @@
             btn.textContent = 'Cadastrar Vendedor';
             carregar();
         }
+
         carregar();
     </script>
 </body>
