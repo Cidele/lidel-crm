@@ -12,12 +12,11 @@
         .navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
         .container { max-width: 700px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
         h2 { color: #0055FF; }
-        select, input, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin: 5px 0; box-sizing: border-box; }
-        .busca-row { display: flex; gap: 10px; align-items: center; }
-        .busca-row select { width: auto; }
-        .busca-row input { flex: 1; }
-        button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .botoes { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .botao { padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; cursor: pointer; background: white; font-size: 13px; transition: 0.2s; }
+        .botao.ativo { background: #0055FF; color: white; border-color: #0055FF; }
+        .busca-livre { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: #0055FF; color: white; padding: 12px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
     </style>
@@ -34,18 +33,16 @@
     </div>
     <div class="container">
         <h2>Aniversariantes</h2>
-        <div class="busca-row">
-            <select id="tabela" onchange="buscar()">
-                <option value="clients">Clientes</option>
-                <option value="partners">Parceiros</option>
-                <option value="users">Vendedores</option>
-            </select>
-            <select id="periodo" onchange="buscar()">
-                <option value="mes">Este mês</option>
-                <option value="hoje">Hoje</option>
-            </select>
-            <input type="text" id="buscaNome" placeholder="🔍 Buscar por nome..." oninput="buscar()">
+        <div class="botoes" id="botoesCategoria">
+            <button class="botao ativo" onclick="mudarCategoria('clients', this)">Clientes</button>
+            <button class="botao" onclick="mudarCategoria('partners', this)">Parceiros</button>
+            <button class="botao" onclick="mudarCategoria('users', this)">Vendedores</button>
         </div>
+        <div class="botoes" id="botoesPeriodo">
+            <button class="botao ativo" onclick="mudarPeriodo('mes', this)">Este mês</button>
+            <button class="botao" onclick="mudarPeriodo('hoje', this)">Hoje</button>
+        </div>
+        <input type="text" class="busca-livre" id="buscaNome" placeholder="🔍 Buscar por nome..." oninput="buscar()">
         <table>
             <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Aniversário</th></tr></thead>
             <tbody id="resultados"><tr><td colspan="4">Carregando...</td></tr></tbody>
@@ -57,25 +54,38 @@
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Estado dos botões
+        var categoria = 'clients';
+        var periodo = 'mes';
+
+        function mudarCategoria(nova, btn) {
+            document.querySelectorAll('#botoesCategoria .botao').forEach(b => b.classList.remove('ativo'));
+            btn.classList.add('ativo');
+            categoria = nova;
+            buscar();
+        }
+
+        function mudarPeriodo(novo, btn) {
+            document.querySelectorAll('#botoesPeriodo .botao').forEach(b => b.classList.remove('ativo'));
+            btn.classList.add('ativo');
+            periodo = novo;
+            buscar();
+        }
+
         async function buscar() {
-            var tabela = document.getElementById('tabela').value;
-            var periodo = document.getElementById('periodo').value;
             var buscaNome = document.getElementById('buscaNome').value.trim().toLowerCase();
             var hoje = new Date();
             var diaAtual = hoje.getDate();
             var mesAtual = hoje.getMonth() + 1;
 
-            var query = s.from(tabela)
+            var query = s.from(categoria)
                 .select('name, phone, email, birthday_day, birthday_month')
-                .eq('company_id', COMPANY_ID);
+                .eq('company_id', COMPANY_ID)
+                .eq('birthday_month', mesAtual);
 
-            // Filtra aniversariantes do mês (sempre)
-            query = query.eq('birthday_month', mesAtual);
             if (periodo === 'hoje') {
                 query = query.eq('birthday_day', diaAtual);
             }
-
-            // Se houver busca por nome, filtra
             if (buscaNome) {
                 query = query.ilike('name', '%' + buscaNome + '%');
             }
