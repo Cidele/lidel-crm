@@ -31,6 +31,11 @@
         .badge-cancelado { background: #fee2e2; color: #991b1b; }
         .resultado-busca { background: #f0fdf4; padding: 8px; border-radius: 6px; margin: 3px 0; cursor: pointer; border: 1px solid #bbf7d0; }
         .resultado-busca:hover { background: #dcfce7; }
+        .btn-editar { background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px; }
+        .btn-excluir { background: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; }
     </style>
 </head>
 <body>
@@ -55,29 +60,48 @@
                     <option value="trimestral">Trimestral</option>
                     <option value="anual">Anual</option>
                 </select>
-                <input type="text" id="beneficiosPlano" placeholder="Benefícios (opcional)">
+                <input type="text" id="beneficiosPlano" placeholder="Benefícios">
             </div>
-            <textarea id="descricaoPlano" placeholder="Descrição do plano" rows="2"></textarea>
+            <textarea id="descricaoPlano" placeholder="Descrição" rows="2"></textarea>
             <button id="btnSalvarPlano" onclick="criarPlano()">💾 Salvar Plano</button>
         </div>
         <div class="card">
-            <h2>🔗 Vincular Cliente a um Plano</h2>
+            <h2>🔗 Vincular Cliente</h2>
             <div id="msgAssinatura" class="msg"></div>
             <label>Buscar Cliente</label>
-            <input type="text" id="buscaClienteAss" placeholder="Digite o nome do cliente..." oninput="buscarClientesAss()">
+            <input type="text" id="buscaClienteAss" placeholder="Digite o nome..." oninput="buscarClientesAss()">
             <div id="resultadosBuscaAss" style="margin-bottom:10px;"></div>
             <input type="hidden" id="clienteSelect">
             <label>Plano</label>
-            <select id="planoSelect"><option value="">Selecione um plano…</option></select>
+            <select id="planoSelect"><option value="">Selecione...</option></select>
             <label>Data de Início</label>
             <input type="date" id="dataInicio">
             <button id="btnVincular" onclick="vincularCliente()">✅ Vincular</button>
         </div>
         <div class="card">
-            <h2>📑 Assinaturas Ativas</h2>
-            <table><thead><tr><th>Cliente</th><th>Plano</th><th>Próx. Renovação</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tabelaAssinaturas"></tbody></table>
+            <h2>📑 Assinaturas</h2>
+            <table>
+                <thead><tr><th>Cliente</th><th>Plano</th><th>Próx. Renovação</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody id="tabelaAssinaturas"></tbody>
+            </table>
         </div>
     </div>
+
+    <!-- Modal de Edição de Assinatura -->
+    <div class="modal" id="modalEditarAssinatura">
+        <div class="modal-content">
+            <h2>Editar Assinatura</h2>
+            <input type="hidden" id="editAssinaturaId">
+            <label>Novo Plano</label>
+            <select id="editPlanoSelect"><option value="">Selecione...</option></select>
+            <label>Nova Data de Início</label>
+            <input type="date" id="editDataInicio">
+            <button onclick="salvarEdicaoAssinatura()">💾 Salvar</button>
+            <button onclick="fecharModal()" style="background:#ccc;margin-top:5px;">Cancelar</button>
+            <div id="editMsg" class="msg"></div>
+        </div>
+    </div>
+
     <script>
         var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
         var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
@@ -89,7 +113,13 @@
             var resp = await s.from('subscription_plans').select('id,name').eq('company_id', COMPANY_ID).order('name');
             var sp = document.getElementById('planoSelect');
             sp.innerHTML = '<option value="">Selecione um plano…</option>';
-            (resp.data||[]).forEach(function(p) { sp.innerHTML += '<option value="' + p.id + '">' + p.name + '</option>'; });
+            (resp.data||[]).forEach(function(p) { sp.innerHTML += '<option value="'+p.id+'">'+p.name+'</option>'; });
+
+            // Preencher também o select do modal de edição
+            var ep = document.getElementById('editPlanoSelect');
+            ep.innerHTML = '<option value="">Selecione…</option>';
+            (resp.data||[]).forEach(function(p) { ep.innerHTML += '<option value="'+p.id+'">'+p.name+'</option>'; });
+
             await listarAssinaturas();
         }
 
@@ -99,7 +129,7 @@
                 .eq('company_id', COMPANY_ID)
                 .order('next_renewal');
             var tb = document.getElementById('tabelaAssinaturas');
-            if (resp.error) { tb.innerHTML = '<tr><td colspan="5">Erro: ' + resp.error.message + '</td></tr>'; return; }
+            if (resp.error) { tb.innerHTML = '<tr><td colspan="5">Erro: '+resp.error.message+'</td></tr>'; return; }
             if (!resp.data || resp.data.length === 0) { tb.innerHTML = '<tr><td colspan="5">Nenhuma assinatura.</td></tr>'; return; }
             tb.innerHTML = resp.data.map(function(a) {
                 return '<tr>' +
@@ -108,8 +138,9 @@
                     '<td>' + new Date(a.next_renewal).toLocaleDateString('pt-BR') + '</td>' +
                     '<td><span class="badge badge-' + a.status + '">' + a.status + '</span></td>' +
                     '<td>' +
-                        '<button onclick="renovar(\'' + a.id + '\')" style="padding:5px 10px;font-size:12px;">Renovar</button> ' +
-                        '<button onclick="cancelarAssinatura(\'' + a.id + '\')" style="padding:5px 10px;font-size:12px;background:#dc2626;">Cancelar</button>' +
+                        '<button class="btn-editar" onclick="editarAssinatura(\'' + a.id + '\', \'' + a.plan_id + '\', \'' + (a.start_date || '') + '\')">✏️</button>' +
+                        '<button class="btn-excluir" onclick="excluirAssinatura(\'' + a.id + '\')">🗑️</button>' +
+                        (a.status === 'ativo' ? '<button onclick="cancelarAssinatura(\'' + a.id + '\')" style="background:#dc2626;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;margin-left:5px;">Cancelar</button>' : '') +
                     '</td>' +
                 '</tr>';
             }).join('');
@@ -173,6 +204,58 @@
             else { msg.className = 'msg sucesso'; msg.textContent = 'Assinatura vinculada!'; listarAssinaturas(); }
         }
 
+        // Editar assinatura
+        function editarAssinatura(id, planId, startDate) {
+            document.getElementById('editAssinaturaId').value = id;
+            document.getElementById('editPlanoSelect').value = planId;
+            document.getElementById('editDataInicio').value = startDate ? startDate.split('T')[0] : '';
+            document.getElementById('modalEditarAssinatura').classList.add('active');
+        }
+
+        function fecharModal() { document.getElementById('modalEditarAssinatura').classList.remove('active'); }
+
+        async function salvarEdicaoAssinatura() {
+            var id = document.getElementById('editAssinaturaId').value;
+            var plano = document.getElementById('editPlanoSelect').value;
+            var inicio = document.getElementById('editDataInicio').value;
+            if (!plano || !inicio) return alert('Preencha todos os campos.');
+
+            var respPlano = await s.from('subscription_plans').select('frequency').eq('id', plano).single();
+            var freq = respPlano.data?.frequency || 'mensal';
+            var dataInicio = new Date(inicio + 'T00:00:00');
+            var next = new Date(dataInicio);
+            switch (freq) {
+                case 'semanal': next.setDate(next.getDate() + 7); break;
+                case 'trimestral': next.setMonth(next.getMonth() + 3); break;
+                case 'anual': next.setFullYear(next.getFullYear() + 1); break;
+                default: next.setMonth(next.getMonth() + 1);
+            }
+
+            var { error } = await s.from('subscriptions').update({
+                plan_id: plano,
+                start_date: inicio,
+                next_renewal: next.toISOString().split('T')[0]
+            }).eq('id', id);
+
+            if (error) { document.getElementById('editMsg').className = 'msg erro'; document.getElementById('editMsg').textContent = 'Erro: ' + error.message; return; }
+            document.getElementById('editMsg').className = 'msg sucesso'; document.getElementById('editMsg').textContent = 'Assinatura atualizada!';
+            fecharModal();
+            listarAssinaturas();
+        }
+
+        async function excluirAssinatura(id) {
+            if (!confirm('Excluir esta assinatura? Esta ação não pode ser desfeita.')) return;
+            var { error } = await s.from('subscriptions').delete().eq('id', id);
+            if (error) alert('Erro: ' + error.message);
+            else listarAssinaturas();
+        }
+
+        async function cancelarAssinatura(id) {
+            if (!confirm('Cancelar esta assinatura?')) return;
+            await s.from('subscriptions').update({ status: 'cancelado' }).eq('id', id);
+            listarAssinaturas();
+        }
+
         async function renovar(subId) {
             var respSub = await s.from('subscriptions').select('*, subscription_plans!inner(price, frequency)').eq('id', subId).single();
             var sub = respSub.data;
@@ -186,12 +269,6 @@
                 default: next.setMonth(next.getMonth() + 1);
             }
             await s.from('subscriptions').update({ next_renewal: next.toISOString().split('T')[0], status: 'ativo' }).eq('id', subId);
-            listarAssinaturas();
-        }
-
-        async function cancelarAssinatura(subId) {
-            if (!confirm('Cancelar esta assinatura?')) return;
-            await s.from('subscriptions').update({ status: 'cancelado' }).eq('id', subId);
             listarAssinaturas();
         }
 

@@ -9,13 +9,24 @@
         body { font-family: Arial; background: #f0f2f5; padding: 20px; margin: 0; }
         .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; margin: -20px -20px 20px -20px; }
         .navbar a { color: white; margin-left: 15px; text-decoration: none; }
-        input, select, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
+        h2 { color: #0055FF; }
+        input, select, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; box-sizing: border-box; }
         .row { display: flex; gap: 10px; }
         .row input { flex: 1; }
         button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; }
-        th { background: #0055FF; color: white; padding: 12px; }
+        .btn-excluir { background: #dc2626; }
+        .btn-editar { background: #f59e0b; color: white; margin-right:5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #0055FF; color: white; padding: 12px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
+        .msg { padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
+        .msg.info { background: #dbeafe; color: #1e40af; display: block; }
+        .msg.erro { background: #fee2e2; color: #991b1b; display: block; }
+        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; }
     </style>
 </head>
 <body>
@@ -28,46 +39,144 @@
             <a href="aniversariantes.html">🎂 Aniversariantes</a>
         </div>
     </div>
-    <div style="background:white;padding:20px;border-radius:10px;margin-bottom:20px">
-        <input id="nomeVendedor" placeholder="Nome">
-        <input id="emailVendedor" placeholder="Email">
-        <input id="foneVendedor" placeholder="Telefone">
-        <select id="role"><option value="seller">Vendedor</option><option value="manager">Gerente</option></select>
+    <div class="container">
+        <h2>Cadastro de Vendedor</h2>
+        <input type="text" id="nomeVendedor" placeholder="Nome *">
+        <input type="email" id="emailVendedor" placeholder="Email *">
+        <input type="tel" id="foneVendedor" placeholder="Telefone">
+        <select id="role">
+            <option value="seller">Vendedor</option>
+            <option value="manager">Gerente</option>
+        </select>
         <div class="row">
             <input type="number" id="diaVendedor" placeholder="Dia" min="1" max="31">
             <input type="number" id="mesVendedor" placeholder="Mês" min="1" max="12">
         </div>
-        <button id="btnSalvarVend" onclick="adicionarVendedor()">Cadastrar Vendedor</button>
+        <button id="btnSalvar" onclick="adicionar()">💾 Cadastrar</button>
+        <div id="msg" class="msg"></div>
+
+        <h2>Vendedores Cadastrados</h2>
+        <input type="text" id="busca" placeholder="🔍 Buscar..." oninput="filtrar()">
+        <table>
+            <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Função</th><th>Ações</th></tr></thead>
+            <tbody id="lista"></tbody>
+        </table>
     </div>
-    <table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Função</th></tr></thead><tbody id="listaVendedores"></tbody></table>
+
+    <!-- Modal de Edição -->
+    <div class="modal" id="modalEdicao">
+        <div class="modal-content">
+            <h2>Editar Vendedor</h2>
+            <input type="hidden" id="editId">
+            <input type="text" id="editNome" placeholder="Nome">
+            <input type="email" id="editEmail" placeholder="Email">
+            <input type="tel" id="editFone" placeholder="Telefone">
+            <select id="editRole">
+                <option value="seller">Vendedor</option>
+                <option value="manager">Gerente</option>
+            </select>
+            <div class="row">
+                <input type="number" id="editDia" placeholder="Dia" min="1" max="31">
+                <input type="number" id="editMes" placeholder="Mês" min="1" max="12">
+            </div>
+            <button onclick="salvarEdicao()">💾 Salvar</button>
+            <button onclick="fecharModal()" style="background:#ccc;margin-top:5px;">Cancelar</button>
+        </div>
+    </div>
+
     <script>
         var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
         var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var vendedores = [];
 
-        async function carregar(){
+        async function carregar() {
             var resp = await s.from('users').select('*').eq('company_id', COMPANY_ID).order('name');
-            document.getElementById('listaVendedores').innerHTML = (resp.data||[]).map(function(u) {
-                return '<tr><td>' + u.name + '</td><td>' + u.email + '</td><td>' + (u.phone||'-') + '</td><td>' + u.role + '</td></tr>';
+            vendedores = resp.data || [];
+            render(vendedores);
+        }
+
+        function render(lista) {
+            document.getElementById('lista').innerHTML = lista.map(function(u) {
+                return `<tr>
+                    <td>${u.name}</td><td>${u.email}</td><td>${u.phone||'-'}</td><td>${u.role}</td>
+                    <td>
+                        <button class="btn-editar" onclick="editar('${u.id}')">✏️</button>
+                        <button class="btn-excluir" onclick="excluir('${u.id}')">🗑️</button>
+                    </td></tr>`;
             }).join('');
         }
-        async function adicionarVendedor(){
-            var btn = document.getElementById('btnSalvarVend');
-            var n = document.getElementById('nomeVendedor').value;
-            var e = document.getElementById('emailVendedor').value;
-            var f = document.getElementById('foneVendedor').value.trim();
-            if(!n||!e) return;
-            btn.disabled = true; btn.textContent = 'Salvando…';
-            await s.from('users').insert([{
-                company_id:COMPANY_ID, name:n, email:e, phone:f,
-                role:document.getElementById('role').value,
+
+        function filtrar() {
+            var termo = document.getElementById('busca').value.toLowerCase();
+            render(vendedores.filter(function(u) { return u.name.toLowerCase().includes(termo) || u.email.includes(termo); }));
+        }
+
+        async function adicionar() {
+            var n = document.getElementById('nomeVendedor').value.trim();
+            var e = document.getElementById('emailVendedor').value.trim();
+            if (!n || !e) { mostrarMsg('Nome e email obrigatórios.', 'erro'); return; }
+            var btn = document.getElementById('btnSalvar'); btn.disabled = true; btn.textContent = 'Salvando…';
+            var resp = await s.from('users').insert([{
+                company_id: COMPANY_ID, name: n, email: e,
+                phone: document.getElementById('foneVendedor').value,
+                role: document.getElementById('role').value,
                 birthday_day: parseInt(document.getElementById('diaVendedor').value) || null,
                 birthday_month: parseInt(document.getElementById('mesVendedor').value) || null
             }]);
-            btn.disabled = false; btn.textContent = 'Cadastrar Vendedor';
-            carregar();
+            btn.disabled = false; btn.textContent = '💾 Cadastrar';
+            if (resp.error) mostrarMsg(resp.error.message, 'erro');
+            else { mostrarMsg('Vendedor cadastrado!', 'sucesso'); limparForm(); carregar(); }
         }
+
+        function editar(id) {
+            var u = vendedores.find(function(x) { return x.id === id; });
+            if (!u) return;
+            document.getElementById('editId').value = u.id;
+            document.getElementById('editNome').value = u.name;
+            document.getElementById('editEmail').value = u.email;
+            document.getElementById('editFone').value = u.phone || '';
+            document.getElementById('editRole').value = u.role;
+            document.getElementById('editDia').value = u.birthday_day || '';
+            document.getElementById('editMes').value = u.birthday_month || '';
+            document.getElementById('modalEdicao').classList.add('active');
+        }
+
+        function fecharModal() { document.getElementById('modalEdicao').classList.remove('active'); }
+
+        async function salvarEdicao() {
+            var id = document.getElementById('editId').value;
+            var nome = document.getElementById('editNome').value.trim();
+            var email = document.getElementById('editEmail').value.trim();
+            if (!nome || !email) { alert('Nome e email obrigatórios.'); return; }
+            var resp = await s.from('users').update({
+                name: nome, email: email,
+                phone: document.getElementById('editFone').value,
+                role: document.getElementById('editRole').value,
+                birthday_day: parseInt(document.getElementById('editDia').value) || null,
+                birthday_month: parseInt(document.getElementById('editMes').value) || null
+            }).eq('id', id);
+            if (resp.error) mostrarMsg(resp.error.message, 'erro');
+            else { mostrarMsg('Atualizado!', 'sucesso'); fecharModal(); carregar(); }
+        }
+
+        async function excluir(id) {
+            if (!confirm('Excluir este vendedor?')) return;
+            var resp = await s.from('users').delete().eq('id', id);
+            if (resp.error) mostrarMsg(resp.error.message, 'erro');
+            else { mostrarMsg('Excluído!', 'sucesso'); carregar(); }
+        }
+
+        function mostrarMsg(texto, tipo) {
+            var m = document.getElementById('msg');
+            m.className = 'msg ' + tipo;
+            m.textContent = texto;
+        }
+        function limparForm() {
+            ['nomeVendedor','emailVendedor','foneVendedor','diaVendedor','mesVendedor'].forEach(function(id) { document.getElementById(id).value = ''; });
+        }
+
         carregar();
     </script>
 </body>
