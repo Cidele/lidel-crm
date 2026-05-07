@@ -19,7 +19,7 @@
         .btn-excluir { background: #dc2626; }
         .btn-editar { background: #f59e0b; color: white; margin-right:5px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #0055FF; color: white; padding: 12px; text-align: left; }
+        th { background: #0055FF; color: white; padding: 12px; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
         .msg { padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
         .msg.info { background: #dbeafe; color: #1e40af; display: block; }
@@ -27,7 +27,8 @@
         .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+        .clickable { cursor: pointer; color: #0055FF; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -43,7 +44,7 @@
     <div class="container">
         <h2>Cadastro de Parceiro</h2>
         <input type="text" id="nomeParceiro" placeholder="Nome *">
-        <input type="text" id="idprof" placeholder="Identificação Profissional (ex: CRN 12345)">
+        <input type="text" id="idprof" placeholder="Identificação Profissional">
         <input type="tel" id="foneParceiro" placeholder="Telefone *">
         <input type="email" id="emailParceiro" placeholder="Email">
         <div class="row">
@@ -52,16 +53,24 @@
         </div>
         <button id="btnCadastrar" onclick="adicionar()">💾 Cadastrar</button>
         <div id="msg" class="msg"></div>
-
         <h2>Parceiros Cadastrados</h2>
         <input type="text" id="busca" placeholder="🔍 Buscar..." oninput="filtrar()">
         <table>
-            <thead><tr><th>Nome</th><th>ID Prof.</th><th>Telefone</th><th>Comissão</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Nome</th><th>Identificação</th><th>Telefone</th><th>Comissão Acumulada</th><th>Ações</th></tr></thead>
             <tbody id="listaParceiros"></tbody>
         </table>
     </div>
 
-    <!-- Modal Editar -->
+    <!-- Modal de Histórico ao clicar no nome -->
+    <div class="modal" id="modalHistorico">
+        <div class="modal-content">
+            <h2>Histórico de Indicações</h2>
+            <div id="historicoConteudo"></div>
+            <button onclick="fecharModalHistorico()" style="background:#ccc;margin-top:15px;">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
     <div class="modal" id="modalEdicao">
         <div class="modal-content">
             <h2>Editar Parceiro</h2>
@@ -75,7 +84,7 @@
                 <input type="number" id="editMes" placeholder="Mês" min="1" max="12">
             </div>
             <button onclick="salvarEdicao()">💾 Salvar</button>
-            <button onclick="fecharModal()" style="background:#ccc;margin-top:5px;">Cancelar</button>
+            <button onclick="fecharModalEdicao()" style="background:#ccc;margin-top:5px;">Cancelar</button>
         </div>
     </div>
 
@@ -95,7 +104,9 @@
         function render(lista) {
             document.getElementById('listaParceiros').innerHTML = lista.map(function(p) {
                 return `<tr>
-                    <td>${p.name}</td><td>${p.professional_identifier||'-'}</td><td>${p.phone}</td>
+                    <td class="clickable" onclick="verHistorico('${p.id}')">${p.name}</td>
+                    <td>${p.professional_identifier||'-'}</td>
+                    <td>${p.phone}</td>
                     <td style="color:green">R$${(p.cashback_accumulated||0).toFixed(2)}</td>
                     <td>
                         <button class="btn-editar" onclick="editar('${p.id}')">✏️</button>
@@ -126,6 +137,36 @@
             else { mostrarMsg('Parceiro cadastrado!', 'sucesso'); limparForm(); carregar(); }
         }
 
+        async function verHistorico(id) {
+            var p = parceiros.find(function(x) { return x.id === id; });
+            if (!p) return;
+
+            // Buscar vendas indicadas por este parceiro (últimos 3 meses)
+            var tresMesesAtras = new Date(); tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
+            var respVendas = await s.from('sales')
+                .select('sale_date, total_amount, cashback_generated, clients!inner(name)')
+                .eq('partner_id', id)
+                .gte('sale_date', tresMesesAtras.toISOString().split('T')[0])
+                .order('sale_date', { ascending: false });
+
+            var html = `<h3>${p.name}</h3>
+                <p><strong>Comissão acumulada:</strong> R$${(p.cashback_accumulated||0).toFixed(2)}</p>
+                <h4>📋 Indicações recentes (3 meses)</h4>`;
+            if (respVendas.data && respVendas.data.length > 0) {
+                html += '<table><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Comissão (3%)</th></tr>';
+                respVendas.data.forEach(function(v) {
+                    var comissao = (v.total_amount * 0.03).toFixed(2);
+                    html += `<tr><td>${new Date(v.sale_date).toLocaleDateString('pt-BR')}</td><td>${v.clients?.name||'-'}</td><td>R$${v.total_amount.toFixed(2)}</td><td>R$${comissao}</td></tr>`;
+                });
+                html += '</table>';
+            } else html += '<p>Nenhuma indicação recente.</p>';
+
+            document.getElementById('historicoConteudo').innerHTML = html;
+            document.getElementById('modalHistorico').classList.add('active');
+        }
+
+        function fecharModalHistorico() { document.getElementById('modalHistorico').classList.remove('active'); }
+
         function editar(id) {
             var p = parceiros.find(function(x) { return x.id === id; });
             if (!p) return;
@@ -139,7 +180,7 @@
             document.getElementById('modalEdicao').classList.add('active');
         }
 
-        function fecharModal() { document.getElementById('modalEdicao').classList.remove('active'); }
+        function fecharModalEdicao() { document.getElementById('modalEdicao').classList.remove('active'); }
 
         async function salvarEdicao() {
             var id = document.getElementById('editId').value;
@@ -153,15 +194,15 @@
                 birthday_day: parseInt(document.getElementById('editDia').value) || null,
                 birthday_month: parseInt(document.getElementById('editMes').value) || null
             }).eq('id', id);
-            if (resp.error) mostrarMsg(resp.error.message, 'erro');
-            else { mostrarMsg('Atualizado!', 'sucesso'); fecharModal(); carregar(); }
+            if (resp.error) alert(resp.error.message);
+            else { fecharModalEdicao(); carregar(); mostrarMsg('Atualizado!', 'sucesso'); }
         }
 
         async function excluir(id) {
             if (!confirm('Excluir este parceiro?')) return;
             var resp = await s.from('partners').delete().eq('id', id);
-            if (resp.error) mostrarMsg(resp.error.message, 'erro');
-            else { mostrarMsg('Excluído!', 'sucesso'); carregar(); }
+            if (resp.error) alert(resp.error.message);
+            else { carregar(); mostrarMsg('Excluído!', 'sucesso'); }
         }
 
         function mostrarMsg(texto, tipo) {
