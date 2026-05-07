@@ -78,7 +78,7 @@
             msg.style.color = '#1e40af'
             msg.textContent = 'Autenticando...'
 
-            // 1. AUTENTICAR PRIMEIRO
+            // 1. Autenticar
             var response = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password
@@ -91,13 +91,37 @@
                 return
             }
 
-            // 2. DEPOIS BUSCAR O PERFIL
             if (response.data && response.data.user) {
+                // 2. Buscar perfil
                 var userResponse = await supabase
                     .from('users')
                     .select('company_id, role')
                     .eq('email', email)
                     .single()
+
+                // 3. SE NÃO ENCONTRAR, CRIAR O PERFIL AUTOMATICAMENTE
+                if (!userResponse.data) {
+                    var empresaResponse = await supabase
+                        .from('companies')
+                        .select('id')
+                        .limit(1)
+                        .single()
+                    
+                    if (empresaResponse.data) {
+                        await supabase.from('users').insert({
+                            company_id: empresaResponse.data.id,
+                            name: email.split('@')[0],
+                            email: email,
+                            role: 'admin'
+                        })
+                        
+                        userResponse = await supabase
+                            .from('users')
+                            .select('company_id, role')
+                            .eq('email', email)
+                            .single()
+                    }
+                }
 
                 if (userResponse.data) {
                     localStorage.setItem('lidel_token', response.data.session.access_token)
@@ -115,10 +139,6 @@
                             window.location.href = 'dashboard.html'
                         }
                     }, 1000)
-                } else {
-                    msg.style.background = '#fee2e2'
-                    msg.style.color = '#991b1b'
-                    msg.textContent = 'Usuario nao encontrado na base.'
                 }
             }
         }
