@@ -7,13 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: Arial; background: #f0f2f5; padding: 20px; margin: 0; }
-        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; margin: -20px -20px 20px -20px; }
-        .navbar a { color: white; margin-left: 20px; text-decoration: none; }
+        .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; margin: -20px -20px 20px -20px; }
+        .navbar a { color: white; margin-left: 15px; text-decoration: none; }
         input, select, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; }
-        button { background: #4f46e5; color: white; font-weight: bold; cursor: pointer; border: none; }
-        button:disabled { background: #a5b4fc; cursor: not-allowed; }
+        button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; }
-        th { background: #4f46e5; color: white; padding: 12px; }
+        th { background: #0055FF; color: white; padding: 12px; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
     </style>
 </head>
@@ -22,18 +21,8 @@
         <h1>👤 Vendedores</h1>
         <div>
             <a href="dashboard.html">Dashboard</a>
+            <a href="vendas.html">💰 Vender</a>
             <a href="clientes.html">Clientes</a>
-            <a href="vendas.html">Vendas</a>
-            <a href="parceiros.html">Parceiros</a>
-            <a href="vendedores.html">Vendedores</a>
-            <a href="campanhas.html">Campanhas</a>
-            <a href="relatorios.html">Relatórios</a>
-            <a href="sac.html">SAC</a>
-            <a href="indicacao.html">Indicação</a>
-            <a href="consumo.html">Consumo</a>
-            <a href="notificacoes.html">Notificações</a>
-            <a href="saude.html">Saúde</a>
-            <a href="assinaturas.html">Assinaturas</a>
         </div>
     </div>
     <div style="background:white;padding:20px;border-radius:10px;margin-bottom:20px">
@@ -45,7 +34,7 @@
     </div>
     <table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Função</th></tr></thead><tbody id="listaVendedores"></tbody></table>
     <script>
-        var COMPANY_ID = localStorage.getItem('lidel_company_id') || 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
         var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -56,21 +45,17 @@
                 return '<tr><td>' + u.name + '</td><td>' + u.email + '</td><td>' + (u.phone||'-') + '</td><td>' + u.role + '</td></tr>';
             }).join('');
         }
-
         async function adicionarVendedor(){
             var btn = document.getElementById('btnSalvarVend');
             var n = document.getElementById('nomeVendedor').value;
             var e = document.getElementById('emailVendedor').value;
             var f = document.getElementById('foneVendedor').value.trim();
             if(!n||!e) return;
-            btn.disabled = true;
-            btn.textContent = 'Salvando…';
-            await s.from('users').insert([{company_id: COMPANY_ID, name: n, email: e, phone: f, role: document.getElementById('role').value}]);
-            btn.disabled = false;
-            btn.textContent = 'Cadastrar Vendedor';
+            btn.disabled = true; btn.textContent = 'Salvando…';
+            await s.from('users').insert([{company_id:COMPANY_ID, name:n, email:e, phone:f, role:document.getElementById('role').value}]);
+            btn.disabled = false; btn.textContent = 'Cadastrar Vendedor';
             carregar();
         }
-
         carregar();
     </script>
 </body>

@@ -7,28 +7,30 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
-        .navbar h1 { font-size: 22px; margin: 0; }
-        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 20px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
         .container { max-width: 900px; margin: 0 auto; }
         .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-        h2 { color: #4f46e5; margin-top: 0; }
+        h2 { color: #0055FF; margin-top: 0; }
         label { font-weight: bold; display: block; margin: 10px 0 5px; }
         input, select, button { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; margin: 5px 0; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { background: #4f46e5; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button { background: #0055FF; color: white; border: none; font-weight: bold; cursor: pointer; }
         button:disabled { background: #a5b4fc; cursor: not-allowed; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: #4f46e5; color: white; padding: 12px; text-align: left; }
+        th { background: #0055FF; color: white; padding: 12px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
         .msg { padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
         .msg.info { background: #dbeafe; color: #1e40af; display: block; }
         .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
         .msg.erro { background: #fee2e2; color: #991b1b; display: block; }
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
         .badge-ativo { background: #d1fae5; color: #065f46; }
         .badge-atrasado { background: #fef3c7; color: #92400e; }
         .badge-cancelado { background: #fee2e2; color: #991b1b; }
+        .resultado-busca { background: #f0fdf4; padding: 8px; border-radius: 6px; margin: 3px 0; cursor: pointer; border: 1px solid #bbf7d0; }
+        .resultado-busca:hover { background: #dcfce7; }
     </style>
 </head>
 <body>
@@ -36,23 +38,11 @@
         <h1>📦 Assinaturas</h1>
         <div>
             <a href="dashboard.html">Dashboard</a>
+            <a href="vendas.html">💰 Vender</a>
             <a href="clientes.html">Clientes</a>
-            <a href="vendas.html">Vendas</a>
-            <a href="parceiros.html">Parceiros</a>
-            <a href="vendedores.html">Vendedores</a>
-            <a href="campanhas.html">Campanhas</a>
-            <a href="relatorios.html">Relatórios</a>
-            <a href="sac.html">SAC</a>
-            <a href="indicacao.html">Indicação</a>
-            <a href="consumo.html">Consumo</a>
-            <a href="notificacoes.html">Notificações</a>
-            <a href="saude.html">Saúde</a>
-            <a href="assinaturas.html">Assinaturas</a>
         </div>
     </div>
-
     <div class="container">
-        <!-- Cadastro de plano -->
         <div class="card">
             <h2>📋 Planos de Assinatura</h2>
             <div id="msgPlano" class="msg"></div>
@@ -70,159 +60,142 @@
             <textarea id="descricaoPlano" placeholder="Descrição do plano" rows="2"></textarea>
             <button id="btnSalvarPlano" onclick="criarPlano()">💾 Salvar Plano</button>
         </div>
-
-        <!-- Vincular cliente -->
         <div class="card">
             <h2>🔗 Vincular Cliente a um Plano</h2>
             <div id="msgAssinatura" class="msg"></div>
-            <div class="grid-2">
-                <select id="clienteSelect"><option value="">Selecione um cliente…</option></select>
-                <select id="planoSelect"><option value="">Selecione um plano…</option></select>
-                <input type="date" id="dataInicio">
-                <button id="btnVincular" onclick="vincularCliente()">✅ Vincular</button>
-            </div>
+            <label>Buscar Cliente</label>
+            <input type="text" id="buscaClienteAss" placeholder="Digite o nome do cliente..." oninput="buscarClientesAss()">
+            <div id="resultadosBuscaAss" style="margin-bottom:10px;"></div>
+            <input type="hidden" id="clienteSelect">
+            <label>Plano</label>
+            <select id="planoSelect"><option value="">Selecione um plano…</option></select>
+            <label>Data de Início</label>
+            <input type="date" id="dataInicio">
+            <button id="btnVincular" onclick="vincularCliente()">✅ Vincular</button>
         </div>
-
-        <!-- Lista de assinaturas ativas -->
         <div class="card">
             <h2>📑 Assinaturas Ativas</h2>
-            <table>
-                <thead><tr><th>Cliente</th><th>Plano</th><th>Próx. Renovação</th><th>Status</th><th>Ações</th></tr></thead>
-                <tbody id="tabelaAssinaturas"><tr><td colspan="5" style="text-align:center">Carregando…</td></tr></tbody>
-            </table>
+            <table><thead><tr><th>Cliente</th><th>Plano</th><th>Próx. Renovação</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tabelaAssinaturas"></tbody></table>
         </div>
     </div>
-
     <script>
-        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
-        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
-        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var clienteSelecionadoAss = null;
 
-        async function carregarSelects(){
-            // Clientes
-            const {data:clientes} = await s.from('clients').select('id,name').eq('company_id',COMPANY_ID).order('name');
-            const sc = document.getElementById('clienteSelect');
-            sc.innerHTML = '<option value="">Selecione um cliente…</option>';
-            clientes?.forEach(c => sc.innerHTML += `<option value="${c.id}">${c.name}</option>`);
-
-            // Planos
-            const {data:planos} = await s.from('subscription_plans').select('id,name').eq('company_id',COMPANY_ID).order('name');
-            const sp = document.getElementById('planoSelect');
+        async function carregarPlanos() {
+            var resp = await s.from('subscription_plans').select('id,name').eq('company_id', COMPANY_ID).order('name');
+            var sp = document.getElementById('planoSelect');
             sp.innerHTML = '<option value="">Selecione um plano…</option>';
-            planos?.forEach(p => sp.innerHTML += `<option value="${p.id}">${p.name}</option>`);
-
-            // Listar assinaturas
+            (resp.data||[]).forEach(function(p) { sp.innerHTML += '<option value="' + p.id + '">' + p.name + '</option>'; });
             await listarAssinaturas();
         }
 
-        async function criarPlano(){
-            const btn = document.getElementById('btnSalvarPlano');
-            const msg = document.getElementById('msgPlano');
-            const nome = document.getElementById('nomePlano').value.trim();
-            const preco = parseFloat(document.getElementById('precoPlano').value);
-            const freq = document.getElementById('frequenciaPlano').value;
-            if(!nome || !preco){ msg.className='msg erro'; msg.textContent='Nome e preço são obrigatórios.'; return; }
-            btn.disabled = true; btn.textContent = 'Salvando…';
-            const {error} = await s.from('subscription_plans').insert([{
-                company_id: COMPANY_ID,
-                name: nome,
-                price: preco,
-                frequency: freq,
-                benefits: document.getElementById('beneficiosPlano').value.trim() || null,
-                description: document.getElementById('descricaoPlano').value.trim() || null
-            }]);
-            btn.disabled = false; btn.textContent = '💾 Salvar Plano';
-            if(error){ msg.className='msg erro'; msg.textContent='Erro: '+error.message; }
-            else { msg.className='msg sucesso'; msg.textContent='Plano criado!'; carregarSelects(); }
-        }
-
-        async function vincularCliente(){
-            const btn = document.getElementById('btnVincular');
-            const msg = document.getElementById('msgAssinatura');
-            const cliente = document.getElementById('clienteSelect').value;
-            const plano = document.getElementById('planoSelect').value;
-            const inicio = document.getElementById('dataInicio').value;
-            if(!cliente || !plano || !inicio){ msg.className='msg erro'; msg.textContent='Preencha todos os campos.'; return; }
-            // Calcular próxima renovação com base na frequência do plano
-            const {data:planoData} = await s.from('subscription_plans').select('frequency').eq('id',plano).single();
-            let freq = planoData?.frequency || 'mensal';
-            const dataInicio = new Date(inicio + 'T00:00:00');
-            let next = new Date(dataInicio);
-            switch(freq){
-                case 'semanal': next.setDate(next.getDate()+7); break;
-                case 'trimestral': next.setMonth(next.getMonth()+3); break;
-                case 'anual': next.setFullYear(next.getFullYear()+1); break;
-                default: next.setMonth(next.getMonth()+1); // mensal
-            }
-            btn.disabled = true; btn.textContent = 'Vinculando…';
-            const {error} = await s.from('subscriptions').insert([{
-                company_id: COMPANY_ID,
-                client_id: cliente,
-                plan_id: plano,
-                start_date: inicio,
-                next_renewal: next.toISOString().split('T')[0],
-                status: 'ativo'
-            }]);
-            btn.disabled = false; btn.textContent = '✅ Vincular';
-            if(error){ msg.className='msg erro'; msg.textContent='Erro: '+error.message; }
-            else { msg.className='msg sucesso'; msg.textContent='Assinatura vinculada!'; listarAssinaturas(); }
-        }
-
-        async function listarAssinaturas(){
-            const {data, error} = await s.from('subscriptions')
-                .select('id, start_date, next_renewal, status, clients!inner(name), subscription_plans!inner(name)')
+        async function listarAssinaturas() {
+            var resp = await s.from('subscriptions')
+                .select('id, start_date, next_renewal, status, clients!inner(name), subscription_plans!inner(name, frequency)')
                 .eq('company_id', COMPANY_ID)
                 .order('next_renewal');
-            const tb = document.getElementById('tabelaAssinaturas');
-            if(error){ tb.innerHTML = `<tr><td colspan="5">Erro: ${error.message}</td></tr>`; return; }
-            if(!data || data.length===0){ tb.innerHTML = '<tr><td colspan="5">Nenhuma assinatura.</td></tr>'; return; }
-            tb.innerHTML = data.map(a => `
-                <tr>
-                    <td>${a.clients?.name || '-'}</td>
-                    <td>${a.subscription_plans?.name || '-'}</td>
-                    <td>${new Date(a.next_renewal).toLocaleDateString('pt-BR')}</td>
-                    <td><span class="badge badge-${a.status}">${a.status}</span></td>
-                    <td>
-                        <button onclick="renovar('${a.id}')" style="width:auto;padding:5px 10px;font-size:12px">Renovar</button>
-                        <button onclick="cancelarAssinatura('${a.id}')" style="width:auto;padding:5px 10px;font-size:12px;background:#dc2626;margin-left:5px">Cancelar</button>
-                    </td>
-                </tr>
-            `).join('');
+            var tb = document.getElementById('tabelaAssinaturas');
+            if (resp.error) { tb.innerHTML = '<tr><td colspan="5">Erro: ' + resp.error.message + '</td></tr>'; return; }
+            if (!resp.data || resp.data.length === 0) { tb.innerHTML = '<tr><td colspan="5">Nenhuma assinatura.</td></tr>'; return; }
+            tb.innerHTML = resp.data.map(function(a) {
+                return '<tr>' +
+                    '<td>' + (a.clients?.name || '-') + '</td>' +
+                    '<td>' + (a.subscription_plans?.name || '-') + '</td>' +
+                    '<td>' + new Date(a.next_renewal).toLocaleDateString('pt-BR') + '</td>' +
+                    '<td><span class="badge badge-' + a.status + '">' + a.status + '</span></td>' +
+                    '<td>' +
+                        '<button onclick="renovar(\'' + a.id + '\')" style="padding:5px 10px;font-size:12px;">Renovar</button> ' +
+                        '<button onclick="cancelarAssinatura(\'' + a.id + '\')" style="padding:5px 10px;font-size:12px;background:#dc2626;">Cancelar</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
         }
 
-        async function renovar(subId){
-            const {data:sub} = await s.from('subscriptions').select('*, subscription_plans!inner(price)').eq('id', subId).single();
-            if(!sub) return;
-            // Registrar venda
-            await s.from('sales').insert([{
-                client_id: sub.client_id,
-                company_id: COMPANY_ID,
-                total_amount: sub.subscription_plans.price,
-                final_amount: sub.subscription_plans.price,
-                cashback_generated: Math.min(sub.subscription_plans.price * 0.14, 150),
-                cashback_expires_at: new Date(Date.now() + 45*86400000).toISOString(),
-                sale_date: new Date().toISOString()
-            }]);
-            // Atualizar próxima renovação
-            let next = new Date(sub.next_renewal);
-            switch(sub.subscription_plans.frequency){
-                case 'semanal': next.setDate(next.getDate()+7); break;
-                case 'trimestral': next.setMonth(next.getMonth()+3); break;
-                case 'anual': next.setFullYear(next.getFullYear()+1); break;
-                default: next.setMonth(next.getMonth()+1);
+        async function buscarClientesAss() {
+            var termo = document.getElementById('buscaClienteAss').value.trim();
+            if (termo.length < 2) { document.getElementById('resultadosBuscaAss').innerHTML = ''; return; }
+            var resp = await s.from('clients').select('id, name, phone').eq('company_id', COMPANY_ID).ilike('name', '%' + termo + '%').limit(10);
+            var html = '';
+            if (resp.data) {
+                resp.data.forEach(function(c) {
+                    html += '<div class="resultado-busca" onclick="selecionarClienteAss(\'' + c.id + '\', \'' + c.name + '\')">' + c.name + ' (' + c.phone + ')</div>';
+                });
+            }
+            document.getElementById('resultadosBuscaAss').innerHTML = html || '<p style="color:#999;">Nenhum cliente encontrado.</p>';
+        }
+
+        function selecionarClienteAss(id, nome) {
+            clienteSelecionadoAss = id;
+            document.getElementById('clienteSelect').value = id;
+            document.getElementById('buscaClienteAss').value = nome;
+            document.getElementById('resultadosBuscaAss').innerHTML = '';
+        }
+
+        async function criarPlano() {
+            var btn = document.getElementById('btnSalvarPlano');
+            var msg = document.getElementById('msgPlano');
+            var nome = document.getElementById('nomePlano').value.trim();
+            var preco = parseFloat(document.getElementById('precoPlano').value);
+            var freq = document.getElementById('frequenciaPlano').value;
+            if (!nome || !preco) { msg.className = 'msg erro'; msg.textContent = 'Nome e preço obrigatórios.'; return; }
+            btn.disabled = true; btn.textContent = 'Salvando…';
+            var { error } = await s.from('subscription_plans').insert([{ company_id: COMPANY_ID, name: nome, price: preco, frequency: freq, benefits: document.getElementById('beneficiosPlano').value, description: document.getElementById('descricaoPlano').value }]);
+            btn.disabled = false; btn.textContent = '💾 Salvar Plano';
+            if (error) { msg.className = 'msg erro'; msg.textContent = 'Erro: ' + error.message; }
+            else { msg.className = 'msg sucesso'; msg.textContent = 'Plano criado!'; carregarPlanos(); }
+        }
+
+        async function vincularCliente() {
+            var btn = document.getElementById('btnVincular');
+            var msg = document.getElementById('msgAssinatura');
+            var cliente = clienteSelecionadoAss;
+            var plano = document.getElementById('planoSelect').value;
+            var inicio = document.getElementById('dataInicio').value;
+            if (!cliente || !plano || !inicio) { msg.className = 'msg erro'; msg.textContent = 'Preencha todos os campos.'; return; }
+            btn.disabled = true; btn.textContent = 'Vinculando…';
+            var respPlano = await s.from('subscription_plans').select('frequency').eq('id', plano).single();
+            var freq = respPlano.data?.frequency || 'mensal';
+            var dataInicio = new Date(inicio + 'T00:00:00');
+            var next = new Date(dataInicio);
+            switch (freq) {
+                case 'semanal': next.setDate(next.getDate() + 7); break;
+                case 'trimestral': next.setMonth(next.getMonth() + 3); break;
+                case 'anual': next.setFullYear(next.getFullYear() + 1); break;
+                default: next.setMonth(next.getMonth() + 1);
+            }
+            var { error } = await s.from('subscriptions').insert([{ company_id: COMPANY_ID, client_id: cliente, plan_id: plano, start_date: inicio, next_renewal: next.toISOString().split('T')[0] }]);
+            btn.disabled = false; btn.textContent = '✅ Vincular';
+            if (error) { msg.className = 'msg erro'; msg.textContent = 'Erro: ' + error.message; }
+            else { msg.className = 'msg sucesso'; msg.textContent = 'Assinatura vinculada!'; listarAssinaturas(); }
+        }
+
+        async function renovar(subId) {
+            var respSub = await s.from('subscriptions').select('*, subscription_plans!inner(price, frequency)').eq('id', subId).single();
+            var sub = respSub.data;
+            if (!sub) return;
+            await s.from('sales').insert([{ client_id: sub.client_id, company_id: COMPANY_ID, total_amount: sub.subscription_plans.price, final_amount: sub.subscription_plans.price, cashback_generated: Math.min(sub.subscription_plans.price * 0.14, 150), cashback_expires_at: new Date(Date.now() + 45*86400000).toISOString(), sale_date: new Date().toISOString() }]);
+            var next = new Date(sub.next_renewal);
+            switch (sub.subscription_plans.frequency) {
+                case 'semanal': next.setDate(next.getDate() + 7); break;
+                case 'trimestral': next.setMonth(next.getMonth() + 3); break;
+                case 'anual': next.setFullYear(next.getFullYear() + 1); break;
+                default: next.setMonth(next.getMonth() + 1);
             }
             await s.from('subscriptions').update({ next_renewal: next.toISOString().split('T')[0], status: 'ativo' }).eq('id', subId);
             listarAssinaturas();
         }
 
-        async function cancelarAssinatura(subId){
-            if(!confirm('Cancelar esta assinatura?')) return;
+        async function cancelarAssinatura(subId) {
+            if (!confirm('Cancelar esta assinatura?')) return;
             await s.from('subscriptions').update({ status: 'cancelado' }).eq('id', subId);
             listarAssinaturas();
         }
 
-        carregarSelects();
+        carregarPlanos();
     </script>
 </body>
 </html>

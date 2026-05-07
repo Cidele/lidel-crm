@@ -7,17 +7,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
-        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
-        .navbar h1 { font-size: 22px; }
-        .navbar a { color: white; margin-left: 20px; text-decoration: none; font-size: 14px; }
+        .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 20px; }
+        .navbar a { color: white; margin-left: 15px; text-decoration: none; font-size: 14px; }
         .container { max-width: 700px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-        h2 { color: #4f46e5; margin-top: 0; }
+        h2 { color: #0055FF; margin-top: 0; }
         label { font-weight: bold; display: block; margin: 15px 0 5px; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
         textarea { resize: vertical; }
-        button { background: #4f46e5; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; }
+        button { background: #0055FF; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; }
         table { width: 100%; border-collapse: collapse; margin-top: 30px; }
-        th { background: #4f46e5; color: white; padding: 12px; text-align: left; }
+        th { background: #0055FF; color: white; padding: 12px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
         .msg { padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
         .msg.info { background: #dbeafe; color: #1e40af; display: block; }
@@ -26,6 +26,7 @@
         .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
         .badge-ativo { background: #d1fae5; color: #065f46; }
         .badge-inativo { background: #fee2e2; color: #991b1b; }
+        .badge-encerrada { background: #e5e7eb; color: #6b7280; }
     </style>
 </head>
 <body>
@@ -33,18 +34,8 @@
         <h1>🎮 Campanhas</h1>
         <div>
             <a href="dashboard.html">Dashboard</a>
+            <a href="vendas.html">💰 Vender</a>
             <a href="clientes.html">Clientes</a>
-            <a href="vendas.html">Vendas</a>
-            <a href="parceiros.html">Parceiros</a>
-            <a href="vendedores.html">Vendedores</a>
-            <a href="campanhas.html">Campanhas</a>
-            <a href="relatorios.html">Relatórios</a>
-            <a href="sac.html">SAC</a>
-            <a href="indicacao.html">Indicação</a>
-            <a href="consumo.html">Consumo</a>
-            <a href="notificacoes.html">Notificações</a>
-            <a href="saude.html">Saúde</a>
-            <a href="assinaturas.html">Assinaturas</a>
         </div>
     </div>
     <div class="container">
@@ -55,26 +46,65 @@
         <label for="tipo">Tipo *</label>
         <select id="tipo"><option value="data_comemorativa">Data Comemorativa</option><option value="live_shop">Live Shop</option><option value="indicacao">Indicação de Amigo</option><option value="unboxing">Unboxing</option><option value="outro">Outro</option></select>
         <label for="recompensa_tipo">Tipo de Recompensa *</label>
-        <select id="recompensa_tipo" onchange="mostrarPreview()"><option value="cashback_extra">Cashback Extra (%)</option><option value="box_surpresa">Box Surpresa</option><option value="brinde">Brinde Personalizado</option><option value="giftcard">Gift Card</option></select>
-        <label for="recompensa_valor">Valor / Percentual da Recompensa</label>
-        <input type="number" id="recompensa_valor" placeholder="Ex: 10 (para 10% ou R$ 10)" step="0.01">
+        <select id="recompensa_tipo"><option value="cashback_extra">Cashback Extra (%)</option><option value="box_surpresa">Box Surpresa</option><option value="brinde">Brinde Personalizado</option><option value="giftcard">Gift Card</option></select>
+        <label for="recompensa_valor">Valor / Percentual</label>
+        <input type="number" id="recompensa_valor" placeholder="Ex: 10" step="0.01">
         <label for="descricao">Descrição</label>
-        <textarea id="descricao" rows="3" placeholder="Ex: Ganhe 10% de cashback extra nesta compra!"></textarea>
+        <textarea id="descricao" rows="3" placeholder="Ex: Ganhe 10% de cashback extra!"></textarea>
+        <label for="dataInicio">Data de Início</label>
+        <input type="date" id="dataInicio">
+        <label for="dataFim">Data de Término</label>
+        <input type="date" id="dataFim">
         <button onclick="criarCampanha()">💾 Salvar Campanha</button>
         <div id="msg" class="msg"></div>
-        <h2 style="margin-top:30px">📋 Campanhas Cadastradas</h2>
-        <table><thead><tr><th>Nome</th><th>Tipo</th><th>Recompensa</th><th>Status</th></tr></thead><tbody id="listaCampanhas"><tr><td colspan="4">Carregando…</td></tr></tbody></table>
+        <h2 style="margin-top:30px">📋 Campanhas</h2>
+        <table><thead><tr><th>Nome</th><th>Tipo</th><th>Recompensa</th><th>Início</th><th>Fim</th><th>Status</th><th>Ação</th></tr></thead><tbody id="listaCampanhas"><tr><td colspan="7">Carregando…</td></tr></tbody></table>
     </div>
     <script>
-        const COMPANY_ID = 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae';
-        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
-        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        async function carregarLista(){const{data}=await s.from('campaigns').select('*').eq('company_id',COMPANY_ID).order('created_at',{ascending:false});const t=document.getElementById('listaCampanhas');t.innerHTML=(data||[]).map(c=>`<tr><td>${c.name}</td><td>${c.type}</td><td>${c.reward_type}: ${c.reward_value||'N/A'}</td><td><span class="badge ${c.is_active?'badge-ativo':'badge-inativo'}">${c.is_active?'Ativa':'Inativa'}</span></td></tr>`).join('')}
-        function mostrarPreview(){}
-        async function criarCampanha(){const m=document.getElementById('msg');const n=document.getElementById('nome').value.trim();if(!n){m.className='msg erro';m.textContent='Nome obrigatório.';return}m.className='msg info';m.textContent='Salvando…';const{error}=await s.from('campaigns').insert([{company_id:COMPANY_ID,name:n,type:document.getElementById('tipo').value,reward_type:document.getElementById('recompensa_tipo').value,reward_value:parseFloat(document.getElementById('recompensa_valor').value)||null,reward_description:document.getElementById('descricao').value.trim()||null,is_active:true}]);if(error){m.className='msg erro';m.textContent='Erro: '+error.message}else{m.className='msg sucesso';m.textContent='Campanha criada!';document.getElementById('nome').value='';document.getElementById('recompensa_valor').value='';document.getElementById('descricao').value='';carregarLista()}}
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function carregarLista() {
+            var resp = await s.from('campaigns').select('*').eq('company_id', COMPANY_ID).order('created_at', { ascending: false });
+            var tbody = document.getElementById('listaCampanhas');
+            if (!resp.data || resp.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Nenhuma campanha.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = resp.data.map(function(c) {
+                var inicio = c.starts_at ? new Date(c.starts_at).toLocaleDateString('pt-BR') : '-';
+                var fim = c.ends_at ? new Date(c.ends_at).toLocaleDateString('pt-BR') : '-';
+                var statusAtual = c.is_active ? 'Ativa' : 'Encerrada';
+                var badgeClass = c.is_active ? 'badge-ativo' : 'badge-encerrada';
+                var botaoEncerrar = c.is_active ? '<button onclick="encerrarCampanha(\'' + c.id + '\')" style="padding:5px 10px;font-size:12px;background:#dc2626;">Encerrar</button>' : '';
+                return '<tr><td>' + c.name + '</td><td>' + c.type + '</td><td>' + c.reward_type + ': ' + (c.reward_value || 'N/A') + '</td><td>' + inicio + '</td><td>' + fim + '</td><td><span class="badge ' + badgeClass + '">' + statusAtual + '</span></td><td>' + botaoEncerrar + '</td></tr>';
+            }).join('');
+        }
+
+        async function criarCampanha() {
+            var m = document.getElementById('msg');
+            var n = document.getElementById('nome').value.trim();
+            var ini = document.getElementById('dataInicio').value;
+            var fim = document.getElementById('dataFim').value;
+            if (!n) { m.className = 'msg erro'; m.textContent = 'Nome obrigatório.'; return; }
+            m.className = 'msg info'; m.textContent = 'Salvando…';
+            var dados = { company_id: COMPANY_ID, name: n, type: document.getElementById('tipo').value, reward_type: document.getElementById('recompensa_tipo').value, reward_value: parseFloat(document.getElementById('recompensa_valor').value) || null, reward_description: document.getElementById('descricao').value.trim() || null, is_active: true };
+            if (ini) dados.starts_at = ini;
+            if (fim) dados.ends_at = fim;
+            var { error } = await s.from('campaigns').insert([dados]);
+            if (error) { m.className = 'msg erro'; m.textContent = 'Erro: ' + error.message; }
+            else { m.className = 'msg sucesso'; m.textContent = 'Campanha criada!'; document.getElementById('nome').value = ''; carregarLista(); }
+        }
+
+        async function encerrarCampanha(id) {
+            if (!confirm('Encerrar esta campanha?')) return;
+            await s.from('campaigns').update({ is_active: false }).eq('id', id);
+            carregarLista();
+        }
+
         carregarLista();
     </script>
 </body>
-</html>
 </html>

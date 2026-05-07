@@ -6,23 +6,21 @@
     <title>LIDEL - Clientes</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .navbar { background: #4f46e5; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
-        .navbar h1 { font-size: 22px; margin: 0; }
-        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-        h2 { color: #4f46e5; margin-top: 0; }
-        input, select, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
-        button { background: #4f46e5; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:disabled { background: #a5b4fc; cursor: not-allowed; }
+        body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 20px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
+        h2 { color: #0055FF; }
+        input, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; box-sizing: border-box; }
+        button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #4f46e5; color: white; padding: 12px; text-align: left; }
+        th { background: #0055FF; color: white; padding: 12px; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
         .msg { padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
         .msg.info { background: #dbeafe; color: #1e40af; display: block; }
-        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
         .msg.erro { background: #fee2e2; color: #991b1b; display: block; }
-        .link-consumo { color: #4f46e5; text-decoration: underline; cursor: pointer; }
+        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
     </style>
 </head>
 <body>
@@ -30,108 +28,77 @@
         <h1>👥 Clientes</h1>
         <div>
             <a href="dashboard.html">Dashboard</a>
+            <a href="vendas.html">💰 Vender</a>
             <a href="clientes.html">Clientes</a>
-            <a href="vendas.html">Vendas</a>
-            <a href="parceiros.html">Parceiros</a>
-            <a href="vendedores.html">Vendedores</a>
-            <a href="campanhas.html">Campanhas</a>
-            <a href="relatorios.html">Relatórios</a>
-            <a href="sac.html">SAC</a>
-            <a href="indicacao.html">Indicação</a>
-            <a href="consumo.html">Consumo</a>
-            <a href="notificacoes.html">Notificações</a>
-            <a href="saude.html">Saúde</a>
-            <a href="assinaturas.html">Assinaturas</a>
         </div>
     </div>
-
     <div class="container">
-        <h2>Cadastro de Cliente</h2>
-        <input type="text" id="nome" placeholder="Nome completo *">
+        <h2>Cadastro Rápido</h2>
+        <input type="text" id="nome" placeholder="Nome *">
         <input type="tel" id="telefone" placeholder="Telefone *">
         <input type="email" id="email" placeholder="Email">
-        <input type="text" id="aniversario" placeholder="Aniversário (DD/MM)">
-        <button id="btnSalvar" onclick="cadastrarCliente()">💾 Salvar Cliente</button>
+        <button id="btnSalvar" onclick="cadastrar()">💾 Salvar</button>
         <div id="msg" class="msg"></div>
-
-        <h2 style="margin-top:30px">Clientes Cadastrados</h2>
+        <h2 style="margin-top:30px;">Clientes Cadastrados</h2>
         <input type="text" id="busca" placeholder="🔍 Buscar por nome ou telefone..." oninput="filtrar()">
         <table>
-            <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Cashback</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Cashback</th></tr></thead>
             <tbody id="lista"></tbody>
         </table>
     </div>
-
     <script>
-        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co'
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc'
-        const s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-        const COMPANY_ID = localStorage.getItem('lidel_company_id') || 'ab52ae79-063b-4e9d-9e19-295ffdf2f8ae'
-        let clientes = []
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var clientes = [];
 
-        async function carregarLista() {
-            const { data, error } = await s.from('clients').select('*').eq('company_id', COMPANY_ID).order('name')
-            if (error) return
-            clientes = data || []
-            renderTabela(clientes)
+        async function carregar() {
+            var resp = await s.from('clients').select('*').eq('company_id', COMPANY_ID).order('name');
+            clientes = resp.data || [];
+            render(clientes);
         }
 
-        function renderTabela(lista) {
-            document.getElementById('lista').innerHTML = lista.map(c => `
-                <tr>
-                    <td>${c.name}</td>
-                    <td>${c.phone}</td>
-                    <td>${c.email || '-'}</td>
-                    <td style="color:green">R$ ${(c.cashback_balance || 0).toFixed(2)}</td>
-                    <td><a class="link-consumo" href="consumo.html?id=${c.id}">📋 Consumo</a></td>
-                </tr>
-            `).join('')
+        function render(lista) {
+            document.getElementById('lista').innerHTML = lista.map(function(c) {
+                return '<tr><td>' + c.name + '</td><td>' + c.phone + '</td><td>' + (c.email || '-') + '</td><td style="color:green">R$' + (c.cashback_balance || 0).toFixed(2) + '</td></tr>';
+            }).join('');
         }
 
         function filtrar() {
-            const termo = document.getElementById('busca').value.toLowerCase()
-            renderTabela(clientes.filter(c => c.name.toLowerCase().includes(termo) || c.phone.includes(termo)))
+            var termo = document.getElementById('busca').value.toLowerCase();
+            var filtrados = clientes.filter(function(c) {
+                return c.name.toLowerCase().includes(termo) || c.phone.includes(termo);
+            });
+            render(filtrados);
         }
 
-        async function cadastrarCliente() {
-            const btn = document.getElementById('btnSalvar')
-            const msg = document.getElementById('msg')
-            const nome = document.getElementById('nome').value.trim()
-            const fone = document.getElementById('telefone').value.trim()
-            const email = document.getElementById('email').value.trim()
-
+        async function cadastrar() {
+            var nome = document.getElementById('nome').value.trim();
+            var fone = document.getElementById('telefone').value.trim();
             if (!nome || !fone) {
-                msg.className = 'msg erro'
-                msg.textContent = 'Nome e telefone são obrigatórios.'
-                return
+                document.getElementById('msg').className = 'msg erro';
+                document.getElementById('msg').textContent = 'Nome e telefone obrigatórios.';
+                return;
             }
-
-            btn.disabled = true
-            btn.textContent = 'Salvando...'
-            msg.className = 'msg info'
-            msg.textContent = 'Salvando cliente...'
-
-            const { error } = await s.from('clients').insert([{
-                company_id: COMPANY_ID, name: nome, phone: fone, email: email || null
-            }])
-
-            btn.disabled = false
-            btn.textContent = '💾 Salvar Cliente'
-
-            if (error) {
-                msg.className = 'msg erro'
-                msg.textContent = 'Erro: ' + error.message
+            var btn = document.getElementById('btnSalvar');
+            btn.disabled = true; btn.textContent = 'Salvando...';
+            var resp = await s.from('clients').insert([{ company_id: COMPANY_ID, name: nome, phone: fone, email: document.getElementById('email').value.trim() || null }]);
+            btn.disabled = false; btn.textContent = '💾 Salvar';
+            if (resp.error) {
+                document.getElementById('msg').className = 'msg erro';
+                document.getElementById('msg').textContent = 'Erro: ' + resp.error.message;
             } else {
-                msg.className = 'msg sucesso'
-                msg.textContent = 'Cliente cadastrado com sucesso!'
-                document.getElementById('nome').value = ''
-                document.getElementById('telefone').value = ''
-                document.getElementById('email').value = ''
-                carregarLista()
+                document.getElementById('msg').className = 'msg sucesso';
+                document.getElementById('msg').textContent = 'Cliente cadastrado!';
+                document.getElementById('nome').value = '';
+                document.getElementById('telefone').value = '';
+                document.getElementById('email').value = '';
+                carregar();
             }
         }
 
-        carregarLista()
+        carregar();
     </script>
 </body>
 </html>
