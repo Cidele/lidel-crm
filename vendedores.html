@@ -10,6 +10,8 @@
         .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; margin: -20px -20px 20px -20px; }
         .navbar a { color: white; margin-left: 15px; text-decoration: none; }
         input, select, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; }
+        .row { display: flex; gap: 10px; }
+        .row input { flex: 1; }
         button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; }
         th { background: #0055FF; color: white; padding: 12px; }
@@ -30,6 +32,10 @@
         <input id="emailVendedor" placeholder="Email">
         <input id="foneVendedor" placeholder="Telefone">
         <select id="role"><option value="seller">Vendedor</option><option value="manager">Gerente</option></select>
+        <div class="row">
+            <input type="number" id="diaVendedor" placeholder="Dia" min="1" max="31">
+            <input type="number" id="mesVendedor" placeholder="Mês" min="1" max="12">
+        </div>
         <button id="btnSalvarVend" onclick="adicionarVendedor()">Cadastrar Vendedor</button>
     </div>
     <table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Função</th></tr></thead><tbody id="listaVendedores"></tbody></table>
@@ -52,7 +58,12 @@
             var f = document.getElementById('foneVendedor').value.trim();
             if(!n||!e) return;
             btn.disabled = true; btn.textContent = 'Salvando…';
-            await s.from('users').insert([{company_id:COMPANY_ID, name:n, email:e, phone:f, role:document.getElementById('role').value}]);
+            await s.from('users').insert([{
+                company_id:COMPANY_ID, name:n, email:e, phone:f,
+                role:document.getElementById('role').value,
+                birthday_day: parseInt(document.getElementById('diaVendedor').value) || null,
+                birthday_month: parseInt(document.getElementById('mesVendedor').value) || null
+            }]);
             btn.disabled = false; btn.textContent = 'Cadastrar Vendedor';
             carregar();
         }

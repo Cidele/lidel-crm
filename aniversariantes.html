@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Aniversariantes</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 20px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
+        .container { max-width: 700px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
+        h2 { color: #0055FF; }
+        select, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin: 5px; }
+        button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #0055FF; color: white; padding: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🎂 Aniversariantes</h1>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="vendas.html">💰 Vender</a>
+            <a href="clientes.html">Clientes</a>
+        </div>
+    </div>
+    <div class="container">
+        <h2>Filtrar por</h2>
+        <select id="tipo">
+            <option value="dia">Aniversariantes do Dia</option>
+            <option value="mes">Aniversariantes do Mês</option>
+        </select>
+        <select id="tabela">
+            <option value="clients">Clientes</option>
+            <option value="partners">Parceiros</option>
+            <option value="users">Vendedores</option>
+        </select>
+        <button onclick="buscar()">🔍 Buscar</button>
+        <table>
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Aniversário</th></tr></thead>
+            <tbody id="resultados"></tbody>
+        </table>
+    </div>
+    <script>
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function buscar() {
+            var tabela = document.getElementById('tabela').value;
+            var tipo = document.getElementById('tipo').value;
+            var hoje = new Date();
+            var diaAtual = hoje.getDate();
+            var mesAtual = hoje.getMonth() + 1;
+
+            var query = s.from(tabela)
+                .select('name, phone, email, birthday_day, birthday_month')
+                .eq('company_id', COMPANY_ID);
+
+            if (tipo === 'dia') {
+                query = query.eq('birthday_day', diaAtual).eq('birthday_month', mesAtual);
+            } else {
+                query = query.eq('birthday_month', mesAtual);
+            }
+
+            var { data, error } = await query.order('birthday_day');
+            var tbody = document.getElementById('resultados');
+            if (error) {
+                tbody.innerHTML = '<tr><td colspan="4">Erro: ' + error.message + '</td></tr>';
+                return;
+            }
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">Nenhum aniversariante encontrado.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(function(p) {
+                return '<tr><td>' + p.name + '</td><td>' + (p.phone||'-') + '</td><td>' + (p.email||'-') + '</td><td>' + p.birthday_day + '/' + p.birthday_month + '</td></tr>';
+            }).join('');
+        }
+
+        buscar();
+    </script>
+</body>
+</html>

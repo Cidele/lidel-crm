@@ -13,6 +13,8 @@
         .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
         h2 { color: #0055FF; }
         input, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; box-sizing: border-box; }
+        .row { display: flex; gap: 10px; }
+        .row input { flex: 1; }
         button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: #0055FF; color: white; padding: 12px; text-align: left; }
@@ -30,6 +32,7 @@
             <a href="dashboard.html">Dashboard</a>
             <a href="vendas.html">💰 Vender</a>
             <a href="clientes.html">Clientes</a>
+            <a href="aniversariantes.html">🎂 Aniversariantes</a>
         </div>
     </div>
     <div class="container">
@@ -37,12 +40,17 @@
         <input type="text" id="nome" placeholder="Nome *">
         <input type="tel" id="telefone" placeholder="Telefone *">
         <input type="email" id="email" placeholder="Email">
+        <label style="font-weight:bold;margin-top:10px;">🎂 Aniversário (opcional)</label>
+        <div class="row">
+            <input type="number" id="dia" placeholder="Dia" min="1" max="31">
+            <input type="number" id="mes" placeholder="Mês" min="1" max="12">
+        </div>
         <button id="btnSalvar" onclick="cadastrar()">💾 Salvar</button>
         <div id="msg" class="msg"></div>
         <h2 style="margin-top:30px;">Clientes Cadastrados</h2>
         <input type="text" id="busca" placeholder="🔍 Buscar por nome ou telefone..." oninput="filtrar()">
         <table>
-            <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Cashback</th></tr></thead>
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Aniversário</th><th>Cashback</th></tr></thead>
             <tbody id="lista"></tbody>
         </table>
     </div>
@@ -61,7 +69,8 @@
 
         function render(lista) {
             document.getElementById('lista').innerHTML = lista.map(function(c) {
-                return '<tr><td>' + c.name + '</td><td>' + c.phone + '</td><td>' + (c.email || '-') + '</td><td style="color:green">R$' + (c.cashback_balance || 0).toFixed(2) + '</td></tr>';
+                var aniv = (c.birthday_day && c.birthday_month) ? c.birthday_day + '/' + c.birthday_month : '-';
+                return '<tr><td>' + c.name + '</td><td>' + c.phone + '</td><td>' + (c.email || '-') + '</td><td>' + aniv + '</td><td style="color:green">R$' + (c.cashback_balance || 0).toFixed(2) + '</td></tr>';
             }).join('');
         }
 
@@ -76,6 +85,8 @@
         async function cadastrar() {
             var nome = document.getElementById('nome').value.trim();
             var fone = document.getElementById('telefone').value.trim();
+            var dia = parseInt(document.getElementById('dia').value) || null;
+            var mes = parseInt(document.getElementById('mes').value) || null;
             if (!nome || !fone) {
                 document.getElementById('msg').className = 'msg erro';
                 document.getElementById('msg').textContent = 'Nome e telefone obrigatórios.';
@@ -83,7 +94,7 @@
             }
             var btn = document.getElementById('btnSalvar');
             btn.disabled = true; btn.textContent = 'Salvando...';
-            var resp = await s.from('clients').insert([{ company_id: COMPANY_ID, name: nome, phone: fone, email: document.getElementById('email').value.trim() || null }]);
+            var resp = await s.from('clients').insert([{ company_id: COMPANY_ID, name: nome, phone: fone, email: document.getElementById('email').value.trim() || null, birthday_day: dia, birthday_month: mes }]);
             btn.disabled = false; btn.textContent = '💾 Salvar';
             if (resp.error) {
                 document.getElementById('msg').className = 'msg erro';
@@ -94,6 +105,8 @@
                 document.getElementById('nome').value = '';
                 document.getElementById('telefone').value = '';
                 document.getElementById('email').value = '';
+                document.getElementById('dia').value = '';
+                document.getElementById('mes').value = '';
                 carregar();
             }
         }
