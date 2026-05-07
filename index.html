@@ -134,9 +134,9 @@
 
                     setTimeout(function() {
                         if (userResponse.data.role === 'admin') {
-                            window.location.href = 'admin.html'
+                             window.location.replace('admin.html');
                         } else {
-                            window.location.href = 'dashboard.html'
+                            window.location.replace('dashboard.html');
                         }
                     }, 1000)
                 }
