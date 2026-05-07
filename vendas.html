@@ -169,7 +169,7 @@
             if (!resp.data || resp.data.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Nenhuma venda.</td></tr>'; return; }
             tbody.innerHTML = resp.data.map(function(v) {
                 return `<tr>
-                    <td>${new Date(v.sale_date).toLocaleDateString('pt-BR')}</td>
+                    <td>${new Date(v.sale_date).toLocaleString('pt-BR')}</td>
                     <td>${v.clients?.name || '-'}</td>
                     <td>R$${v.total_amount.toFixed(2)}</td>
                     <td style="color:green">R$${(v.cashback_generated||0).toFixed(2)}</td>

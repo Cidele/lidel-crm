@@ -88,7 +88,7 @@
             }
             tbody.innerHTML = vendasData.map(function(v) {
                 return `<tr>
-                    <td>${new Date(v.sale_date).toLocaleDateString('pt-BR')}</td>
+                    <td>${new Date(v.sale_date).toLocaleString('pt-BR')}</td>
                     <td>${v.clients?.name || '-'}</td>
                     <td>R$${v.total_amount.toFixed(2)}</td>
                     <td>R$${v.final_amount.toFixed(2)}</td>
