@@ -160,8 +160,9 @@
         // ===== LISTA DE VENDAS =====
         async function carregarVendas() {
             var resp = await s.from('sales')
-                .select('id, sale_date, total_amount, cashback_generated, clients!inner(name)')
-                .eq('company_id', COMPANY_ID)
+                .select('id, sale_date, total_amount, final_amount, cashback_generated, clients:client_id(name)')
+        
+             .eq('company_id', COMPANY_ID)
                 .order('sale_date', { ascending: false })
                 .limit(20);
             var tbody = document.getElementById('listaVendas');

@@ -71,9 +71,9 @@
             var inicio = document.getElementById('dataInicio').value;
             var fim = document.getElementById('dataFim').value;
             var query = s.from('sales')
-                .select('id, sale_date, total_amount, final_amount, cashback_generated, clients!inner(name)')
-                .eq('company_id', COMPANY_ID)
-                .order('sale_date', { ascending: false });
+             .select('id, sale_date, total_amount, final_amount, cashback_generated, clients:client_id(name)')
+             .eq('company_id', COMPANY_ID)
+             .order('sale_date', { ascending: false });
             if (inicio) query = query.gte('sale_date', inicio);
             if (fim) query = query.lte('sale_date', fim + 'T23:59:59');
             var { data, error } = await query;
