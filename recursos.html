@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Recursos</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 20px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
+        h2 { color: #0055FF; margin-top: 0; }
+        .secao { background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+        .secao h3 { color: #0055FF; margin-top: 0; cursor: pointer; }
+        .secao-conteudo { display: block; }
+        .secao-conteudo.oculto { display: none; }
+        label { font-weight: bold; display: block; margin: 10px 0 5px; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .row { display: flex; gap: 10px; }
+        .row input, .row select { flex: 1; }
+        button { background: #0055FF; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 5px 0; }
+        button.btn-editar { background: #10b981; }
+        button.btn-excluir { background: #ec4899; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #0055FF; color: white; padding: 10px; text-align: left; font-size: 12px; }
+        td { padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .msg { padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
+        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
+        .msg.erro { background: #fee2e2; color: #991b1b; display: block; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .badge-ativo { background: #d1fae5; color: #065f46; }
+        .badge-inativo { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>📦 Recursos</h1>
+        <div>
+            <a href="inicio.html">🏠 Início</a>
+            <a href="vendas.html">💰 Vender</a>
+            <a href="cadastros.html">👥 Cadastros</a>
+            <a href="recursos.html">📦 Recursos</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SEÇÃO CAMPANHAS -->
+        <div class="secao">
+            <h3 onclick="toggleSecao('campanhas')">🎮 Campanhas ▾</h3>
+            <div id="campanhas" class="secao-conteudo">
+                <div class="row"><input type="text" id="nomeCampanha" placeholder="Nome da campanha *"><select id="tipoCampanha"><option value="data_comemorativa">Data Comemorativa</option><option value="live_shop">Live Shop</option><option value="indicacao">Indicação</option></select></div>
+                <div class="row"><input type="date" id="inicioCampanha"><input type="date" id="fimCampanha"></div>
+                <input type="text" id="recompensaCampanha" placeholder="Recompensa (ex: +10% cashback)">
+                <textarea id="descricaoCampanha" rows="2" placeholder="Descrição"></textarea>
+                <button onclick="criarCampanha()">💾 Criar</button>
+                <table id="tabelaCampanhas"><thead><tr><th>Nome</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <!-- SEÇÃO ASSINATURAS -->
+        <div class="secao">
+            <h3 onclick="toggleSecao('assinaturas')">📦 Assinaturas ▾</h3>
+            <div id="assinaturas" class="secao-conteudo">
+                <div class="row"><input type="text" id="nomePlano" placeholder="Nome do plano *"><input type="number" id="precoPlano" placeholder="Preço R$ *" step="0.01"></div>
+                <div class="row"><select id="frequenciaPlano"><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="anual">Anual</option></select><input type="text" id="beneficiosPlano" placeholder="Benefícios"></div>
+                <button onclick="criarPlano()">💾 Criar Plano</button>
+                <table id="tabelaPlanos"><thead><tr><th>Nome</th><th>Preço</th><th>Frequência</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <!-- SEÇÃO MISSÕES -->
+        <div class="secao">
+            <h3 onclick="toggleSecao('missoes')">🎯 Missões ▾</h3>
+            <div id="missoes" class="secao-conteudo">
+                <input type="text" id="nomeMissao" placeholder="Nome da missão">
+                <div class="row"><input type="date" id="inicioMissao"><input type="date" id="fimMissao"></div>
+                <input type="text" id="premiacaoMissao" placeholder="Premiação (ex: Gift Card R$50 + 5% cashback)">
+                <textarea id="descricaoMissao" rows="2" placeholder="Descrição da missão"></textarea>
+                <button onclick="criarMissao()">💾 Criar Missão</button>
+                <table id="tabelaMissoes"><thead><tr><th>Missão</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <!-- SEÇÃO GAMIFICAÇÃO (NÍVEIS + GIFT CARD) -->
+        <div class="secao">
+            <h3 onclick="toggleSecao('gamificacao')">🏆 Gamificação ▾</h3>
+            <div id="gamificacao" class="secao-conteudo">
+                <h4>🎁 Gift Cards</h4>
+                <div class="row"><input type="number" id="valorGiftCard" placeholder="Valor R$" step="0.01"><input type="text" id="presenteadoGiftCard" placeholder="Nome do presenteado"></div>
+                <textarea id="mensagemGiftCard" rows="2" placeholder="Mensagem do gift card"></textarea>
+                <button onclick="criarGiftCard()">💾 Criar Gift Card</button>
+                <table id="tabelaGiftCards"><thead><tr><th>Código</th><th>Valor</th><th>Presenteado</th><th>Usado?</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <!-- SEÇÃO NOTIFICAÇÕES -->
+        <div class="secao">
+            <h3 onclick="toggleSecao('notificacoes')">🔔 Central de Notificações ▾</h3>
+            <div id="notificacoes" class="secao-conteudo">
+                <p>Rascunhos aguardando revisão:</p>
+                <table id="tabelaNotificacoes"><thead><tr><th>Data</th><th>Tipo</th><th>Destinatário</th><th>Mensagem</th><th>Status</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function toggleSecao(id) { document.getElementById(id).classList.toggle('oculto'); }
+
+        // ===== CAMPANHAS =====
+        async function carregarCampanhas() {
+            var resp = await s.from('campaigns').select('*').eq('company_id', COMPANY_ID).order('created_at', { ascending: false });
+            var tbody = document.querySelector('#tabelaCampanhas tbody');
+            tbody.innerHTML = (resp.data||[]).map(function(c) {
+                return '<tr><td>'+c.name+'</td><td>'+(c.starts_at?new Date(c.starts_at).toLocaleDateString('pt-BR'):'-')+'</td><td>'+(c.ends_at?new Date(c.ends_at).toLocaleDateString('pt-BR'):'-')+'</td><td><span class="badge '+(c.is_active?'badge-ativo':'badge-inativo')+'">'+(c.is_active?'Ativa':'Encerrada')+'</span></td><td><button class="btn-editar" onclick="editarCampanha(\''+c.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirCampanha(\''+c.id+'\')">🗑️</button></td></tr>';
+            }).join('');
+        }
+        async function criarCampanha() {
+            var nome = document.getElementById('nomeCampanha').value.trim();
+            if (!nome) return alert('Nome obrigatório.');
+            await s.from('campaigns').insert([{ company_id: COMPANY_ID, name: nome, type: document.getElementById('tipoCampanha').value, starts_at: document.getElementById('inicioCampanha').value||null, ends_at: document.getElementById('fimCampanha').value||null, reward_description: document.getElementById('recompensaCampanha').value||null, is_active: true }]);
+            carregarCampanhas();
+        }
+        async function excluirCampanha(id) { if (!confirm('Excluir?')) return; await s.from('campaigns').delete().eq('id', id); carregarCampanhas(); }
+        function editarCampanha(id) { alert('Edição em breve.'); }
+
+        // ===== ASSINATURAS =====
+        async function carregarPlanos() {
+            var resp = await s.from('subscription_plans').select('*').eq('company_id', COMPANY_ID).order('name');
+            var tbody = document.querySelector('#tabelaPlanos tbody');
+            tbody.innerHTML = (resp.data||[]).map(function(p) { return '<tr><td>'+p.name+'</td><td>R$'+p.price.toFixed(2)+'</td><td>'+p.frequency+'</td><td><button class="btn-editar">✏️</button><button class="btn-excluir" onclick="excluirPlano(\''+p.id+'\')">🗑️</button></td></tr>'; }).join('');
+        }
+        async function criarPlano() {
+            var nome = document.getElementById('nomePlano').value.trim();
+            var preco = parseFloat(document.getElementById('precoPlano').value);
+            if (!nome || !preco) return alert('Nome e preço obrigatórios.');
+            await s.from('subscription_plans').insert([{ company_id: COMPANY_ID, name: nome, price: preco, frequency: document.getElementById('frequenciaPlano').value }]);
+            carregarPlanos();
+        }
+        async function excluirPlano(id) { if (!confirm('Excluir?')) return; await s.from('subscription_plans').delete().eq('id', id); carregarPlanos(); }
+
+        // ===== MISSÕES =====
+        async function carregarMissoes() {
+            var resp = await s.from('missions').select('*').eq('company_id', COMPANY_ID).order('created_at', { ascending: false });
+            var tbody = document.querySelector('#tabelaMissoes tbody');
+            tbody.innerHTML = (resp.data||[]).map(function(m) { return '<tr><td>'+m.name+'</td><td>'+(m.starts_at?new Date(m.starts_at).toLocaleDateString('pt-BR'):'-')+'</td><td>'+(m.ends_at?new Date(m.ends_at).toLocaleDateString('pt-BR'):'-')+'</td><td><span class="badge '+(m.is_active?'badge-ativo':'badge-inativo')+'">'+(m.is_active?'Ativa':'Encerrada')+'</span></td><td><button class="btn-editar" onclick="editarMissao(\''+m.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirMissao(\''+m.id+'\')">🗑️</button></td></tr>'; }).join('');
+        }
+        async function criarMissao() {
+            var nome = document.getElementById('nomeMissao').value.trim();
+            if (!nome) return alert('Nome obrigatório.');
+            await s.from('missions').insert([{ company_id: COMPANY_ID, name: nome, reward: document.getElementById('premiacaoMissao').value||null, starts_at: document.getElementById('inicioMissao').value||null, ends_at: document.getElementById('fimMissao').value||null }]);
+            carregarMissoes();
+        }
+        async function excluirMissao(id) { if (!confirm('Excluir?')) return; await s.from('missions').delete().eq('id', id); carregarMissoes(); }
+        function editarMissao(id) { alert('Edição em breve.'); }
+
+        // ===== GAMIFICAÇÃO / GIFT CARDS =====
+        async function carregarGiftCards() {
+            var resp = await s.from('giftcards').select('*').eq('company_id', COMPANY_ID).order('created_at', { ascending: false });
+            var tbody = document.querySelector('#tabelaGiftCards tbody');
+            tbody.innerHTML = (resp.data||[]).map(function(g) { return '<tr><td>'+g.code+'</td><td>R$'+g.value.toFixed(2)+'</td><td>'+(g.recipient_name||'-')+'</td><td>'+(g.is_used?'Sim':'Não')+'</td><td><button class="btn-editar" onclick="editarGiftCard(\''+g.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirGiftCard(\''+g.id+'\')">🗑️</button></td></tr>'; }).join('');
+        }
+        async function criarGiftCard() {
+            var valor = parseFloat(document.getElementById('valorGiftCard').value);
+            if (!valor) return alert('Valor obrigatório.');
+            var code = 'GIFT-'+Math.random().toString(36).substring(2,8).toUpperCase();
+            await s.from('giftcards').insert([{ company_id: COMPANY_ID, code: code, value: valor, recipient_name: document.getElementById('presenteadoGiftCard').value||null, message: document.getElementById('mensagemGiftCard').value||null }]);
+            carregarGiftCards();
+        }
+        async function excluirGiftCard(id) { if (!confirm('Excluir?')) return; await s.from('giftcards').delete().eq('id', id); carregarGiftCards(); }
+        function editarGiftCard(id) { alert('Edição em breve.'); }
+
+        // ===== NOTIFICAÇÕES =====
+        async function carregarNotificacoes() {
+            var resp = await s.from('notifications').select('*').eq('company_id', COMPANY_ID).eq('status','rascunho').order('created_at', { ascending: false }).limit(20);
+            var tbody = document.querySelector('#tabelaNotificacoes tbody');
+            tbody.innerHTML = (resp.data||[]).map(function(n) { return '<tr><td>'+new Date(n.created_at).toLocaleString('pt-BR')+'</td><td>'+n.recipient_type+'</td><td>'+n.recipient_id+'</td><td>'+(n.content?.message||'-')+'</td><td>'+n.status+'</td><td><button class="btn-editar">✅ Aprovar</button><button class="btn-excluir">🗑️ Cancelar</button></td></tr>'; }).join('');
+        }
+
+        // Inicializar todas as listas
+        carregarCampanhas(); carregarPlanos(); carregarMissoes(); carregarGiftCards(); carregarNotificacoes();
+    </script>
+</body>
+</html>
