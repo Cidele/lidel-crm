@@ -6,318 +6,317 @@
     <title>LIDEL - Recursos</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-       /* =============================================
-   LIDEL CRM - Tema Azul & Branco
-   ============================================= */
-body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #f5f7fa;
-    color: #1a1a1a;
-    margin: 0;
-    padding: 20px;
-}
+        /* =============================================
+           LIDEL CRM - Tema Azul & Branco
+           ============================================= */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a1a;
+            margin: 0;
+            padding: 20px;
+        }
+        .navbar {
+            background: #0033CC;
+            color: white;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: -20px -20px 20px -20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .navbar h1 { font-size: 20px; margin: 0; font-weight: 600; }
+        .navbar a {
+            color: #e0e7ff;
+            text-decoration: none;
+            margin-left: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .navbar a:hover { color: white; }
 
-.navbar {
-    background: #0033CC;  /* azul mais escuro */
-    color: white;
-    padding: 14px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: -20px -20px 20px -20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.navbar h1 { font-size: 20px; margin: 0; font-weight: 600; }
-.navbar a {
-    color: #e0e7ff;
-    text-decoration: none;
-    margin-left: 18px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-.navbar a:hover { color: white; }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
 
-.container {
-    max-width: 960px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-}
+        h2 { color: #0033CC; margin-top: 0; font-weight: 600; }
 
-h2 { color: #0033CC; margin-top: 0; font-weight: 600; }
+        label {
+            font-weight: 600;
+            display: block;
+            margin: 12px 0 4px;
+            color: #333;
+        }
 
-label {
-    font-weight: 600;
-    display: block;
-    margin: 12px 0 4px;
-    color: #333;
-}
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            margin: 6px 0;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.2s;
+            box-sizing: border-box;
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #0055FF;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0,85,255,0.1);
+        }
 
-input, select, textarea {
-    width: 100%;
-    padding: 10px 12px;
-    margin: 6px 0;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border 0.2s;
-    box-sizing: border-box;
-    background: white;
-}
-input:focus, select:focus, textarea:focus {
-    border-color: #0055FF;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(0,85,255,0.1);
-}
+        button {
+            background: #0055FF;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        button:hover { background: #0033CC; }
+        button:disabled { background: #a5b4fc; cursor: not-allowed; }
 
-button {
-    background: #0055FF;
-    color: white;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-size: 14px;
-    transition: background 0.2s;
-}
-button:hover { background: #0033CC; }
-button:disabled { background: #a5b4fc; cursor: not-allowed; }
+        .btn-editar {
+            background: #10b981;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-right: 5px;
+        }
+        .btn-editar:hover { background: #059669; }
 
-.btn-editar {
-    background: #10b981;
-    color: white;
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
-    margin-right: 5px;
-}
-.btn-editar:hover { background: #059669; }
+        .btn-excluir {
+            background: #ec4899;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        .btn-excluir:hover { background: #db2777; }
 
-.btn-excluir {
-    background: #ec4899;
-    color: white;
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
-}
-.btn-excluir:hover { background: #db2777; }
+        .btn-cancelar {
+            background: #e5e7eb;
+            color: #333;
+            margin-top: 5px;
+        }
+        .btn-cancelar:hover { background: #d1d5db; }
 
-.btn-cancelar {
-    background: #e5e7eb;
-    color: #333;
-    margin-top: 5px;
-}
-.btn-cancelar:hover { background: #d1d5db; }
+        .preview {
+            background: #eef2ff;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 16px 0;
+            border: 1px dashed #0055FF;
+        }
 
-.preview {
-    background: #eef2ff;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    margin: 16px 0;
-    border: 1px dashed #0055FF;
-}
+        .msg {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+            display: none;
+        }
+        .msg.info    { background: #dbeafe; color: #1e40af; display: block; }
+        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
+        .msg.erro    { background: #fee2e2; color: #991b1b; display: block; }
 
-.msg {
-    padding: 12px;
-    border-radius: 8px;
-    margin: 12px 0;
-    display: none;
-}
-.msg.info    { background: #dbeafe; color: #1e40af; display: block; }
-.msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
-.msg.erro    { background: #fee2e2; color: #991b1b; display: block; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th {
+            background: #0033CC;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        tr:hover td { background: #f8faff; }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-}
-th {
-    background: #0033CC;
-    color: white;
-    padding: 12px;
-    text-align: left;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
-}
-tr:hover td { background: #f8faff; }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-verde  { background: #d1fae5; color: #065f46; }
+        .badge-amarelo{ background: #fef3c7; color: #92400e; }
+        .badge-vermelho{ background: #fee2e2; color: #991b1b; }
+        .badge-preto  { background: #1e1e1e; color: #e5e7eb; }
+        .badge-ativo  { background: #d1fae5; color: #065f46; }
+        .badge-inativo{ background: #fee2e2; color: #991b1b; }
 
-.badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    display: inline-block;
-}
-.badge-verde  { background: #d1fae5; color: #065f46; }
-.badge-amarelo{ background: #fef3c7; color: #92400e; }
-.badge-vermelho{ background: #fee2e2; color: #991b1b; }
-.badge-preto  { background: #1e1e1e; color: #e5e7eb; }
-.badge-ativo  { background: #d1fae5; color: #065f46; }
-.badge-inativo{ background: #fee2e2; color: #991b1b; }
+        .codigo-box {
+            background: #fef3c7;
+            border: 2px dashed #f59e0b;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 16px 0;
+            display: none;
+        }
+        .codigo-box strong { font-size: 20px; letter-spacing: 2px; }
 
-.codigo-box {
-    background: #fef3c7;
-    border: 2px dashed #f59e0b;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    margin: 16px 0;
-    display: none;
-}
-.codigo-box strong { font-size: 20px; letter-spacing: 2px; }
+        .qr-code img { display: block; margin: 10px auto; border-radius: 8px; }
 
-.qr-code img { display: block; margin: 10px auto; border-radius: 8px; }
+        .resultado-busca {
+            background: #f0fdf4;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 4px 0;
+            cursor: pointer;
+            border: 1px solid #bbf7d0;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .resultado-busca:hover { background: #dcfce7; }
 
-.resultado-busca {
-    background: #f0fdf4;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin: 4px 0;
-    cursor: pointer;
-    border: 1px solid #bbf7d0;
-    font-size: 13px;
-    transition: background 0.2s;
-}
-.resultado-busca:hover { background: #dcfce7; }
+        .form-inline {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 10px;
+            margin: 12px 0;
+            border: 1px dashed #0055FF;
+        }
+        .form-inline h3 { margin: 0 0 10px 0; color: #0055FF; }
 
-.form-inline {
-    background: #f9fafb;
-    padding: 16px;
-    border-radius: 10px;
-    margin: 12px 0;
-    border: 1px dashed #0055FF;
-}
-.form-inline h3 { margin: 0 0 10px 0; color: #0055FF; }
+        .secao-colapsavel summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #0033CC;
+            padding: 10px;
+            background: #f0f2f5;
+            border-radius: 8px;
+        }
+        .secao-colapsavel summary:hover { background: #e5e7eb; }
 
-.secao-colapsavel summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: #0033CC;
-    padding: 10px;
-    background: #f0f2f5;
-    border-radius: 8px;
-}
-.secao-colapsavel summary:hover { background: #e5e7eb; }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            text-align: center;
+        }
+        .card .value { font-size: 28px; font-weight: 700; color: #0055FF; }
+        .card .label { color: #666; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    text-align: center;
-}
-.card .value { font-size: 28px; font-weight: 700; color: #0055FF; }
-.card .label { color: #666; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .alerta-diario {
+            background: #fef3c7;
+            border-left: 5px solid #f59e0b;
+            padding: 14px 20px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .alerta-diario button {
+            background: #0055FF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-.alerta-diario {
-    background: #fef3c7;
-    border-left: 5px solid #f59e0b;
-    padding: 14px 20px;
-    border-radius: 0 12px 12px 0;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.alerta-diario button {
-    background: #0055FF;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-/* Mini SAC flutuante */
-.sac-float {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 999;
-}
-.sac-float button {
-    width: 56px;
-    height: 56px;
-    border-radius: 28px;
-    background: #0055FF;
-    color: white;
-    font-size: 24px;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.sac-float button:hover { transform: scale(1.08); }
-.sac-popup {
-    display: none;
-    position: fixed;
-    bottom: 90px;
-    right: 24px;
-    width: 300px;
-    max-height: 400px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    z-index: 1000;
-    flex-direction: column;
-    overflow: hidden;
-}
-.sac-popup.active { display: flex; }
-.sac-popup-header {
-    background: #0055FF;
-    color: white;
-    padding: 12px 16px;
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-}
-.sac-popup-body {
-    flex: 1;
-    padding: 12px;
-    overflow-y: auto;
-    font-size: 13px;
-    max-height: 250px;
-}
-.sac-popup-body .msg-line { margin-bottom: 8px; }
-.sac-popup-body .user { text-align: right; color: #0055FF; }
-.sac-popup-body .bot  { text-align: left; color: #333; }
-.sac-popup-input {
-    display: flex;
-    border-top: 1px solid #eee;
-    padding: 8px;
-}
-.sac-popup-input input {
-    flex: 1;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 14px;
-    font-size: 13px;
-}
-.sac-popup-input button {
-    background: #0055FF;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 14px;
-    margin-left: 8px;
-    font-size: 13px;
-}
+        /* Mini SAC flutuante */
+        .sac-float {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+        }
+        .sac-float button {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: #0055FF;
+            color: white;
+            font-size: 24px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .sac-float button:hover { transform: scale(1.08); }
+        .sac-popup {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 300px;
+            max-height: 400px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sac-popup.active { display: flex; }
+        .sac-popup-header {
+            background: #0055FF;
+            color: white;
+            padding: 12px 16px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+        .sac-popup-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            font-size: 13px;
+            max-height: 250px;
+        }
+        .sac-popup-body .msg-line { margin-bottom: 8px; }
+        .sac-popup-body .user { text-align: right; color: #0055FF; }
+        .sac-popup-body .bot  { text-align: left; color: #333; }
+        .sac-popup-input {
+            display: flex;
+            border-top: 1px solid #eee;
+            padding: 8px;
+        }
+        .sac-popup-input input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+        .sac-popup-input button {
+            background: #0055FF;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 14px;
+            margin-left: 8px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -333,61 +332,120 @@ tr:hover td { background: #f8faff; }
 
     <div class="container">
         <!-- SEÇÃO CAMPANHAS -->
-        <div class="secao">
-            <h3 onclick="toggleSecao('campanhas')">🎮 Campanhas ▾</h3>
+        <div class="secao" style="background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e5e7eb;">
+            <h3 onclick="toggleSecao('campanhas')" style="cursor:pointer;color:#0055FF;">🎮 Campanhas ▾</h3>
             <div id="campanhas" class="secao-conteudo">
-                <div class="row"><input type="text" id="nomeCampanha" placeholder="Nome da campanha *"><select id="tipoCampanha"><option value="data_comemorativa">Data Comemorativa</option><option value="live_shop">Live Shop</option><option value="indicacao">Indicação</option></select></div>
-                <div class="row"><input type="date" id="inicioCampanha"><input type="date" id="fimCampanha"></div>
+                <div class="row" style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input type="text" id="nomeCampanha" placeholder="Nome da campanha *" style="flex:1;">
+                    <select id="tipoCampanha" style="flex:1;">
+                        <option value="data_comemorativa">Data Comemorativa</option>
+                        <option value="live_shop">Live Shop</option>
+                        <option value="indicacao">Indicação</option>
+                    </select>
+                </div>
+                <div class="row" style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input type="date" id="inicioCampanha" style="flex:1;">
+                    <input type="date" id="fimCampanha" style="flex:1;">
+                </div>
                 <input type="text" id="recompensaCampanha" placeholder="Recompensa (ex: +10% cashback)">
                 <textarea id="descricaoCampanha" rows="2" placeholder="Descrição"></textarea>
                 <button onclick="criarCampanha()">💾 Criar</button>
-                <table id="tabelaCampanhas"><thead><tr><th>Nome</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                <table id="tabelaCampanhas" style="margin-top:10px;">
+                    <thead><tr><th>Nome</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
         <!-- SEÇÃO ASSINATURAS -->
-        <div class="secao">
-            <h3 onclick="toggleSecao('assinaturas')">📦 Assinaturas ▾</h3>
+        <div class="secao" style="background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e5e7eb;">
+            <h3 onclick="toggleSecao('assinaturas')" style="cursor:pointer;color:#0055FF;">📦 Assinaturas ▾</h3>
             <div id="assinaturas" class="secao-conteudo">
-                <div class="row"><input type="text" id="nomePlano" placeholder="Nome do plano *"><input type="number" id="precoPlano" placeholder="Preço R$ *" step="0.01"></div>
-                <div class="row"><select id="frequenciaPlano"><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="anual">Anual</option></select><input type="text" id="beneficiosPlano" placeholder="Benefícios"></div>
+                <div class="row" style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input type="text" id="nomePlano" placeholder="Nome do plano *" style="flex:2;">
+                    <input type="number" id="precoPlano" placeholder="Preço R$ *" step="0.01" style="flex:1;">
+                </div>
+                <div class="row" style="display:flex;gap:10px;margin-bottom:10px;">
+                    <select id="frequenciaPlano" style="flex:1;">
+                        <option value="mensal">Mensal</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="anual">Anual</option>
+                    </select>
+                    <input type="text" id="beneficiosPlano" placeholder="Benefícios" style="flex:1;">
+                </div>
                 <button onclick="criarPlano()">💾 Criar Plano</button>
-                <table id="tabelaPlanos"><thead><tr><th>Nome</th><th>Preço</th><th>Frequência</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                <table id="tabelaPlanos" style="margin-top:10px;">
+                    <thead><tr><th>Nome</th><th>Preço</th><th>Frequência</th><th>Ações</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
         <!-- SEÇÃO MISSÕES -->
-        <div class="secao">
-            <h3 onclick="toggleSecao('missoes')">🎯 Missões ▾</h3>
+        <div class="secao" style="background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e5e7eb;">
+            <h3 onclick="toggleSecao('missoes')" style="cursor:pointer;color:#0055FF;">🎯 Missões ▾</h3>
             <div id="missoes" class="secao-conteudo">
                 <input type="text" id="nomeMissao" placeholder="Nome da missão">
-                <div class="row"><input type="date" id="inicioMissao"><input type="date" id="fimMissao"></div>
+                <div class="row" style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input type="date" id="inicioMissao" style="flex:1;">
+                    <input type="date" id="fimMissao" style="flex:1;">
+                </div>
                 <input type="text" id="premiacaoMissao" placeholder="Premiação (ex: Gift Card R$50 + 5% cashback)">
                 <textarea id="descricaoMissao" rows="2" placeholder="Descrição da missão"></textarea>
                 <button onclick="criarMissao()">💾 Criar Missão</button>
-                <table id="tabelaMissoes"><thead><tr><th>Missão</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                <table id="tabelaMissoes" style="margin-top:10px;">
+                    <thead><tr><th>Missão</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- SEÇÃO GAMIFICAÇÃO (NÍVEIS + GIFT CARD) -->
-        <div class="secao">
-            <h3 onclick="toggleSecao('gamificacao')">🏆 Gamificação ▾</h3>
+        <!-- SEÇÃO GAMIFICAÇÃO (GIFT CARDS) -->
+        <div class="secao" style="background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e5e7eb;">
+            <h3 onclick="toggleSecao('gamificacao')" style="cursor:pointer;color:#0055FF;">🏆 Gamificação ▾</h3>
             <div id="gamificacao" class="secao-conteudo">
                 <h4>🎁 Gift Cards</h4>
-                <div class="row"><input type="number" id="valorGiftCard" placeholder="Valor R$" step="0.01"><input type="text" id="presenteadoGiftCard" placeholder="Nome do presenteado"></div>
+                <div class="row" style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input type="number" id="valorGiftCard" placeholder="Valor R$" step="0.01" style="flex:1;">
+                    <input type="text" id="presenteadoGiftCard" placeholder="Nome do presenteado" style="flex:1;">
+                </div>
                 <textarea id="mensagemGiftCard" rows="2" placeholder="Mensagem do gift card"></textarea>
                 <button onclick="criarGiftCard()">💾 Criar Gift Card</button>
-                <table id="tabelaGiftCards"><thead><tr><th>Código</th><th>Valor</th><th>Presenteado</th><th>Usado?</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                <table id="tabelaGiftCards" style="margin-top:10px;">
+                    <thead><tr><th>Código</th><th>Valor</th><th>Presenteado</th><th>Usado?</th><th>Ações</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
         <!-- SEÇÃO NOTIFICAÇÕES -->
-        <div class="secao">
-            <h3 onclick="toggleSecao('notificacoes')">🔔 Central de Notificações ▾</h3>
+        <div class="secao" style="background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #e5e7eb;">
+            <h3 onclick="toggleSecao('notificacoes')" style="cursor:pointer;color:#0055FF;">🔔 Central de Notificações ▾</h3>
             <div id="notificacoes" class="secao-conteudo">
                 <p>Rascunhos aguardando revisão:</p>
-                <table id="tabelaNotificacoes"><thead><tr><th>Data</th><th>Tipo</th><th>Destinatário</th><th>Mensagem</th><th>Status</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                <table id="tabelaNotificacoes">
+                    <thead><tr><th>Data</th><th>Tipo</th><th>Destinatário</th><th>Mensagem</th><th>Status</th><th>Ações</th></tr></thead>
+                    <tbody><tr><td colspan="6">Nenhuma notificação pendente.</td></tr></tbody>
+                </table>
             </div>
+        </div>
+    </div>
+
+    <!-- MINI SAC FLUTUANTE -->
+    <div class="sac-float">
+        <button onclick="toggleSAC()">💬</button>
+    </div>
+    <div class="sac-popup" id="sacPopup">
+        <div class="sac-popup-header">
+            💬 Suporte LIDEL
+            <span onclick="toggleSAC()" style="cursor:pointer;">✕</span>
+        </div>
+        <div class="sac-popup-body" id="sacMsgs">
+            <div class="msg-line bot">👋 Olá! Pergunte sobre cashback, indicações ou suporte.</div>
+        </div>
+        <div class="sac-popup-input">
+            <input type="text" id="sacInput" placeholder="Digite sua dúvida..." onkeypress="if(event.key==='Enter') enviarSAC()">
+            <button onclick="enviarSAC()">➤</button>
         </div>
     </div>
 
@@ -413,20 +471,37 @@ tr:hover td { background: #f8faff; }
             await s.from('campaigns').insert([{ company_id: COMPANY_ID, name: nome, type: document.getElementById('tipoCampanha').value, starts_at: document.getElementById('inicioCampanha').value||null, ends_at: document.getElementById('fimCampanha').value||null, reward_description: document.getElementById('recompensaCampanha').value||null, is_active: true }]);
             carregarCampanhas();
         }
+        async function editarCampanha(id) {
+            var c = await s.from('campaigns').select('*').eq('id', id).single();
+            if (!c.data) return;
+            var nNome = prompt("Nome:", c.data.name);
+            if (!nNome) return;
+            await s.from('campaigns').update({ name: nNome }).eq('id', id);
+            carregarCampanhas();
+        }
         async function excluirCampanha(id) { if (!confirm('Excluir?')) return; await s.from('campaigns').delete().eq('id', id); carregarCampanhas(); }
-        function editarCampanha(id) { alert('Edição em breve.'); }
 
         // ===== ASSINATURAS =====
         async function carregarPlanos() {
             var resp = await s.from('subscription_plans').select('*').eq('company_id', COMPANY_ID).order('name');
             var tbody = document.querySelector('#tabelaPlanos tbody');
-            tbody.innerHTML = (resp.data||[]).map(function(p) { return '<tr><td>'+p.name+'</td><td>R$'+p.price.toFixed(2)+'</td><td>'+p.frequency+'</td><td><button class="btn-editar">✏️</button><button class="btn-excluir" onclick="excluirPlano(\''+p.id+'\')">🗑️</button></td></tr>'; }).join('');
+            tbody.innerHTML = (resp.data||[]).map(function(p) { return '<tr><td>'+p.name+'</td><td>R$'+p.price.toFixed(2)+'</td><td>'+p.frequency+'</td><td><button class="btn-editar" onclick="editarPlano(\''+p.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirPlano(\''+p.id+'\')">🗑️</button></td></tr>'; }).join('');
         }
         async function criarPlano() {
             var nome = document.getElementById('nomePlano').value.trim();
             var preco = parseFloat(document.getElementById('precoPlano').value);
             if (!nome || !preco) return alert('Nome e preço obrigatórios.');
             await s.from('subscription_plans').insert([{ company_id: COMPANY_ID, name: nome, price: preco, frequency: document.getElementById('frequenciaPlano').value }]);
+            carregarPlanos();
+        }
+        async function editarPlano(id) {
+            var p = await s.from('subscription_plans').select('*').eq('id', id).single();
+            if (!p.data) return;
+            var nNome = prompt("Nome:", p.data.name);
+            if (!nNome) return;
+            var nPreco = prompt("Preço (R$):", p.data.price);
+            if (!nPreco) return;
+            await s.from('subscription_plans').update({ name: nNome, price: parseFloat(nPreco) }).eq('id', id);
             carregarPlanos();
         }
         async function excluirPlano(id) { if (!confirm('Excluir?')) return; await s.from('subscription_plans').delete().eq('id', id); carregarPlanos(); }
@@ -443,8 +518,16 @@ tr:hover td { background: #f8faff; }
             await s.from('missions').insert([{ company_id: COMPANY_ID, name: nome, reward: document.getElementById('premiacaoMissao').value||null, starts_at: document.getElementById('inicioMissao').value||null, ends_at: document.getElementById('fimMissao').value||null }]);
             carregarMissoes();
         }
+        async function editarMissao(id) {
+            var m = await s.from('missions').select('*').eq('id', id).single();
+            if (!m.data) return;
+            var nNome = prompt("Nome da missão:", m.data.name);
+            if (!nNome) return;
+            var nPremio = prompt("Premiação:", m.data.reward || '');
+            await s.from('missions').update({ name: nNome, reward: nPremio || null }).eq('id', id);
+            carregarMissoes();
+        }
         async function excluirMissao(id) { if (!confirm('Excluir?')) return; await s.from('missions').delete().eq('id', id); carregarMissoes(); }
-        function editarMissao(id) { alert('Edição em breve.'); }
 
         // ===== GAMIFICAÇÃO / GIFT CARDS =====
         async function carregarGiftCards() {
@@ -459,330 +542,54 @@ tr:hover td { background: #f8faff; }
             await s.from('giftcards').insert([{ company_id: COMPANY_ID, code: code, value: valor, recipient_name: document.getElementById('presenteadoGiftCard').value||null, message: document.getElementById('mensagemGiftCard').value||null }]);
             carregarGiftCards();
         }
+        async function editarGiftCard(id) {
+            var g = await s.from('giftcards').select('*').eq('id', id).single();
+            if (!g.data) return;
+            var nValor = prompt("Valor (R$):", g.data.value);
+            if (!nValor) return;
+            var nPresenteado = prompt("Presenteado:", g.data.recipient_name || '');
+            await s.from('giftcards').update({ value: parseFloat(nValor), recipient_name: nPresenteado || null }).eq('id', id);
+            carregarGiftCards();
+        }
         async function excluirGiftCard(id) { if (!confirm('Excluir?')) return; await s.from('giftcards').delete().eq('id', id); carregarGiftCards(); }
-        function editarGiftCard(id) { alert('Edição em breve.'); }
 
         // ===== NOTIFICAÇÕES =====
         async function carregarNotificacoes() {
             var resp = await s.from('notifications').select('*').eq('company_id', COMPANY_ID).eq('status','rascunho').order('created_at', { ascending: false }).limit(20);
             var tbody = document.querySelector('#tabelaNotificacoes tbody');
-            tbody.innerHTML = (resp.data||[]).map(function(n) { return '<tr><td>'+new Date(n.created_at).toLocaleString('pt-BR')+'</td><td>'+n.recipient_type+'</td><td>'+n.recipient_id+'</td><td>'+(n.content?.message||'-')+'</td><td>'+n.status+'</td><td><button class="btn-editar">✅ Aprovar</button><button class="btn-excluir">🗑️ Cancelar</button></td></tr>'; }).join('');
+            if (!resp.data || resp.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">Nenhuma notificação pendente.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = resp.data.map(function(n) { return '<tr><td>'+new Date(n.created_at).toLocaleString('pt-BR')+'</td><td>'+n.recipient_type+'</td><td>'+n.recipient_id+'</td><td>'+(n.content?.message||'-')+'</td><td>'+n.status+'</td><td><button class="btn-editar" onclick="aprovarNotificacao(\''+n.id+'\')">✅ Aprovar</button><button class="btn-excluir" onclick="excluirNotificacao(\''+n.id+'\')">🗑️ Cancelar</button></td></tr>'; }).join('');
+        }
+        async function aprovarNotificacao(id) {
+            await s.from('notifications').update({ status: 'aprovado', approved_at: new Date().toISOString(), approved_by: 'user' }).eq('id', id);
+            carregarNotificacoes();
+        }
+        async function excluirNotificacao(id) { if (!confirm('Cancelar esta notificação?')) return; await s.from('notifications').delete().eq('id', id); carregarNotificacoes(); }
+
+        // ===== MINI SAC =====
+        function toggleSAC() { document.getElementById('sacPopup').classList.toggle('active'); }
+        function enviarSAC() {
+            var input = document.getElementById('sacInput');
+            var msg = input.value.trim();
+            if (!msg) return;
+            var msgs = document.getElementById('sacMsgs');
+            msgs.innerHTML += '<div class="msg-line user" style="text-align:right;color:#0055FF;margin-bottom:8px;">' + msg + '</div>';
+            input.value = '';
+            setTimeout(function() {
+                var resp = 'No momento, nosso suporte está em horário comercial. Deixe sua mensagem!';
+                if (msg.toLowerCase().includes('cashback')) resp = '💰 Cashback: 14% sobre o valor pago, teto de R$150, válido por 45 dias.';
+                else if (msg.toLowerCase().includes('indicação')) resp = '🎫 Cada código de indicação dá 3% de cashback para você e seu amigo!';
+                msgs.innerHTML += '<div class="msg-line bot" style="text-align:left;color:#333;margin-bottom:8px;">' + resp + '</div>';
+                msgs.scrollTop = msgs.scrollHeight;
+            }, 600);
+            msgs.scrollTop = msgs.scrollHeight;
         }
 
         // Inicializar todas as listas
         carregarCampanhas(); carregarPlanos(); carregarMissoes(); carregarGiftCards(); carregarNotificacoes();
     </script>
-    /* =============================================
-   LIDEL CRM - Tema Azul & Branco
-   ============================================= */
-body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #f5f7fa;
-    color: #1a1a1a;
-    margin: 0;
-    padding: 20px;
-}
-
-.navbar {
-    background: #0033CC;  /* azul mais escuro */
-    color: white;
-    padding: 14px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: -20px -20px 20px -20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.navbar h1 { font-size: 20px; margin: 0; font-weight: 600; }
-.navbar a {
-    color: #e0e7ff;
-    text-decoration: none;
-    margin-left: 18px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-.navbar a:hover { color: white; }
-
-.container {
-    max-width: 960px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-}
-
-h2 { color: #0033CC; margin-top: 0; font-weight: 600; }
-
-label {
-    font-weight: 600;
-    display: block;
-    margin: 12px 0 4px;
-    color: #333;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 10px 12px;
-    margin: 6px 0;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border 0.2s;
-    box-sizing: border-box;
-    background: white;
-}
-input:focus, select:focus, textarea:focus {
-    border-color: #0055FF;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(0,85,255,0.1);
-}
-
-button {
-    background: #0055FF;
-    color: white;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-size: 14px;
-    transition: background 0.2s;
-}
-button:hover { background: #0033CC; }
-button:disabled { background: #a5b4fc; cursor: not-allowed; }
-
-.btn-editar {
-    background: #10b981;
-    color: white;
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
-    margin-right: 5px;
-}
-.btn-editar:hover { background: #059669; }
-
-.btn-excluir {
-    background: #ec4899;
-    color: white;
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
-}
-.btn-excluir:hover { background: #db2777; }
-
-.btn-cancelar {
-    background: #e5e7eb;
-    color: #333;
-    margin-top: 5px;
-}
-.btn-cancelar:hover { background: #d1d5db; }
-
-.preview {
-    background: #eef2ff;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    margin: 16px 0;
-    border: 1px dashed #0055FF;
-}
-
-.msg {
-    padding: 12px;
-    border-radius: 8px;
-    margin: 12px 0;
-    display: none;
-}
-.msg.info    { background: #dbeafe; color: #1e40af; display: block; }
-.msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
-.msg.erro    { background: #fee2e2; color: #991b1b; display: block; }
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-}
-th {
-    background: #0033CC;
-    color: white;
-    padding: 12px;
-    text-align: left;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 13px;
-}
-tr:hover td { background: #f8faff; }
-
-.badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    display: inline-block;
-}
-.badge-verde  { background: #d1fae5; color: #065f46; }
-.badge-amarelo{ background: #fef3c7; color: #92400e; }
-.badge-vermelho{ background: #fee2e2; color: #991b1b; }
-.badge-preto  { background: #1e1e1e; color: #e5e7eb; }
-.badge-ativo  { background: #d1fae5; color: #065f46; }
-.badge-inativo{ background: #fee2e2; color: #991b1b; }
-
-.codigo-box {
-    background: #fef3c7;
-    border: 2px dashed #f59e0b;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    margin: 16px 0;
-    display: none;
-}
-.codigo-box strong { font-size: 20px; letter-spacing: 2px; }
-
-.qr-code img { display: block; margin: 10px auto; border-radius: 8px; }
-
-.resultado-busca {
-    background: #f0fdf4;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin: 4px 0;
-    cursor: pointer;
-    border: 1px solid #bbf7d0;
-    font-size: 13px;
-    transition: background 0.2s;
-}
-.resultado-busca:hover { background: #dcfce7; }
-
-.form-inline {
-    background: #f9fafb;
-    padding: 16px;
-    border-radius: 10px;
-    margin: 12px 0;
-    border: 1px dashed #0055FF;
-}
-.form-inline h3 { margin: 0 0 10px 0; color: #0055FF; }
-
-.secao-colapsavel summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: #0033CC;
-    padding: 10px;
-    background: #f0f2f5;
-    border-radius: 8px;
-}
-.secao-colapsavel summary:hover { background: #e5e7eb; }
-
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    text-align: center;
-}
-.card .value { font-size: 28px; font-weight: 700; color: #0055FF; }
-.card .label { color: #666; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.alerta-diario {
-    background: #fef3c7;
-    border-left: 5px solid #f59e0b;
-    padding: 14px 20px;
-    border-radius: 0 12px 12px 0;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.alerta-diario button {
-    background: #0055FF;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-/* Mini SAC flutuante */
-.sac-float {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 999;
-}
-.sac-float button {
-    width: 56px;
-    height: 56px;
-    border-radius: 28px;
-    background: #0055FF;
-    color: white;
-    font-size: 24px;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.sac-float button:hover { transform: scale(1.08); }
-.sac-popup {
-    display: none;
-    position: fixed;
-    bottom: 90px;
-    right: 24px;
-    width: 300px;
-    max-height: 400px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    z-index: 1000;
-    flex-direction: column;
-    overflow: hidden;
-}
-.sac-popup.active { display: flex; }
-.sac-popup-header {
-    background: #0055FF;
-    color: white;
-    padding: 12px 16px;
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-}
-.sac-popup-body {
-    flex: 1;
-    padding: 12px;
-    overflow-y: auto;
-    font-size: 13px;
-    max-height: 250px;
-}
-.sac-popup-body .msg-line { margin-bottom: 8px; }
-.sac-popup-body .user { text-align: right; color: #0055FF; }
-.sac-popup-body .bot  { text-align: left; color: #333; }
-.sac-popup-input {
-    display: flex;
-    border-top: 1px solid #eee;
-    padding: 8px;
-}
-.sac-popup-input input {
-    flex: 1;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 14px;
-    font-size: 13px;
-}
-.sac-popup-input button {
-    background: #0055FF;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 14px;
-    margin-left: 8px;
-    font-size: 13px;
-}
 </body>
 </html>
