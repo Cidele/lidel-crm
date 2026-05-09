@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIDEL - Cadastros</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 20px; }
+        .navbar { background: #0055FF; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; }
+        .navbar h1 { font-size: 20px; margin: 0; }
+        .navbar a { color: white; text-decoration: none; margin-left: 15px; font-size: 14px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; }
+        h2 { color: #0055FF; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background: #e5e7eb; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: bold; }
+        .tab.active { background: #0055FF; color: white; }
+        input, button { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 5px 0; box-sizing: border-box; }
+        .row { display: flex; gap: 10px; }
+        .row input { flex: 1; }
+        button { background: #0055FF; color: white; font-weight: bold; cursor: pointer; border: none; }
+        .btn-excluir { background: #ec4899; color: white; }
+        .btn-editar { background: #10b981; color: white; margin-right:5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #0055FF; color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .msg { padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
+        .msg.info { background: #dbeafe; color: #1e40af; display: block; }
+        .msg.erro { background: #fee2e2; color: #991b1b; display: block; }
+        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+        .clickable { cursor: pointer; color: #0055FF; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>👥 Cadastros</h1>
+        <div>
+            <a href="inicio.html">🏠 Início</a>
+            <a href="vendas.html">💰 Vender</a>
+            <a href="cadastros.html">👥 Cadastros</a>
+            <a href="recursos.html">📦 Recursos</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="mudarAba('clientes')">👥 Clientes</button>
+            <button class="tab" onclick="mudarAba('parceiros')">🤝 Parceiros</button>
+            <button class="tab" onclick="mudarAba('vendedores')">👤 Vendedores</button>
+        </div>
+
+        <!-- ABA CLIENTES -->
+        <div id="abaClientes" class="aba-conteudo">
+            <h2>Cadastro de Cliente</h2>
+            <input type="text" id="nomeCliente" placeholder="Nome *">
+            <input type="tel" id="telefoneCliente" placeholder="Telefone *">
+            <input type="email" id="emailCliente" placeholder="Email">
+            <div class="row">
+                <input type="number" id="diaCliente" placeholder="Dia" min="1" max="31">
+                <input type="number" id="mesCliente" placeholder="Mês" min="1" max="12">
+            </div>
+            <label>🎯 Fase / Momento de Vida</label>
+            <input type="text" id="lifeMomentCliente" placeholder="Ex: Iniciando no esporte, Gravidez...">
+            <button id="btnSalvarCliente" onclick="cadastrarCliente()">💾 Salvar</button>
+            <div id="msgCliente" class="msg"></div>
+            <h3>Clientes Cadastrados</h3>
+            <input type="text" id="buscaCliente" placeholder="🔍 Buscar..." oninput="filtrarClientes()">
+            <table>
+                <thead><tr><th>Nome</th><th>Telefone</th><th>Cashback</th><th>Ações</th></tr></thead>
+                <tbody id="listaClientes"></tbody>
+            </table>
+        </div>
+
+        <!-- ABA PARCEIROS -->
+        <div id="abaParceiros" class="aba-conteudo" style="display:none;">
+            <h2>Cadastro de Parceiro</h2>
+            <input type="text" id="nomeParceiro" placeholder="Nome *">
+            <input type="text" id="idprofParceiro" placeholder="Identificação Profissional">
+            <input type="tel" id="telefoneParceiro" placeholder="Telefone *">
+            <input type="email" id="emailParceiro" placeholder="Email">
+            <div class="row">
+                <input type="number" id="diaParceiro" placeholder="Dia" min="1" max="31">
+                <input type="number" id="mesParceiro" placeholder="Mês" min="1" max="12">
+            </div>
+            <button id="btnSalvarParceiro" onclick="cadastrarParceiro()">💾 Salvar</button>
+            <div id="msgParceiro" class="msg"></div>
+            <h3>Parceiros Cadastrados</h3>
+            <input type="text" id="buscaParceiro" placeholder="🔍 Buscar..." oninput="filtrarParceiros()">
+            <table>
+                <thead><tr><th>Nome</th><th>Identificação</th><th>Comissão</th><th>Ações</th></tr></thead>
+                <tbody id="listaParceiros"></tbody>
+            </table>
+        </div>
+
+        <!-- ABA VENDEDORES -->
+        <div id="abaVendedores" class="aba-conteudo" style="display:none;">
+            <h2>Cadastro de Vendedor</h2>
+            <input type="text" id="nomeVendedor" placeholder="Nome *">
+            <input type="email" id="emailVendedor" placeholder="Email *">
+            <input type="tel" id="telefoneVendedor" placeholder="Telefone">
+            <select id="roleVendedor"><option value="seller">Vendedor</option><option value="manager">Gerente</option></select>
+            <div class="row">
+                <input type="number" id="diaVendedor" placeholder="Dia" min="1" max="31">
+                <input type="number" id="mesVendedor" placeholder="Mês" min="1" max="12">
+            </div>
+            <button id="btnSalvarVendedor" onclick="cadastrarVendedor()">💾 Salvar</button>
+            <div id="msgVendedor" class="msg"></div>
+            <h3>Vendedores Cadastrados</h3>
+            <input type="text" id="buscaVendedor" placeholder="🔍 Buscar..." oninput="filtrarVendedores()">
+            <table>
+                <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Função</th><th>Ações</th></tr></thead>
+                <tbody id="listaVendedores"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL DE HISTÓRICO -->
+    <div class="modal" id="modalHistorico">
+        <div class="modal-content">
+            <h2 id="tituloHistorico"></h2>
+            <div id="conteudoHistorico"></div>
+            <button onclick="fecharModalHistorico()" style="background:#ccc;margin-top:15px;">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
+        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var clientes = [], parceiros = [], vendedores = [];
+
+        function mudarAba(aba) {
+            document.querySelectorAll('.aba-conteudo').forEach(function(el) { el.style.display = 'none'; });
+            document.querySelectorAll('.tab').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('aba'+aba.charAt(0).toUpperCase()+aba.slice(1)).style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        // ===== CLIENTES =====
+        async function carregarClientes() {
+            var resp = await s.from('clients').select('*').eq('company_id', COMPANY_ID).order('name');
+            clientes = resp.data || [];
+            renderClientes(clientes);
+        }
+        function renderClientes(lista) {
+            document.getElementById('listaClientes').innerHTML = lista.map(function(c) {
+                return '<tr><td class="clickable" onclick="verHistoricoCliente(\''+c.id+'\')">'+c.name+'</td><td>'+c.phone+'</td><td style="color:green">R$'+(c.cashback_balance||0).toFixed(2)+'</td><td><button class="btn-editar" onclick="editarCliente(\''+c.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirCliente(\''+c.id+'\')">🗑️</button></td></tr>';
+            }).join('');
+        }
+        function filtrarClientes() {
+            var termo = document.getElementById('buscaCliente').value.toLowerCase();
+            renderClientes(clientes.filter(function(c) { return c.name.toLowerCase().includes(termo) || c.phone.includes(termo); }));
+        }
+        async function cadastrarCliente() {
+            var nome = document.getElementById('nomeCliente').value.trim();
+            var fone = document.getElementById('telefoneCliente').value.trim();
+            if (!nome || !fone) { mostrarMsg('msgCliente', 'Nome e telefone obrigatórios.', 'erro'); return; }
+            var existente = clientes.find(function(c) { return c.phone === fone; });
+            if (existente && !confirm('Já existe um cliente com este telefone ('+existente.name+'). Deseja cadastrar mesmo assim?')) return;
+            var resp = await s.from('clients').insert([{ company_id: COMPANY_ID, name: nome, phone: fone, email: document.getElementById('emailCliente').value.trim()||null, birthday_day: parseInt(document.getElementById('diaCliente').value)||null, birthday_month: parseInt(document.getElementById('mesCliente').value)||null, life_moment: document.getElementById('lifeMomentCliente').value.trim()||null }]);
+            if (resp.error) mostrarMsg('msgCliente', resp.error.message, 'erro');
+            else { mostrarMsg('msgCliente', 'Cliente cadastrado!', 'sucesso'); limparFormCliente(); carregarClientes(); }
+        }
+        function editarCliente(id) { alert('Edição será implementada na Fase 3.2'); }
+        async function excluirCliente(id) { if (!confirm('Excluir este cliente?')) return; await s.from('clients').delete().eq('id', id); carregarClientes(); }
+        async function verHistoricoCliente(id) {
+            var c = clientes.find(function(x) { return x.id === id; });
+            if (!c) return;
+            var tresMeses = new Date(); tresMeses.setMonth(tresMeses.getMonth()-3);
+            var respConsumo = await s.from('consumption_history').select('*').eq('client_id',id).gte('consumed_at',tresMeses.toISOString().split('T')[0]).order('consumed_at',{ascending:false});
+            var respVendas = await s.from('sales').select('sale_date,total_amount,final_amount,cashback_generated').eq('client_id',id).gte('sale_date',tresMeses.toISOString().split('T')[0]).order('sale_date',{ascending:false});
+            var respIndicacoes = await s.from('referral_codes').select('code,is_used,created_at').eq('client_id',id).gte('created_at',tresMeses.toISOString().split('T')[0]).order('created_at',{ascending:false});
+            var html = '<h3>'+c.name+'</h3><p><strong>Cashback disponível:</strong> R$'+(c.cashback_balance||0).toFixed(2)+'</p><h4>📋 Consumo</h4>';
+            if (respConsumo.data && respConsumo.data.length > 0) {
+                html += '<table><tr><th>Produto</th><th>Qtd</th><th>Data</th></tr>';
+                respConsumo.data.forEach(function(h) { html += '<tr><td>'+h.product_name+'</td><td>'+(h.quantity||'-')+'</td><td>'+new Date(h.consumed_at).toLocaleDateString('pt-BR')+'</td></tr>'; });
+                html += '</table>';
+            } else html += '<p>Nenhum consumo recente.</p>';
+            html += '<h4>💰 Vendas (3 meses)</h4>';
+            if (respVendas.data && respVendas.data.length > 0) {
+                html += '<table><tr><th>Data</th><th>Valor Total</th><th>Valor Pago</th><th>Cashback</th></tr>';
+                respVendas.data.forEach(function(v) { html += '<tr><td>'+new Date(v.sale_date).toLocaleDateString('pt-BR')+'</td><td>R$'+v.total_amount.toFixed(2)+'</td><td>R$'+v.final_amount.toFixed(2)+'</td><td style="color:green">R$'+(v.cashback_generated||0).toFixed(2)+'</td></tr>'; });
+                html += '</table>';
+            } else html += '<p>Nenhuma venda recente.</p>';
+            html += '<h4>🎫 Indicações (3 meses)</h4>';
+            if (respIndicacoes.data && respIndicacoes.data.length > 0) {
+                html += '<table><tr><th>Código</th><th>Usado?</th><th>Data</th></tr>';
+                respIndicacoes.data.forEach(function(i) { html += '<tr><td>'+i.code+'</td><td>'+(i.is_used?'Sim':'Não')+'</td><td>'+new Date(i.created_at).toLocaleDateString('pt-BR')+'</td></tr>'; });
+                html += '</table>';
+            } else html += '<p>Nenhuma indicação.</p>';
+            document.getElementById('tituloHistorico').textContent = 'Histórico do Cliente';
+            document.getElementById('conteudoHistorico').innerHTML = html;
+            document.getElementById('modalHistorico').classList.add('active');
+        }
+
+        // ===== PARCEIROS =====
+        async function carregarParceiros() {
+            var resp = await s.from('partners').select('*').eq('company_id', COMPANY_ID).order('name');
+            parceiros = resp.data || [];
+            document.getElementById('listaParceiros').innerHTML = parceiros.map(function(p) {
+                return '<tr><td class="clickable" onclick="verHistoricoParceiro(\''+p.id+'\')">'+p.name+'</td><td>'+(p.professional_identifier||'-')+'</td><td style="color:green">R$'+(p.cashback_accumulated||0).toFixed(2)+'</td><td><button class="btn-editar" onclick="editarParceiro(\''+p.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirParceiro(\''+p.id+'\')">🗑️</button></td></tr>';
+            }).join('');
+        }
+        function filtrarParceiros() {
+            var termo = document.getElementById('buscaParceiro').value.toLowerCase();
+            document.getElementById('listaParceiros').innerHTML = parceiros.filter(function(p) { return p.name.toLowerCase().includes(termo); }).map(function(p) {
+                return '<tr><td class="clickable" onclick="verHistoricoParceiro(\''+p.id+'\')">'+p.name+'</td><td>'+(p.professional_identifier||'-')+'</td><td style="color:green">R$'+(p.cashback_accumulated||0).toFixed(2)+'</td><td><button class="btn-editar" onclick="editarParceiro(\''+p.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirParceiro(\''+p.id+'\')">🗑️</button></td></tr>';
+            }).join('');
+        }
+        async function cadastrarParceiro() {
+            var nome = document.getElementById('nomeParceiro').value.trim();
+            var fone = document.getElementById('telefoneParceiro').value.trim();
+            if (!nome || !fone) { mostrarMsg('msgParceiro', 'Nome e telefone obrigatórios.', 'erro'); return; }
+            var resp = await s.from('partners').insert([{ company_id: COMPANY_ID, name: nome, phone: fone, professional_identifier: document.getElementById('idprofParceiro').value.trim()||null, email: document.getElementById('emailParceiro').value.trim()||null, birthday_day: parseInt(document.getElementById('diaParceiro').value)||null, birthday_month: parseInt(document.getElementById('mesParceiro').value)||null }]);
+            if (resp.error) mostrarMsg('msgParceiro', resp.error.message, 'erro');
+            else { mostrarMsg('msgParceiro', 'Parceiro cadastrado!', 'sucesso'); limparFormParceiro(); carregarParceiros(); }
+        }
+        function editarParceiro(id) { alert('Edição será implementada na Fase 3.2'); }
+        async function excluirParceiro(id) { if (!confirm('Excluir este parceiro?')) return; await s.from('partners').delete().eq('id', id); carregarParceiros(); }
+        async function verHistoricoParceiro(id) {
+            var p = parceiros.find(function(x) { return x.id === id; });
+            if (!p) return;
+            var respVendas = await s.from('sales').select('sale_date,total_amount,clients:client_id(name)').eq('partner_id',id).order('sale_date',{ascending:false}).limit(20);
+            var html = '<h3>'+p.name+'</h3><p><strong>Comissão acumulada:</strong> R$'+(p.cashback_accumulated||0).toFixed(2)+'</p><h4>📋 Indicações</h4>';
+            if (respVendas.data && respVendas.data.length > 0) {
+                html += '<table><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Comissão (3%)</th></tr>';
+                respVendas.data.forEach(function(v) { html += '<tr><td>'+new Date(v.sale_date).toLocaleDateString('pt-BR')+'</td><td>'+(v.clients?.name||'-')+'</td><td>R$'+v.total_amount.toFixed(2)+'</td><td style="color:green">R$'+(v.total_amount*0.03).toFixed(2)+'</td></tr>'; });
+                html += '</table>';
+            } else html += '<p>Nenhuma indicação.</p>';
+            document.getElementById('tituloHistorico').textContent = 'Histórico do Parceiro';
+            document.getElementById('conteudoHistorico').innerHTML = html;
+            document.getElementById('modalHistorico').classList.add('active');
+        }
+
+        // ===== VENDEDORES =====
+        async function carregarVendedores() {
+            var resp = await s.from('users').select('*').eq('company_id', COMPANY_ID).order('name');
+            vendedores = resp.data || [];
+            document.getElementById('listaVendedores').innerHTML = vendedores.map(function(v) {
+                return '<tr><td class="clickable" onclick="verHistoricoVendedor(\''+v.id+'\')">'+v.name+'</td><td>'+v.email+'</td><td>'+(v.phone||'-')+'</td><td>'+v.role+'</td><td><button class="btn-editar" onclick="editarVendedor(\''+v.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirVendedor(\''+v.id+'\')">🗑️</button></td></tr>';
+            }).join('');
+        }
+        function filtrarVendedores() {
+            var termo = document.getElementById('buscaVendedor').value.toLowerCase();
+            document.getElementById('listaVendedores').innerHTML = vendedores.filter(function(v) { return v.name.toLowerCase().includes(termo); }).map(function(v) {
+                return '<tr><td class="clickable" onclick="verHistoricoVendedor(\''+v.id+'\')">'+v.name+'</td><td>'+v.email+'</td><td>'+(v.phone||'-')+'</td><td>'+v.role+'</td><td><button class="btn-editar" onclick="editarVendedor(\''+v.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirVendedor(\''+v.id+'\')">🗑️</button></td></tr>';
+            }).join('');
+        }
+        async function cadastrarVendedor() {
+            var nome = document.getElementById('nomeVendedor').value.trim();
+            var email = document.getElementById('emailVendedor').value.trim();
+            if (!nome || !email) { mostrarMsg('msgVendedor', 'Nome e email obrigatórios.', 'erro'); return; }
+            var resp = await s.from('users').insert([{ company_id: COMPANY_ID, name: nome, email: email, phone: document.getElementById('telefoneVendedor').value.trim()||null, role: document.getElementById('roleVendedor').value, birthday_day: parseInt(document.getElementById('diaVendedor').value)||null, birthday_month: parseInt(document.getElementById('mesVendedor').value)||null }]);
+            if (resp.error) mostrarMsg('msgVendedor', resp.error.message, 'erro');
+            else { mostrarMsg('msgVendedor', 'Vendedor cadastrado!', 'sucesso'); limparFormVendedor(); carregarVendedores(); }
+        }
+        function editarVendedor(id) { alert('Edição será implementada na Fase 3.2'); }
+        async function excluirVendedor(id) { if (!confirm('Excluir este vendedor?')) return; await s.from('users').delete().eq('id', id); carregarVendedores(); }
+        async function verHistoricoVendedor(id) {
+            var v = vendedores.find(function(x) { return x.id === id; });
+            if (!v) return;
+            var respVendas = await s.from('sales').select('sale_date,total_amount,cashback_generated,clients:client_id(name)').eq('seller_id',id).order('sale_date',{ascending:false}).limit(20);
+            var html = '<h3>'+v.name+'</h3><h4>💰 Vendas</h4>';
+            if (respVendas.data && respVendas.data.length > 0) {
+                html += '<table><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Cashback</th></tr>';
+                respVendas.data.forEach(function(s) { html += '<tr><td>'+new Date(s.sale_date).toLocaleDateString('pt-BR')+'</td><td>'+(s.clients?.name||'-')+'</td><td>R$'+s.total_amount.toFixed(2)+'</td><td style="color:green">R$'+(s.cashback_generated||0).toFixed(2)+'</td></tr>'; });
+                html += '</table>';
+            } else html += '<p>Nenhuma venda.</p>';
+            document.getElementById('tituloHistorico').textContent = 'Histórico do Vendedor';
+            document.getElementById('conteudoHistorico').innerHTML = html;
+            document.getElementById('modalHistorico').classList.add('active');
+        }
+
+        function fecharModalHistorico() { document.getElementById('modalHistorico').classList.remove('active'); }
+        function mostrarMsg(id, texto, tipo) { var m = document.getElementById(id); m.className = 'msg '+tipo; m.textContent = texto; }
+        function limparFormCliente() { ['nomeCliente','telefoneCliente','emailCliente','diaCliente','mesCliente','lifeMomentCliente'].forEach(function(id) { document.getElementById(id).value = ''; }); }
+        function limparFormParceiro() { ['nomeParceiro','idprofParceiro','telefoneParceiro','emailParceiro','diaParceiro','mesParceiro'].forEach(function(id) { document.getElementById(id).value = ''; }); }
+        function limparFormVendedor() { ['nomeVendedor','emailVendedor','telefoneVendedor','diaVendedor','mesVendedor'].forEach(function(id) { document.getElementById(id).value = ''; }); }
+
+        carregarClientes(); carregarParceiros(); carregarVendedores();
+    </script>
+</body>
+</html>
