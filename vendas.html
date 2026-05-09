@@ -23,78 +23,119 @@
         .msg.erro { background: #fee2e2; color: #991b1b; display: block; }
         .codigo-box { background: #fef3c7; border: 2px dashed #f59e0b; padding: 15px; border-radius: 10px; text-align: center; margin: 15px 0; display: none; }
         .codigo-box strong { font-size: 20px; letter-spacing: 2px; }
-        .nps-box { background: #ede9fe; border-radius: 10px; padding: 15px; text-align: center; margin-top: 15px; }
-        .nps-box button { width: auto; margin: 5px; padding: 8px 15px; }
         .qr-code { margin: 10px 0; }
         .qr-code img { display: block; margin: 0 auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: #0055FF; color: white; padding: 10px; text-align: left; font-size: 12px; }
         td { padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; }
-        .btn-excluir { background: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .btn-editar { background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-right: 5px; }
+        .btn-excluir { background: #ec4899; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .btn-editar { background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-right: 5px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
         .resultado-busca { background: #f0fdf4; padding: 8px; border-radius: 6px; margin: 3px 0; cursor: pointer; border: 1px solid #bbf7d0; font-size: 13px; }
         .resultado-busca:hover { background: #dcfce7; }
+        .form-inline { background: #f9fafb; padding: 15px; border-radius: 10px; margin: 10px 0; border: 1px dashed #0055FF; }
+        .form-inline h3 { margin: 0 0 10px 0; color: #0055FF; }
+        .btn-cancelar { background: #ccc; color: #333; margin-top: 5px; }
+        .secao-colapsavel { margin: 10px 0; }
+        .secao-colapsavel summary { cursor: pointer; font-weight: bold; color: #0055FF; padding: 8px; background: #f0f2f5; border-radius: 8px; }
+        .secao-colapsavel summary:hover { background: #e5e7eb; }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <h1>💰 Vendas</h1>
+        <h1>💰 Vender</h1>
         <div>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="clientes.html">Clientes</a>
-            <a href="aniversariantes.html">🎂 Aniversariantes</a>
+            <a href="inicio.html">🏠 Início</a>
+            <a href="vendas.html">💰 Vender</a>
+            <a href="cadastros.html">👥 Cadastros</a>
+            <a href="recursos.html">📦 Recursos</a>
         </div>
     </div>
 
     <div class="container">
         <h2>Nova Venda</h2>
 
+        <!-- 🔍 BUSCA DE CLIENTE -->
         <label>🔍 Buscar Cliente</label>
         <input type="text" id="buscaCliente" placeholder="Digite nome ou telefone..." oninput="filtrarClientes()">
+        <div id="resultadosBusca" style="margin-bottom:10px;"></div>
 
-        <label>Cliente *</label>
-        <select id="cliente"><option value="">Selecione um cliente...</option></select>
+        <!-- CLIENTE SELECIONADO -->
+        <input type="hidden" id="clienteId">
+        <div id="clienteInfo" style="display:none; background:#f0fdf4; padding:10px; border-radius:8px; margin:10px 0;">
+            <strong id="clienteNome"></strong> | Cashback: <strong id="clienteCashback">R$ 0,00</strong>
+            <button onclick="limparCliente()" style="float:right;background:#ccc;color:#333;padding:5px 10px;border:none;border-radius:5px;cursor:pointer;width:auto;">✕</button>
+        </div>
 
-        <label>Valor da Compra (R$) *</label>
+        <!-- FORMULÁRIO DE CADASTRO INLINE (CLIENTE NOVO) -->
+        <div id="formNovoCliente" class="form-inline" style="display:none;">
+            <h3>📝 Cadastrar Novo Cliente</h3>
+            <input type="text" id="novoNome" placeholder="Nome *">
+            <input type="tel" id="novoTelefone" placeholder="Telefone *">
+            <input type="email" id="novoEmail" placeholder="Email">
+            <div style="display:flex;gap:10px;">
+                <input type="number" id="novoDia" placeholder="Dia" min="1" max="31" style="flex:1;">
+                <input type="number" id="novoMes" placeholder="Mês" min="1" max="12" style="flex:1;">
+            </div>
+            <label>🎯 Fase / Momento de Vida (opcional)</label>
+            <input type="text" id="novoLifeMoment" placeholder="Ex: Iniciando no esporte, Gravidez, etc.">
+            <button onclick="salvarNovoCliente()" style="background:#10b981;">💾 Salvar Cliente</button>
+            <button onclick="cancelarNovoCliente()" class="btn-cancelar">Cancelar</button>
+        </div>
+
+        <!-- VALOR DA COMPRA -->
+        <label>💵 Valor da Compra (R$) *</label>
         <input type="number" id="valor" placeholder="0,00" step="0.01" oninput="atualizar()">
 
-        <label>Parceiro (opcional)</label>
-        <select id="parceiro"><option value="">Nenhum parceiro</option></select>
+        <!-- RESULTADO DO CASHBACK -->
+        <div class="preview">
+            💵 Cashback gerado: <strong id="cashback">R$ 0,00</strong><br>
+            <span id="descontoInfo" style="display:none;font-size:12px;color:#666;"></span>
+        </div>
 
-        <label>Vendedor (opcional)</label>
+        <!-- PARCEIRO -->
+        <label>🤝 Parceiro (opcional)</label>
+        <select id="parceiro"><option value="">Nenhum parceiro</option></select>
+        <button onclick="mostrarFormParceiro()" style="background:#10b981;font-size:12px;width:auto;margin-top:-5px;">+ Cadastrar Novo</button>
+
+        <!-- FORMULÁRIO DE PARCEIRO INLINE -->
+        <div id="formNovoParceiro" class="form-inline" style="display:none;">
+            <h3>📝 Cadastrar Novo Parceiro</h3>
+            <input type="text" id="novoParceiroNome" placeholder="Nome *">
+            <input type="text" id="novoParceiroIdprof" placeholder="Identificação Profissional">
+            <input type="tel" id="novoParceiroFone" placeholder="Telefone *">
+            <input type="email" id="novoParceiroEmail" placeholder="Email">
+            <button onclick="salvarNovoParceiro()" style="background:#10b981;">💾 Salvar Parceiro</button>
+            <button onclick="cancelarNovoParceiro()" class="btn-cancelar">Cancelar</button>
+        </div>
+
+        <!-- VENDEDOR -->
+        <label>👤 Vendedor (opcional)</label>
         <select id="vendedor"><option value="">Nenhum vendedor</option></select>
 
-        <div style="margin: 10px 0;">
-            <label style="display: inline; margin-right: 5px;">Usar cashback?</label>
-            <input type="checkbox" id="usarCashback" onchange="toggleCashback()">
-            <span id="cashbackDisponivel" style="font-size:12px; color:#666;"></span>
-        </div>
-
-<div class="preview">
-            💵 Cashback a gerar: <strong id="cashback">R$ 0,00</strong><br>
-            <span id="descontoAplicado" style="display:none;">Desconto do cashback: <strong id="valorDesconto">R$ 0,00</strong></span>
-        </div>
+        <!-- CONSUMO (OPCIONAL) -->
+        <details class="secao-colapsavel" style="margin-top:15px;">
+            <summary>📋 Registrar Consumo (opcional)</summary>
+            <div style="padding:10px;">
+                <input type="text" id="consumoProduto" placeholder="Produto/Alimento">
+                <input type="text" id="consumoQuantidade" placeholder="Quantidade">
+                <input type="text" id="consumoDuracao" placeholder="Duração em dias">
+            </div>
+        </details>
 
         <button id="btnRegistrar" onclick="registrar()">✅ Registrar Venda</button>
         <div id="msg" class="msg"></div>
+
+        <!-- CÓDIGO DE INDICAÇÃO -->
         <div id="codigoGerado" class="codigo-box">
             🎫 Código de Indicação: <strong id="codigoTexto"></strong>
             <div class="qr-code" id="qrCodeContainer"></div>
             <small>Compartilhe com um amigo! Ambos ganham 3% de cashback.</small>
         </div>
 
-        <div id="npsBox" class="nps-box" style="display:none;">
-            <p>De 0 a 10, quanto você recomendaria nossa loja?</p>
-            <div>
-                <button onclick="enviarNPS(0)">0</button><button onclick="enviarNPS(1)">1</button><button onclick="enviarNPS(2)">2</button><button onclick="enviarNPS(3)">3</button><button onclick="enviarNPS(4)">4</button>
-                <button onclick="enviarNPS(5)">5</button><button onclick="enviarNPS(6)">6</button><button onclick="enviarNPS(7)">7</button><button onclick="enviarNPS(8)">8</button><button onclick="enviarNPS(9)">9</button>
-                <button onclick="enviarNPS(10)">10</button>
-            </div>
-        </div>
-
+        <!-- ÚLTIMAS VENDAS -->
         <h2 style="margin-top:30px;">Últimas Vendas</h2>
         <table>
             <thead><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Cashback</th><th>Ações</th></tr></thead>
@@ -102,239 +143,169 @@
         </table>
     </div>
 
-    <!-- Modal de Edição de Venda -->
-    <div class="modal" id="modalEdicao">
-        <div class="modal-content">
-            <h2>Editar Venda</h2>
-            <input type="hidden" id="editSaleId">
-            <label>Novo Cliente</label>
-            <input type="text" id="editBuscaCliente" placeholder="Buscar cliente..." oninput="buscarClienteEdit()">
-            <div id="editResultadosBusca"></div>
-            <input type="hidden" id="editClienteId">
-            <span id="editClienteNome" style="font-weight:bold;"></span>
-            <label>Novo Valor (R$)</label>
-            <input type="number" id="editValor" step="0.01" oninput="atualizarEdit()">
-            <label>Novo Parceiro</label>
-            <select id="editParceiro"><option value="">Nenhum</option></select>
-            <label>Novo Vendedor</label>
-            <select id="editVendedor"><option value="">Nenhum</option></select>
-            <div class="preview">💵 Novo Cashback: <strong id="editCashback">R$ 0,00</strong></div>
-            <button onclick="salvarEdicao()">💾 Salvar Alterações</button>
-            <button onclick="fecharModal()" style="background:#ccc;margin-top:5px;">Cancelar</button>
-            <div id="editMsg" class="msg"></div>
-        </div>
-    </div>
-
-<script>
+    <script>
         var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
         var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        var currentClient = null, lastSaleId = null, todosClientes = [];
+        var currentClient = null, todosClientes = [];
 
         async function carregarSelects() {
             var respCli = await s.from('clients').select('id, name, phone, cashback_balance, cashback_expires_at').eq('company_id', COMPANY_ID).order('name');
             todosClientes = respCli.data || [];
-            renderClientes(todosClientes);
 
             var respPar = await s.from('partners').select('id, name').eq('company_id', COMPANY_ID).order('name');
             var sp = document.getElementById('parceiro');
             sp.innerHTML = '<option value="">Nenhum parceiro</option>';
             (respPar.data||[]).forEach(function(p) { sp.innerHTML += '<option value="'+p.id+'">'+p.name+'</option>'; });
-            // Preencher também o select do modal
-            var ep = document.getElementById('editParceiro');
-            ep.innerHTML = '<option value="">Nenhum</option>';
-            (respPar.data||[]).forEach(function(p) { ep.innerHTML += '<option value="'+p.id+'">'+p.name+'</option>'; });
 
             var respVend = await s.from('users').select('id, name').eq('company_id', COMPANY_ID).order('name');
             var sv = document.getElementById('vendedor');
             sv.innerHTML = '<option value="">Nenhum vendedor</option>';
             (respVend.data||[]).forEach(function(u) { sv.innerHTML += '<option value="'+u.id+'">'+u.name+'</option>'; });
-            var ev = document.getElementById('editVendedor');
-            ev.innerHTML = '<option value="">Nenhum</option>';
-            (respVend.data||[]).forEach(function(u) { ev.innerHTML += '<option value="'+u.id+'">'+u.name+'</option>'; });
 
             await carregarVendas();
         }
 
-        // ===== LISTA DE VENDAS =====
-        async function carregarVendas() {
-            var resp = await s.from('sales')
-                .select('id, sale_date, total_amount, final_amount, cashback_generated, clients:client_id(name)')
-        
-             .eq('company_id', COMPANY_ID)
-                .order('sale_date', { ascending: false })
-                .limit(20);
-            var tbody = document.getElementById('listaVendas');
-            if (resp.error) { tbody.innerHTML = '<tr><td colspan="5">Erro: '+resp.error.message+'</td></tr>'; return; }
-            if (!resp.data || resp.data.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Nenhuma venda.</td></tr>'; return; }
-            tbody.innerHTML = resp.data.map(function(v) {
-                return `<tr>
-                    <td>${new Date(v.sale_date).toLocaleString('pt-BR')}</td>
-                    <td>${v.clients?.name || '-'}</td>
-                    <td>R$${v.total_amount.toFixed(2)}</td>
-                    <td style="color:green">R$${(v.cashback_generated||0).toFixed(2)}</td>
-                    <td>
-                        <button class="btn-editar" onclick="abrirEdicao('${v.id}')">✏️</button>
-                        <button class="btn-excluir" onclick="excluirVenda('${v.id}')">🗑️</button>
-                    </td></tr>`;
-            }).join('');
-        }
-
-        async function excluirVenda(id) {
-            if (!confirm('Excluir esta venda? O cashback NÃO será revertido.')) return;
-            var resp = await s.from('sales').delete().eq('id', id);
-            if (resp.error) { alert('Erro: ' + resp.error.message); return; }
-            carregarVendas();
-            mostrarMsg('Venda excluída!', 'sucesso');
-        }
-
-        // ===== EDIÇÃO DE VENDA =====
-        async function abrirEdicao(id) {
-            var resp = await s.from('sales').select('*').eq('id', id).single();
-            var venda = resp.data;
-            if (!venda) return;
-
-            document.getElementById('editSaleId').value = venda.id;
-            document.getElementById('editClienteId').value = venda.client_id;
-            document.getElementById('editValor').value = venda.total_amount;
-            document.getElementById('editParceiro').value = venda.partner_id || '';
-            document.getElementById('editVendedor').value = venda.seller_id || '';
-
-            // Buscar nome do cliente
-            var cliResp = await s.from('clients').select('name').eq('id', venda.client_id).single();
-            document.getElementById('editClienteNome').textContent = cliResp.data?.name || '';
-            document.getElementById('editBuscaCliente').value = cliResp.data?.name || '';
-
-            atualizarEdit();
-            document.getElementById('modalEdicao').classList.add('active');
-        }
-
-function fecharModal() { document.getElementById('modalEdicao').classList.remove('active'); }
-
-        async function buscarClienteEdit() {
-            var termo = document.getElementById('editBuscaCliente').value.trim();
-            if (termo.length < 2) { document.getElementById('editResultadosBusca').innerHTML = ''; return; }
-            var resp = await s.from('clients').select('id, name, phone').eq('company_id', COMPANY_ID).ilike('name', '%'+termo+'%').limit(10);
-            var html = '';
-            (resp.data||[]).forEach(function(c) {
-                html += '<div class="resultado-busca" onclick="selecionarClienteEdit(\''+c.id+'\', \''+c.name+'\')">'+c.name+' ('+c.phone+')</div>';
-            });
-            document.getElementById('editResultadosBusca').innerHTML = html || '<p style="color:#999;">Nenhum cliente.</p>';
-        }
-
-        function selecionarClienteEdit(id, nome) {
-            document.getElementById('editClienteId').value = id;
-            document.getElementById('editClienteNome').textContent = nome;
-            document.getElementById('editBuscaCliente').value = nome;
-            document.getElementById('editResultadosBusca').innerHTML = '';
-            atualizarEdit();
-        }
-
-        function atualizarEdit() {
-            var val = parseFloat(document.getElementById('editValor').value) || 0;
-            document.getElementById('editCashback').textContent = 'R$ ' + Math.min(val * 0.14, 150).toFixed(2);
-        }
-
-        async function salvarEdicao() {
-            var id = document.getElementById('editSaleId').value;
-            var clienteId = document.getElementById('editClienteId').value;
-            var valor = parseFloat(document.getElementById('editValor').value);
-            var parceiro = document.getElementById('editParceiro').value || null;
-            var vendedor = document.getElementById('editVendedor').value || null;
-
-            if (!clienteId || !valor) { alert('Selecione um cliente e informe o valor.'); return; }
-
-            var cashback = Math.min(valor * 0.14, 150);
-            var resp = await s.from('sales').update({
-                client_id: clienteId,
-                total_amount: valor,
-                final_amount: valor,
-                cashback_generated: cashback,
-                partner_id: parceiro,
-                seller_id: vendedor
-            }).eq('id', id);
-
-            if (resp.error) {
-                document.getElementById('editMsg').className = 'msg erro';
-                document.getElementById('editMsg').textContent = 'Erro: ' + resp.error.message;
-                return;
-            }
-            document.getElementById('editMsg').className = 'msg sucesso';
-            document.getElementById('editMsg').textContent = 'Venda atualizada!';
-            fecharModal();
-            carregarVendas();
-            mostrarMsg('Venda atualizada com sucesso!', 'sucesso');
-        }
-
-        // ===== NOVA VENDA (mantido) =====
+        // ===== BUSCA E SELEÇÃO DE CLIENTE =====
         function filtrarClientes() {
             var termo = document.getElementById('buscaCliente').value.toLowerCase();
+            if (termo.length < 2) { document.getElementById('resultadosBusca').innerHTML = ''; return; }
             var filtrados = todosClientes.filter(function(c) { return c.name.toLowerCase().includes(termo) || (c.phone||'').includes(termo); });
-            renderClientes(filtrados);
-        }
-
-        function renderClientes(lista) {
-            var sc = document.getElementById('cliente');
-            sc.innerHTML = '<option value="">Selecione um cliente...</option>';
-            lista.forEach(function(c) {
-                sc.innerHTML += '<option value="'+c.id+'" data-cashback="'+(c.cashback_balance||0)+'" data-exp="'+(c.cashback_expires_at||'')+'">'+c.name+' ('+c.phone+') - R$'+(c.cashback_balance||0).toFixed(2)+'</option>';
+            var html = '';
+            filtrados.forEach(function(c) {
+                html += '<div class="resultado-busca" onclick="selecionarCliente(\''+c.id+'\', \''+c.name+'\', '+(c.cashback_balance||0)+', \''+(c.cashback_expires_at||'')+'\')">'+c.name+' ('+c.phone+') - Saldo: R$'+(c.cashback_balance||0).toFixed(2)+'</div>';
             });
-            sc.addEventListener('change', onClienteChange);
-        }
-
-        function onClienteChange() {
-            var opt = document.getElementById('cliente').selectedOptions[0];
-            if (opt && opt.dataset.cashback) {
-                var cashback = parseFloat(opt.dataset.cashback);
-                var exp = opt.dataset.exp;
-                var disponivel = cashback > 0 && (!exp || new Date(exp) > new Date());
-                document.getElementById('cashbackDisponivel').textContent = disponivel ? 'Saldo disponível: R$ '+cashback.toFixed(2) : 'Sem saldo';
-                document.getElementById('usarCashback').checked = false;
-                document.getElementById('descontoAplicado').style.display = 'none';
-                document.getElementById('usarCashback').disabled = !disponivel;
-                currentClient = { id: opt.value, cashback: cashback, exp: exp };
+            if (filtrados.length === 0 && termo.length >= 2) {
+                html += '<div class="resultado-busca" style="background:#fef3c7;border-color:#f59e0b;" onclick="mostrarFormNovoCliente(\''+termo+'\')">🆕 Cliente não encontrado. <strong>Cadastrar novo?</strong></div>';
             }
+            document.getElementById('resultadosBusca').innerHTML = html;
         }
 
-        function toggleCashback() {
-            document.getElementById('descontoAplicado').style.display = document.getElementById('usarCashback').checked ? 'inline' : 'none';
+        function selecionarCliente(id, nome, cashback, exp) {
+            document.getElementById('clienteId').value = id;
+            document.getElementById('clienteNome').textContent = nome;
+            document.getElementById('clienteCashback').textContent = 'R$ ' + cashback.toFixed(2);
+            document.getElementById('clienteInfo').style.display = 'block';
+            document.getElementById('resultadosBusca').innerHTML = '';
+            document.getElementById('buscaCliente').value = nome;
+
+            var disponivel = cashback > 0 && (!exp || new Date(exp) > new Date());
+            currentClient = { id: id, cashback: cashback, exp: exp, disponivel: disponivel };
             atualizar();
         }
 
-        function atualizar() {
-            var valor = parseFloat(document.getElementById('valor').value) || 0;
-            document.getElementById('cashback').textContent = 'R$ ' + Math.min(valor * 0.14, 150).toFixed(2);
-            if (document.getElementById('usarCashback').checked && currentClient && currentClient.cashback > 0) {
-                var cashbackUsado = 0;
-                if (valor >= currentClient.cashback * 0.25) cashbackUsado = currentClient.cashback;
-                else cashbackUsado = valor * 0.25;
-                cashbackUsado = Math.min(cashbackUsado, valor);
-                document.getElementById('valorDesconto').textContent = 'R$ ' + cashbackUsado.toFixed(2);
-            } else document.getElementById('valorDesconto').textContent = 'R$ 0,00';
+        function limparCliente() {
+            document.getElementById('clienteId').value = '';
+            document.getElementById('clienteInfo').style.display = 'none';
+            document.getElementById('buscaCliente').value = '';
+            currentClient = null;
+            document.getElementById('cashback').textContent = 'R$ 0,00';
+            document.getElementById('descontoInfo').style.display = 'none';
         }
 
+        // ===== CADASTRO INLINE DE CLIENTE =====
+        function mostrarFormNovoCliente(telefone) {
+            document.getElementById('formNovoCliente').style.display = 'block';
+            document.getElementById('novoTelefone').value = telefone || '';
+            document.getElementById('resultadosBusca').innerHTML = '';
+        }
+
+        function cancelarNovoCliente() {
+            document.getElementById('formNovoCliente').style.display = 'none';
+            document.getElementById('novoNome').value = '';
+            document.getElementById('novoEmail').value = '';
+            document.getElementById('novoDia').value = '';
+            document.getElementById('novoMes').value = '';
+            document.getElementById('novoLifeMoment').value = '';
+        }
+
+        async function salvarNovoCliente() {
+            var nome = document.getElementById('novoNome').value.trim();
+            var fone = document.getElementById('novoTelefone').value.trim();
+            if (!nome || !fone) { alert('Nome e telefone obrigatórios.'); return; }
+            var resp = await s.from('clients').insert([{
+                company_id: COMPANY_ID, name: nome, phone: fone,
+                email: document.getElementById('novoEmail').value.trim() || null,
+                birthday_day: parseInt(document.getElementById('novoDia').value) || null,
+                birthday_month: parseInt(document.getElementById('novoMes').value) || null,
+                life_moment: document.getElementById('novoLifeMoment').value.trim() || null
+            }]).select().single();
+            if (resp.error) { alert('Erro: ' + resp.error.message); return; }
+            cancelarNovoCliente();
+            await carregarSelects();
+            selecionarCliente(resp.data.id, resp.data.name, 0, null);
+        }
+
+        // ===== CADASTRO INLINE DE PARCEIRO =====
+        function mostrarFormParceiro() {
+            document.getElementById('formNovoParceiro').style.display = 'block';
+        }
+
+        function cancelarNovoParceiro() {
+            document.getElementById('formNovoParceiro').style.display = 'none';
+        }
+
+        async function salvarNovoParceiro() {
+            var nome = document.getElementById('novoParceiroNome').value.trim();
+            var fone = document.getElementById('novoParceiroFone').value.trim();
+            if (!nome || !fone) { alert('Nome e telefone obrigatórios.'); return; }
+            var resp = await s.from('partners').insert([{
+                company_id: COMPANY_ID, name: nome, phone: fone,
+                professional_identifier: document.getElementById('novoParceiroIdprof').value.trim() || null,
+                email: document.getElementById('novoParceiroEmail').value.trim() || null
+            }]).select().single();
+            if (resp.error) { alert('Erro: ' + resp.error.message); return; }
+            cancelarNovoParceiro();
+            await carregarSelects();
+            document.getElementById('parceiro').value = resp.data.id;
+        }
+
+        // ===== CASHBACK AUTOMÁTICO =====
+        function atualizar() {
+            var val = parseFloat(document.getElementById('valor').value) || 0;
+            if (!currentClient) {
+                document.getElementById('cashback').textContent = 'R$ ' + Math.min(val * 0.14, 150).toFixed(2);
+                document.getElementById('descontoInfo').style.display = 'none';
+                return;
+            }
+            var cashbackUsado = 0;
+            if (currentClient.disponivel && val >= currentClient.cashback * 0.25) {
+                cashbackUsado = currentClient.cashback;
+            } else if (currentClient.disponivel && val < currentClient.cashback * 0.25) {
+                cashbackUsado = val * 0.25;
+            }
+            cashbackUsado = Math.min(cashbackUsado, val);
+            var valorFinal = val - cashbackUsado;
+            document.getElementById('cashback').textContent = 'R$ ' + Math.min(valorFinal * 0.14, 150).toFixed(2);
+            if (cashbackUsado > 0) {
+                document.getElementById('descontoInfo').style.display = 'inline';
+                document.getElementById('descontoInfo').textContent = '💰 Desconto automático: R$ ' + cashbackUsado.toFixed(2);
+            } else {
+                document.getElementById('descontoInfo').style.display = 'none';
+            }
+        }
+
+        // ===== REGISTRAR VENDA =====
         async function registrar() {
-            var cli = document.getElementById('cliente').value;
+            var cli = document.getElementById('clienteId').value;
             var val = parseFloat(document.getElementById('valor').value);
             var par = document.getElementById('parceiro').value || null;
             var vend = document.getElementById('vendedor').value || null;
-            var usarCash = document.getElementById('usarCashback').checked;
             var btn = document.getElementById('btnRegistrar');
             var msg = document.getElementById('msg');
 
-            if (!cli || !val) { msg.className = 'msg erro'; msg.textContent = 'Preencha cliente e valor.'; return; }
+            if (!cli || !val) { msg.className = 'msg erro'; msg.textContent = 'Selecione um cliente e informe o valor.'; return; }
 
-            var valorFinal = val, cashbackUsado = 0;
-            if (usarCash && currentClient && currentClient.cashback > 0) {
-                if (new Date(currentClient.exp) < new Date()) { msg.className = 'msg erro'; msg.textContent = 'Cashback expirado.'; return; }
+            var cashbackUsado = 0, valorFinal = val;
+            if (currentClient && currentClient.cashback > 0 && (!currentClient.exp || new Date(currentClient.exp) > new Date())) {
                 if (val >= currentClient.cashback * 0.25) cashbackUsado = currentClient.cashback;
                 else cashbackUsado = val * 0.25;
                 cashbackUsado = Math.min(cashbackUsado, val);
                 valorFinal = val - cashbackUsado;
             }
 
-btn.disabled = true; btn.textContent = 'Registrando...';
+            btn.disabled = true; btn.textContent = 'Registrando...';
             msg.className = 'msg info'; msg.textContent = 'Salvando venda...';
 
             var cashbackGerado = Math.min(valorFinal * 0.14, 150);
@@ -346,49 +317,70 @@ btn.disabled = true; btn.textContent = 'Registrando...';
                 partner_id: par, seller_id: vend
             }]).select().single();
 
-            if (respVenda.error) {
-                msg.className = 'msg erro'; msg.textContent = 'Erro: ' + respVenda.error.message;
-                btn.disabled = false; btn.textContent = '✅ Registrar Venda'; return;
+            if (respVenda.error) { msg.className = 'msg erro'; msg.textContent = 'Erro: ' + respVenda.error.message; btn.disabled = false; btn.textContent = '✅ Registrar Venda'; return; }
+
+            // Zerar cashback se usado
+            if (cashbackUsado > 0) await s.from('clients').update({ cashback_balance: 0, cashback_expires_at: null }).eq('id', cli);
+            // Atualizar saldo do cliente
+            await s.from('clients').update({ cashback_balance: cashbackGerado, cashback_expires_at: exp.toISOString() }).eq('id', cli);
+            // Atualizar comissão do parceiro
+            if (par) {
+                var { data: partner } = await s.from('partners').select('cashback_accumulated').eq('id', par).single();
+                var novaComissao = (partner?.cashback_accumulated || 0) + (val * 0.03);
+                await s.from('partners').update({ cashback_accumulated: Math.min(novaComissao, 500) }).eq('id', par);
             }
 
-            if (cashbackUsado > 0) await s.from('clients').update({ cashback_balance: 0, cashback_expires_at: null }).eq('id', cli);
-            await s.from('clients').update({ cashback_balance: cashbackGerado, cashback_expires_at: exp.toISOString() }).eq('id', cli);
-
-            // Gerar código de indicação
+            // Código de indicação
             var respCodigo = await s.rpc('gerar_codigo_unboxing', { p_client_id: cli, p_sale_id: respVenda.data.id });
             if (respCodigo.data) {
                 document.getElementById('codigoTexto').textContent = respCodigo.data;
                 var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(respCodigo.data);
-                document.getElementById('qrCodeContainer').innerHTML = '<img src="' + qrUrl + '" alt="QR Code" width="150" height="150">';
+                document.getElementById('qrCodeContainer').innerHTML = '<img src="'+qrUrl+'" alt="QR Code" width="150" height="150">';
                 document.getElementById('codigoGerado').style.display = 'block';
             }
 
-            msg.className = 'msg sucesso';
-            msg.innerHTML = '✅ Venda registrada! Cashback: R$ ' + cashbackGerado.toFixed(2);
-            if (cashbackUsado > 0) msg.innerHTML += '<br>💰 Desconto usado: R$ ' + cashbackUsado.toFixed(2);
+            // Consumo opcional
+            var prod = document.getElementById('consumoProduto').value.trim();
+            if (prod) {
+                await s.from('consumption_history').insert([{
+                    client_id: cli,
+                    product_name: prod,
+                    quantity: document.getElementById('consumoQuantidade').value.trim() || null,
+                    duration: document.getElementById('consumoDuracao').value.trim() || null,
+                    consumed_at: new Date().toISOString().split('T')[0]
+                }]);
+            }
 
-            lastSaleId = respVenda.data.id;
+            msg.className = 'msg sucesso';
+            msg.innerHTML = '✅ Venda registrada!<br>💰 Valor pago: R$' + valorFinal.toFixed(2) + '<br>💵 Cashback: R$' + cashbackGerado.toFixed(2);
+            if (cashbackUsado > 0) msg.innerHTML += '<br>🔖 Desconto usado: R$' + cashbackUsado.toFixed(2);
+
             document.getElementById('valor').value = '';
             document.getElementById('cashback').textContent = 'R$ 0,00';
-            document.getElementById('usarCashback').checked = false;
-            document.getElementById('descontoAplicado').style.display = 'none';
+            document.getElementById('descontoInfo').style.display = 'none';
+            limparCliente();
             btn.disabled = false; btn.textContent = '✅ Registrar Venda';
-
-            document.getElementById('npsBox').style.display = 'block';
-            carregarVendas(); // atualiza a lista
+            carregarVendas();
+            carregarSelects();
         }
 
-        async function enviarNPS(nota) {
-            if (lastSaleId) await s.from('sales').update({ nps_score: nota }).eq('id', lastSaleId);
-            document.getElementById('npsBox').innerHTML = '<p style="color:green;">Obrigado pela sua avaliação! 🎉</p>';
-            setTimeout(function() { document.getElementById('npsBox').style.display = 'none'; }, 3000);
+        // ===== ÚLTIMAS VENDAS =====
+        async function carregarVendas() {
+            var resp = await s.from('sales')
+                .select('id, sale_date, total_amount, final_amount, cashback_generated, clients:client_id(name)')
+                .eq('company_id', COMPANY_ID)
+                .order('sale_date', { ascending: false })
+                .limit(20);
+            var tbody = document.getElementById('listaVendas');
+            if (resp.error) { tbody.innerHTML = '<tr><td colspan="5">Erro: '+resp.error.message+'</td></tr>'; return; }
+            if (!resp.data || resp.data.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Nenhuma venda.</td></tr>'; return; }
+            tbody.innerHTML = resp.data.map(function(v) {
+                return '<tr><td>'+new Date(v.sale_date).toLocaleString('pt-BR')+'</td><td>'+(v.clients?.name||'-')+'</td><td>R$'+v.total_amount.toFixed(2)+'</td><td style="color:green">R$'+(v.cashback_generated||0).toFixed(2)+'</td><td><button class="btn-editar" onclick="editarVenda(\''+v.id+'\')">✏️</button><button class="btn-excluir" onclick="excluirVenda(\''+v.id+'\')">🗑️</button></td></tr>';
+            }).join('');
         }
 
-        function mostrarMsg(texto, tipo) {
-            var m = document.getElementById('msg');
-            m.className = 'msg ' + tipo;
-            m.textContent = texto;
-        }
+        async function excluirVenda(id) { if (!confirm('Excluir esta venda?')) return; await s.from('sales').delete().eq('id', id); carregarVendas(); }
+        function editarVenda(id) { alert('Edição de venda será implementada na Fase 2.2'); }
 
         carregarSelects();
     </script>
