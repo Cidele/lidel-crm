@@ -36,7 +36,6 @@
             transition: color 0.2s;
         }
         .navbar a:hover { color: white; }
-
         .container {
             max-width: 960px;
             margin: 0 auto;
@@ -45,16 +44,13 @@
             padding: 30px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.04);
         }
-
         h2 { color: #0033CC; margin-top: 0; font-weight: 600; }
-
         label {
             font-weight: 600;
             display: block;
             margin: 12px 0 4px;
             color: #333;
         }
-
         input, select, textarea {
             width: 100%;
             padding: 10px 12px;
@@ -71,7 +67,6 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(0,85,255,0.1);
         }
-
         button {
             background: #0055FF;
             color: white;
@@ -85,7 +80,6 @@
         }
         button:hover { background: #0033CC; }
         button:disabled { background: #a5b4fc; cursor: not-allowed; }
-
         .btn-editar {
             background: #10b981;
             color: white;
@@ -95,7 +89,6 @@
             margin-right: 5px;
         }
         .btn-editar:hover { background: #059669; }
-
         .btn-excluir {
             background: #ec4899;
             color: white;
@@ -104,14 +97,6 @@
             border-radius: 6px;
         }
         .btn-excluir:hover { background: #db2777; }
-
-        .btn-cancelar {
-            background: #e5e7eb;
-            color: #333;
-            margin-top: 5px;
-        }
-        .btn-cancelar:hover { background: #d1d5db; }
-
         .preview {
             background: #eef2ff;
             padding: 16px;
@@ -120,7 +105,6 @@
             margin: 16px 0;
             border: 1px dashed #0055FF;
         }
-
         .msg {
             padding: 12px;
             border-radius: 8px;
@@ -130,7 +114,6 @@
         .msg.info    { background: #dbeafe; color: #1e40af; display: block; }
         .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
         .msg.erro    { background: #fee2e2; color: #991b1b; display: block; }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -154,7 +137,6 @@
             font-size: 13px;
         }
         tr:hover td { background: #f8faff; }
-
         .badge {
             padding: 4px 10px;
             border-radius: 12px;
@@ -165,10 +147,8 @@
         .badge-verde  { background: #d1fae5; color: #065f46; }
         .badge-amarelo{ background: #fef3c7; color: #92400e; }
         .badge-vermelho{ background: #fee2e2; color: #991b1b; }
-        .badge-preto  { background: #1e1e1e; color: #e5e7eb; }
         .badge-ativo  { background: #d1fae5; color: #065f46; }
         .badge-inativo{ background: #fee2e2; color: #991b1b; }
-
         .codigo-box {
             background: #fef3c7;
             border: 2px dashed #f59e0b;
@@ -179,9 +159,7 @@
             display: none;
         }
         .codigo-box strong { font-size: 20px; letter-spacing: 2px; }
-
         .qr-code img { display: block; margin: 10px auto; border-radius: 8px; }
-
         .resultado-busca {
             background: #f0fdf4;
             padding: 8px 12px;
@@ -193,16 +171,6 @@
             transition: background 0.2s;
         }
         .resultado-busca:hover { background: #dcfce7; }
-
-        .form-inline {
-            background: #f9fafb;
-            padding: 16px;
-            border-radius: 10px;
-            margin: 12px 0;
-            border: 1px dashed #0055FF;
-        }
-        .form-inline h3 { margin: 0 0 10px 0; color: #0055FF; }
-
         .secao-colapsavel summary {
             cursor: pointer;
             font-weight: 600;
@@ -211,46 +179,14 @@
             background: #f0f2f5;
             border-radius: 8px;
         }
-        .secao-colapsavel summary:hover { background: #e5e7eb; }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            text-align: center;
-        }
-        .card .value { font-size: 28px; font-weight: 700; color: #0055FF; }
-        .card .label { color: #666; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        .alerta-diario {
-            background: #fef3c7;
-            border-left: 5px solid #f59e0b;
-            padding: 14px 20px;
-            border-radius: 0 12px 12px 0;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .alerta-diario button {
-            background: #0055FF;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* Mini SAC flutuante */
-        .sac-float {
+        .sac-float, .bday-float {
             position: fixed;
             bottom: 24px;
-            right: 24px;
             z-index: 999;
         }
-        .sac-float button {
+        .sac-float { right: 24px; }
+        .bday-float { left: 24px; }
+        .sac-float button, .bday-float button {
             width: 56px;
             height: 56px;
             border-radius: 28px;
@@ -262,12 +198,11 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-        .sac-float button:hover { transform: scale(1.08); }
-        .sac-popup {
+        .bday-float button { background: #f59e0b; }
+        .sac-popup, .bday-popup {
             display: none;
             position: fixed;
             bottom: 90px;
-            right: 24px;
             width: 300px;
             max-height: 400px;
             background: white;
@@ -277,8 +212,10 @@
             flex-direction: column;
             overflow: hidden;
         }
-        .sac-popup.active { display: flex; }
-        .sac-popup-header {
+        .sac-popup { right: 24px; }
+        .bday-popup { left: 24px; }
+        .sac-popup.active, .bday-popup.active { display: flex; }
+        .sac-popup-header, .bday-popup-header {
             background: #0055FF;
             color: white;
             padding: 12px 16px;
@@ -286,16 +223,17 @@
             display: flex;
             justify-content: space-between;
         }
-        .sac-popup-body {
+        .bday-popup-header { background: #f59e0b; }
+        .popup-body {
             flex: 1;
             padding: 12px;
             overflow-y: auto;
             font-size: 13px;
             max-height: 250px;
         }
-        .sac-popup-body .msg-line { margin-bottom: 8px; }
-        .sac-popup-body .user { text-align: right; color: #0055FF; }
-        .sac-popup-body .bot  { text-align: left; color: #333; }
+        .popup-body .msg-line { margin-bottom: 8px; }
+        .popup-body .user { text-align: right; color: #0055FF; }
+        .popup-body .bot  { text-align: left; color: #333; }
         .sac-popup-input {
             display: flex;
             border-top: 1px solid #eee;
@@ -333,7 +271,7 @@
     <div class="container">
         <h2>Nova Venda</h2>
 
-        <!-- 🔍 CLIENTE + VALOR LADO A LADO -->
+        <!-- 🔍 CLIENTE + VALOR -->
         <div style="display:flex;gap:10px;align-items:end;">
             <div style="flex:2;">
                 <label>🔍 Cliente</label>
@@ -346,129 +284,126 @@
         </div>
         <div id="resultadosBusca" style="margin-bottom:10px;"></div>
 
-        <!-- CLIENTE SELECIONADO -->
         <input type="hidden" id="clienteId">
         <div id="clienteInfo" style="display:none; background:#f0fdf4; padding:10px; border-radius:8px; margin:10px 0;">
             <strong id="clienteNome"></strong> | Cashback: <strong id="clienteCashback">R$ 0,00</strong>
             <button onclick="limparCliente()" style="float:right;background:#ccc;color:#333;padding:5px 10px;border:none;border-radius:5px;cursor:pointer;width:auto;">✕</button>
         </div>
 
-        <!-- FORMULÁRIO DE CADASTRO INLINE (CLIENTE NOVO) -->
-        <div id="formNovoCliente" class="form-inline" style="display:none;">
-            <h3>📝 Cadastrar Novo Cliente</h3>
-            <input type="text" id="novoNome" placeholder="Nome *">
-            <input type="tel" id="novoTelefone" placeholder="Telefone *">
-            <input type="email" id="novoEmail" placeholder="Email">
-            <div style="display:flex;gap:10px;">
-                <input type="number" id="novoDia" placeholder="Dia" min="1" max="31" style="flex:1;">
-                <input type="number" id="novoMes" placeholder="Mês" min="1" max="12" style="flex:1;">
+        <!-- GIFT CARD -->
+        <div style="display:flex;gap:10px;align-items:end;">
+            <div style="flex:2;">
+                <label>🎁 Código Gift Card</label>
+                <input type="text" id="giftCardCode" placeholder="Ex: GIFT-ABC123">
             </div>
-            <label>🎯 Fase / Momento de Vida</label>
-            <input type="text" id="novoLifeMoment" placeholder="Ex: Iniciando no esporte, Gravidez...">
-            <button onclick="salvarNovoCliente()" style="background:#10b981;">💾 Salvar</button>
-            <button onclick="cancelarNovoCliente()" class="btn-cancelar">Cancelar</button>
+            <div style="flex:1;">
+                <button onclick="aplicarGiftCard()" style="background:#f59e0b;color:white;padding:10px 18px;">Aplicar</button>
+            </div>
         </div>
+        <div id="giftCardInfo" style="display:none; background:#fef3c7; padding:8px; border-radius:8px; margin:8px 0;"></div>
 
-        <!-- RESULTADO DO CASHBACK -->
+        <!-- CASHBACK PREVIEW -->
         <div class="preview">
             💵 Cashback gerado: <strong id="cashback">R$ 0,00</strong><br>
             <span id="descontoInfo" style="display:none;font-size:12px;color:#666;"></span>
         </div>
 
-        <!-- PARCEIRO -->
-        <label>🤝 Parceiro (opcional)</label>
-        <select id="parceiro"><option value="">Nenhum parceiro</option></select>
-        <button onclick="mostrarFormParceiro()" style="background:#10b981;font-size:12px;width:auto;margin-top:-5px;">+ Cadastrar Novo</button>
-
-        <!-- FORMULÁRIO DE PARCEIRO INLINE -->
-        <div id="formNovoParceiro" class="form-inline" style="display:none;">
-            <h3>📝 Cadastrar Novo Parceiro</h3>
-            <input type="text" id="novoParceiroNome" placeholder="Nome *">
-            <input type="text" id="novoParceiroIdprof" placeholder="Identificação Profissional">
-            <input type="tel" id="novoParceiroFone" placeholder="Telefone *">
-            <input type="email" id="novoParceiroEmail" placeholder="Email">
-            <button onclick="salvarNovoParceiro()" style="background:#10b981;">💾 Salvar Parceiro</button>
-            <button onclick="cancelarNovoParceiro()" class="btn-cancelar">Cancelar</button>
+        <!-- PARCEIRO + VENDEDOR -->
+        <div style="display:flex;gap:10px;">
+            <div style="flex:1;">
+                <label>🤝 Parceiro</label>
+                <select id="parceiro"><option value="">Nenhum</option></select>
+                <button onclick="mostrarFormParceiro()" style="background:#10b981;font-size:12px;width:auto;">+ Novo</button>
+            </div>
+            <div style="flex:1;">
+                <label>👤 Vendedor</label>
+                <select id="vendedor"><option value="">Nenhum</option></select>
+            </div>
         </div>
 
-        <!-- VENDEDOR -->
-        <label>👤 Vendedor (opcional)</label>
-        <select id="vendedor"><option value="">Nenhum vendedor</option></select>
-
-        <!-- CONSUMO (OPCIONAL) -->
+        <!-- CONSUMO -->
         <details class="secao-colapsavel" style="margin-top:15px;">
             <summary>📋 Registrar Consumo (opcional)</summary>
             <div style="padding:10px;">
-                <input type="text" id="consumoProduto" placeholder="Produto/Alimento">
+                <input type="text" id="consumoProduto" placeholder="Produto">
                 <input type="text" id="consumoQuantidade" placeholder="Quantidade">
-                <input type="text" id="consumoDuracao" placeholder="Duração em dias">
+                <input type="text" id="consumoDuracao" placeholder="Duração (dias)">
             </div>
         </details>
 
-        <!-- BOTÃO SALVAR VENDA -->
-        <button id="btnRegistrar" onclick="registrar()" style="background:#0055FF; font-size:16px; padding:12px;">💾 Salvar Venda</button>
-        <div id="msg" class="msg"></div>
+        <!-- LISTA DE ESPERA -->
+        <details class="secao-colapsavel" style="margin-top:10px;">
+            <summary>📋 Lista de Espera (produto em falta)</summary>
+            <div style="padding:10px;">
+                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                    <input type="text" id="esperaProduto" placeholder="Nome do produto" style="flex:1;">
+                    <input type="text" id="esperaCliente" placeholder="Nome do cliente" style="flex:1;">
+                </div>
+                <input type="tel" id="esperaTelefone" placeholder="Telefone do cliente">
+                <button onclick="salvarEspera()" style="background:#10b981;">💾 Salvar</button>
+                <table id="tabelaEspera" style="margin-top:10px;">
+                    <thead><tr><th>Produto</th><th>Cliente</th><th>Telefone</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </details>
 
-        <!-- CÓDIGO DE INDICAÇÃO -->
+        <button id="btnRegistrar" onclick="registrar()" style="background:#0055FF; font-size:16px; padding:12px;margin-top:15px;">💾 Salvar Venda</button>
+        <div id="msg" class="msg"></div>
         <div id="codigoGerado" class="codigo-box">
             🎫 Código de Indicação: <strong id="codigoTexto"></strong>
             <div class="qr-code" id="qrCodeContainer"></div>
-            <small>Compartilhe com um amigo! Ambos ganham 3% de cashback.</small>
         </div>
 
-        <!-- ÚLTIMAS VENDAS -->
         <h2 style="margin-top:30px;">Últimas Vendas</h2>
-        <table>
-            <thead><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Cashback</th><th>Ações</th></tr></thead>
-            <tbody id="listaVendas"><tr><td colspan="5">Carregando...</td></tr></tbody>
+        <table><thead><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Cashback</th><th>Ações</th></tr></thead>
+            <tbody id="listaVendas"></tbody>
+        </table>
+
+        <h2 style="margin-top:30px;">🎁 Gift Cards Utilizados</h2>
+        <table><thead><tr><th>Código</th><th>Valor</th><th>Data</th><th>Cliente</th></tr></thead>
+            <tbody id="listaGiftCardsUsados"></tbody>
         </table>
     </div>
 
     <!-- MINI SAC FLUTUANTE -->
-    <div class="sac-float">
-        <button onclick="toggleSAC()">💬</button>
-    </div>
+    <div class="sac-float"><button onclick="toggleSAC()">💬</button></div>
     <div class="sac-popup" id="sacPopup">
-        <div class="sac-popup-header">
-            💬 Suporte LIDEL
-            <span onclick="toggleSAC()" style="cursor:pointer;">✕</span>
-        </div>
-        <div class="sac-popup-body" id="sacMsgs">
-            <div class="msg-line bot">👋 Olá! Pergunte sobre cashback, indicações ou suporte.</div>
-        </div>
-        <div class="sac-popup-input">
-            <input type="text" id="sacInput" placeholder="Digite sua dúvida..." onkeypress="if(event.key==='Enter') enviarSAC()">
-            <button onclick="enviarSAC()">➤</button>
-        </div>
+        <div class="sac-popup-header">💬 Suporte <span onclick="toggleSAC()" style="cursor:pointer;">✕</span></div>
+        <div class="popup-body" id="sacMsgs"><div class="msg-line bot">👋 Pergunte sobre cashback, indicações ou suporte.</div></div>
+        <div class="sac-popup-input"><input type="text" id="sacInput" placeholder="Digite..." onkeypress="if(event.key==='Enter') enviarSAC()"><button onclick="enviarSAC()">➤</button></div>
+    </div>
+
+    <!-- MINI 🎂 ANIVERSARIANTES -->
+    <div class="bday-float"><button onclick="toggleBday()">🎂</button></div>
+    <div class="bday-popup" id="bdayPopup">
+        <div class="bday-popup-header">🎂 Aniversariantes <span onclick="toggleBday()" style="cursor:pointer;">✕</span></div>
+        <div class="popup-body" id="bdayMsgs">Carregando...</div>
     </div>
 
     <script>
-        // ===== CONFIGURAÇÃO =====
         var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd';
         var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        var currentClient = null, todosClientes = [];
+        var currentClient = null, todosClientes = [], currentGiftCard = null;
 
-        // ===== INICIALIZAÇÃO =====
         async function carregarSelects() {
             var respCli = await s.from('clients').select('id, name, phone, cashback_balance, cashback_expires_at').eq('company_id', COMPANY_ID).order('name');
             todosClientes = respCli.data || [];
-
             var respPar = await s.from('partners').select('id, name').eq('company_id', COMPANY_ID).order('name');
             var sp = document.getElementById('parceiro');
-            sp.innerHTML = '<option value="">Nenhum parceiro</option>';
+            sp.innerHTML = '<option value="">Nenhum</option>';
             (respPar.data||[]).forEach(function(p) { sp.innerHTML += '<option value="'+p.id+'">'+p.name+'</option>'; });
-
             var respVend = await s.from('users').select('id, name').eq('company_id', COMPANY_ID).order('name');
             var sv = document.getElementById('vendedor');
-            sv.innerHTML = '<option value="">Nenhum vendedor</option>';
+            sv.innerHTML = '<option value="">Nenhum</option>';
             (respVend.data||[]).forEach(function(u) { sv.innerHTML += '<option value="'+u.id+'">'+u.name+'</option>'; });
-
             await carregarVendas();
+            await carregarEspera();
+            await carregarGiftCardsUsados();
         }
 
-        // ===== BUSCA E SELEÇÃO DE CLIENTE =====
         function filtrarClientes() {
             var termo = document.getElementById('buscaCliente').value.toLowerCase();
             if (termo.length < 2) { document.getElementById('resultadosBusca').innerHTML = ''; return; }
@@ -490,7 +425,6 @@
             document.getElementById('clienteInfo').style.display = 'block';
             document.getElementById('resultadosBusca').innerHTML = '';
             document.getElementById('buscaCliente').value = nome;
-
             var disponivel = cashback > 0 && (!exp || new Date(exp) > new Date());
             currentClient = { id: id, cashback: cashback, exp: exp, disponivel: disponivel };
             atualizar();
@@ -505,22 +439,12 @@
             document.getElementById('descontoInfo').style.display = 'none';
         }
 
-        // ===== CADASTRO INLINE DE CLIENTE =====
         function mostrarFormNovoCliente(telefone) {
             document.getElementById('formNovoCliente').style.display = 'block';
             document.getElementById('novoTelefone').value = telefone || '';
             document.getElementById('resultadosBusca').innerHTML = '';
         }
-
-        function cancelarNovoCliente() {
-document.getElementById('formNovoCliente').style.display = 'none';
-            document.getElementById('novoNome').value = '';
-            document.getElementById('novoEmail').value = '';
-            document.getElementById('novoDia').value = '';
-            document.getElementById('novoMes').value = '';
-            document.getElementById('novoLifeMoment').value = '';
-        }
-
+        function cancelarNovoCliente() { document.getElementById('formNovoCliente').style.display = 'none'; }
         async function salvarNovoCliente() {
             var nome = document.getElementById('novoNome').value.trim();
             var fone = document.getElementById('novoTelefone').value.trim();
@@ -538,17 +462,10 @@ document.getElementById('formNovoCliente').style.display = 'none';
             selecionarCliente(resp.data.id, resp.data.name, 0, null);
         }
 
-        // ===== CADASTRO INLINE DE PARCEIRO =====
-        function mostrarFormParceiro() {
-            document.getElementById('formNovoParceiro').style.display = 'block';
-        }
-
-        function cancelarNovoParceiro() {
-            document.getElementById('formNovoParceiro').style.display = 'none';
-        }
-
+        function mostrarFormParceiro() { document.getElementById('formNovoParceiro').style.display = 'block'; }
+        function cancelarNovoParceiro() { document.getElementById('formNovoParceiro').style.display = 'none'; }
         async function salvarNovoParceiro() {
-            var nome = document.getElementById('novoParceiroNome').value.trim();
+var nome = document.getElementById('novoParceiroNome').value.trim();
             var fone = document.getElementById('novoParceiroFone').value.trim();
             if (!nome || !fone) { alert('Nome e telefone obrigatórios.'); return; }
             var resp = await s.from('partners').insert([{
@@ -562,32 +479,52 @@ document.getElementById('formNovoCliente').style.display = 'none';
             document.getElementById('parceiro').value = resp.data.id;
         }
 
-        // ===== CASHBACK AUTOMÁTICO =====
+        async function aplicarGiftCard() {
+            var code = document.getElementById('giftCardCode').value.trim();
+            if (!code) return alert('Digite o código do gift card.');
+            var resp = await s.from('giftcards').select('*').eq('code', code).eq('is_used', false).single();
+            if (resp.error || !resp.data) {
+                document.getElementById('giftCardInfo').style.display = 'block';
+                document.getElementById('giftCardInfo').innerHTML = '❌ Gift card inválido ou já usado.';
+                currentGiftCard = null;
+                return;
+            }
+            var gc = resp.data;
+            if (gc.expires_at && new Date(gc.expires_at) < new Date()) {
+                document.getElementById('giftCardInfo').style.display = 'block';
+                document.getElementById('giftCardInfo').innerHTML = '❌ Gift card expirado.';
+                currentGiftCard = null;
+                return;
+            }
+            currentGiftCard = gc;
+            document.getElementById('giftCardInfo').style.display = 'block';
+            document.getElementById('giftCardInfo').innerHTML = '✅ Gift Card aplicado: R$' + gc.value.toFixed(2) + ' de desconto.';
+            atualizar();
+        }
+
         function atualizar() {
             var val = parseFloat(document.getElementById('valor').value) || 0;
+            var giftDiscount = currentGiftCard ? currentGiftCard.value : 0;
+            var baseCalc = val - giftDiscount;
+            if (baseCalc < 0) baseCalc = 0;
+
             if (!currentClient) {
-                document.getElementById('cashback').textContent = 'R$ ' + Math.min(val * 0.14, 150).toFixed(2);
+                document.getElementById('cashback').textContent = 'R$ ' + Math.min(baseCalc * 0.14, 150).toFixed(2);
                 document.getElementById('descontoInfo').style.display = 'none';
                 return;
             }
-            var cashbackUsado = 0;
-            if (currentClient.disponivel && val >= currentClient.cashback * 0.25) {
-                cashbackUsado = currentClient.cashback;
-            } else if (currentClient.disponivel && val < currentClient.cashback * 0.25) {
-                cashbackUsado = val * 0.25;
-            }
-            cashbackUsado = Math.min(cashbackUsado, val);
-            var valorFinal = val - cashbackUsado;
+            var cashbackUsado = Math.min(currentClient.cashback, baseCalc * 0.25);
+            var valorFinal = baseCalc - cashbackUsado;
+            if (valorFinal < 0) valorFinal = 0;
             document.getElementById('cashback').textContent = 'R$ ' + Math.min(valorFinal * 0.14, 150).toFixed(2);
             if (cashbackUsado > 0) {
                 document.getElementById('descontoInfo').style.display = 'inline';
-                document.getElementById('descontoInfo').textContent = '💰 Desconto automático: R$ ' + cashbackUsado.toFixed(2);
+                document.getElementById('descontoInfo').textContent = '💰 Desconto automático: R$ ' + cashbackUsado.toFixed(2) + (giftDiscount > 0 ? ' + Gift Card R$' + giftDiscount.toFixed(2) : '');
             } else {
                 document.getElementById('descontoInfo').style.display = 'none';
             }
         }
 
-        // ===== REGISTRAR VENDA =====
         async function registrar() {
             var cli = document.getElementById('clienteId').value;
             var val = parseFloat(document.getElementById('valor').value);
@@ -595,15 +532,17 @@ document.getElementById('formNovoCliente').style.display = 'none';
             var vend = document.getElementById('vendedor').value || null;
             var btn = document.getElementById('btnRegistrar');
             var msg = document.getElementById('msg');
-
             if (!cli || !val) { msg.className = 'msg erro'; msg.textContent = 'Selecione um cliente e informe o valor.'; return; }
 
-            var cashbackUsado = 0, valorFinal = val;
+            var giftDiscount = currentGiftCard ? currentGiftCard.value : 0;
+            var baseCalc = val - giftDiscount;
+            if (baseCalc < 0) baseCalc = 0;
+
+            var cashbackUsado = 0;
+            var valorFinal = baseCalc;
             if (currentClient && currentClient.cashback > 0 && (!currentClient.exp || new Date(currentClient.exp) > new Date())) {
-                if (val >= currentClient.cashback * 0.25) cashbackUsado = currentClient.cashback;
-                else cashbackUsado = val * 0.25;
-                cashbackUsado = Math.min(cashbackUsado, val);
-                valorFinal = val - cashbackUsado;
+                cashbackUsado = Math.min(currentClient.cashback, baseCalc * 0.25);
+                valorFinal = baseCalc - cashbackUsado;
             }
 
             btn.disabled = true; btn.textContent = 'Salvando...';
@@ -612,22 +551,34 @@ document.getElementById('formNovoCliente').style.display = 'none';
             var cashbackGerado = Math.min(valorFinal * 0.14, 150);
             var exp = new Date(); exp.setDate(exp.getDate() + 45);
 
-            var respVenda = await s.from('sales').insert([{
-                client_id: cli, company_id: COMPANY_ID, total_amount: val, final_amount: valorFinal,
-                cashback_generated: cashbackGerado, cashback_expires_at: exp.toISOString(),
+            var vendaData = {
+                client_id: cli, company_id: COMPANY_ID,
+                total_amount: val, final_amount: valorFinal,
+                cashback_generated: cashbackGerado,
+                cashback_expires_at: exp.toISOString(),
                 partner_id: par, seller_id: vend
-            }]).select().single();
+            };
+            if (currentGiftCard) vendaData.giftcard_id = currentGiftCard.id;
 
+            var respVenda = await s.from('sales').insert([vendaData]).select().single();
             if (respVenda.error) { msg.className = 'msg erro'; msg.textContent = 'Erro: ' + respVenda.error.message; btn.disabled = false; btn.textContent = '💾 Salvar Venda'; return; }
 
-            if (cashbackUsado > 0) await s.from('clients').update({ cashback_balance: 0, cashback_expires_at: null }).eq('id', cli);
-            await s.from('clients').update({ cashback_balance: cashbackGerado, cashback_expires_at: exp.toISOString() }).eq('id', cli);
+            if (currentClient) {
+                var novoSaldo = currentClient.cashback - cashbackUsado + cashbackGerado;
+                var novoExp = novoSaldo > 0 ? exp.toISOString() : null;
+                await s.from('clients').update({ cashback_balance: novoSaldo, cashback_expires_at: novoExp }).eq('id', cli);
+            }
+            if (currentGiftCard) {
+                await s.from('giftcards').update({ is_used: true, used_by: cli }).eq('id', currentGiftCard.id);
+                currentGiftCard = null;
+                document.getElementById('giftCardCode').value = '';
+                document.getElementById('giftCardInfo').style.display = 'none';
+            }
             if (par) {
                 var { data: partner } = await s.from('partners').select('cashback_accumulated').eq('id', par).single();
                 var novaComissao = (partner?.cashback_accumulated || 0) + (val * 0.03);
                 await s.from('partners').update({ cashback_accumulated: Math.min(novaComissao, 500) }).eq('id', par);
             }
-
             var respCodigo = await s.rpc('gerar_codigo_unboxing', { p_client_id: cli, p_sale_id: respVenda.data.id });
             if (respCodigo.data) {
                 document.getElementById('codigoTexto').textContent = respCodigo.data;
@@ -635,7 +586,6 @@ document.getElementById('formNovoCliente').style.display = 'none';
                 document.getElementById('qrCodeContainer').innerHTML = '<img src="'+qrUrl+'" alt="QR Code" width="150" height="150">';
                 document.getElementById('codigoGerado').style.display = 'block';
             }
-
             var prod = document.getElementById('consumoProduto').value.trim();
             if (prod) {
                 await s.from('consumption_history').insert([{
@@ -645,10 +595,10 @@ document.getElementById('formNovoCliente').style.display = 'none';
                     consumed_at: new Date().toISOString().split('T')[0]
                 }]);
             }
-
             msg.className = 'msg sucesso';
             msg.innerHTML = '✅ Venda registrada!<br>💰 Valor pago: R$' + valorFinal.toFixed(2) + '<br>💵 Cashback: R$' + cashbackGerado.toFixed(2);
-            if (cashbackUsado > 0) msg.innerHTML += '<br>🔖 Desconto usado: R$' + cashbackUsado.toFixed(2);
+            if (cashbackUsado > 0) msg.innerHTML += '<br>🔖 Desconto cashback: R$' + cashbackUsado.toFixed(2);
+            if (giftDiscount > 0) msg.innerHTML += '<br>🎁 Gift Card: R$' + giftDiscount.toFixed(2);
 
             document.getElementById('valor').value = '';
             document.getElementById('cashback').textContent = 'R$ 0,00';
@@ -657,9 +607,9 @@ document.getElementById('formNovoCliente').style.display = 'none';
             btn.disabled = false; btn.textContent = '💾 Salvar Venda';
             carregarVendas();
             carregarSelects();
+            carregarGiftCardsUsados();
         }
 
-        // ===== ÚLTIMAS VENDAS =====
         async function carregarVendas() {
             var resp = await s.from('sales')
                 .select('id, sale_date, total_amount, final_amount, cashback_generated, clients:client_id(name)')
@@ -693,8 +643,79 @@ document.getElementById('formNovoCliente').style.display = 'none';
             carregarVendas();
         }
 
-        // ===== MINI SAC =====
+        async function carregarEspera() {
+            var resp = await s.from('waitlist').select('product_name, clients(name,phone)').eq('company_id', COMPANY_ID).order('created_at', { ascending: false });
+            var tbody = document.querySelector('#tabelaEspera tbody');
+            if (!resp.data || resp.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3">Nenhum item na lista de espera.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = resp.data.map(function(w) {
+                return '<tr><td>'+w.product_name+'</td><td>'+(w.clients?.name||'')+'</td><td>'+(w.clients?.phone||'')+'</td></tr>';
+            }).join('');
+        }
+
+        async function salvarEspera() {
+            var produto = document.getElementById('esperaProduto').value.trim();
+            var clienteNome = document.getElementById('esperaCliente').value.trim();
+            var clienteFone = document.getElementById('esperaTelefone').value.trim();
+            if (!produto || !clienteNome || !clienteFone) return alert('Preencha todos os campos.');
+            var respCli = await s.from('clients').select('id').eq('phone', clienteFone).eq('company_id', COMPANY_ID).single();
+            var clientId = respCli.data?.id;
+            if (!clientId) {
+                var novoCli = await s.from('clients').insert([{ company_id: COMPANY_ID, name: clienteNome, phone: clienteFone }]).select().single();
+                clientId = novoCli.data.id;
+            }
+            await s.from('waitlist').insert([{ company_id: COMPANY_ID, client_id: clientId, product_name: produto }]);
+            carregarEspera();
+            document.getElementById('esperaProduto').value = '';
+            document.getElementById('esperaCliente').value = '';
+            document.getElementById('esperaTelefone').value = '';
+        }
+
+        async function carregarGiftCardsUsados() {
+            var resp = await s.from('giftcards').select('code, value, updated_at, clients:used_by(name)').eq('company_id', COMPANY_ID).eq('is_used', true).order('updated_at', { ascending: false }).limit(20);
+            var tbody = document.getElementById('listaGiftCardsUsados');
+            if (!resp.data || resp.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">Nenhum gift card utilizado.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = resp.data.map(function(g) {
+                return '<tr><td>'+g.code+'</td><td>R$'+g.value.toFixed(2)+'</td><td>'+new Date(g.updated_at).toLocaleDateString('pt-BR')+'</td><td>'+(g.clients?.name||'-')+'</td></tr>';
+            }).join('');
+        }
+
+        async function carregarAniversariantes() {
+            var hoje = new Date();
+            var dia = hoje.getDate();
+            var mes = hoje.getMonth() + 1;
+            var respCli = await s.from('clients').select('name, birthday_day, birthday_month').eq('company_id', COMPANY_ID).eq('birthday_day', dia).eq('birthday_month', mes);
+            var respPar = await s.from('partners').select('name, birthday_day, birthday_month').eq('company_id', COMPANY_ID).eq('birthday_day', dia).eq('birthday_month', mes);
+            var respVend = await s.from('users').select('name, birthday_day, birthday_month').eq('company_id', COMPANY_ID).eq('birthday_day', dia).eq('birthday_month', mes);
+            var html = '';
+            if (respCli.data && respCli.data.length > 0) {
+                html += '<strong>👥 Clientes</strong><br>';
+                respCli.data.forEach(function(c) { html += '• ' + c.name + '<br>'; });
+            }
+            if (respPar.data && respPar.data.length > 0) {
+                html += '<strong>🤝 Parceiros</strong><br>';
+                respPar.data.forEach(function(p) { html += '• ' + p.name + '<br>'; });
+            }
+            if (respVend.data && respVend.data.length > 0) {
+                html += '<strong>👤 Vendedores</strong><br>';
+                respVend.data.forEach(function(v) { html += '• ' + v.name + '<br>'; });
+            }
+            if (!html) html = 'Nenhum aniversariante hoje.';
+            document.getElementById('bdayMsgs').innerHTML = html;
+        }
+
         function toggleSAC() { document.getElementById('sacPopup').classList.toggle('active'); }
+        function toggleBday() {
+            var popup = document.getElementById('bdayPopup');
+            if (!popup.classList.contains('active')) carregarAniversariantes();
+            popup.classList.toggle('active');
+        }
+
         function enviarSAC() {
             var input = document.getElementById('sacInput');
             var msg = input.value.trim();
