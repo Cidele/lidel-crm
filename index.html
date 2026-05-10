@@ -8,12 +8,13 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0033CC, #0055FF);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.5s;
         }
         .login-box {
             background: white;
@@ -23,8 +24,12 @@
             max-width: 400px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { color: #4f46e5; font-size: 36px; }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo img { max-height: 80px; margin-bottom: 10px; }
+        .logo h1 { color: #0033CC; font-size: 28px; }
         .logo p { color: #666; font-size: 14px; }
         input {
             width: 100%;
@@ -37,7 +42,7 @@
         button {
             width: 100%;
             padding: 14px;
-            background: #4f46e5;
+            background: #0033CC;
             color: white;
             border: none;
             border-radius: 10px;
@@ -45,103 +50,136 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
+            transition: background 0.3s;
         }
-        .msg { margin-top: 15px; padding: 10px; border-radius: 8px; text-align: center; display: none; }
+        button:hover { background: #001F7F; }
+        .msg {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+        .msg.error { background: #fee2e2; color: #991b1b; display: block; }
+        .msg.success { background: #d1fae5; color: #065f46; display: block; }
+        .msg.loading { background: #dbeafe; color: #1e40af; display: block; }
     </style>
 </head>
 <body>
     <div class="login-box">
-        <div class="logo">
-            <h1>LIDEL</h1>
-            <p>CRM e Pos-Venda Inteligente</p>
+        <div class="logo" id="logoArea">
+            <h1 id="companyTitle">LIDEL</h1>
+            <p id="companySubtitle">CRM & Pós-Venda Inteligente</p>
         </div>
-        
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Senha">
-        <button onclick="fazerLogin()">Entrar</button>
-        
-        <div id="msg" class="msg"></div>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Senha" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="message" class="msg"></div>
     </div>
 
     <script>
-        var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co'
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc'
-        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function fazerLogin() {
-            var msg = document.getElementById('msg')
-            var email = document.getElementById('email').value
-            var password = document.getElementById('password').value
+        // Obter parâmetro da URL (ex: ?company=gnc)
+        const urlParams = new URLSearchParams(window.location.search);
+        const companySlug = urlParams.get('company');
+        let currentCompany = null;
 
-            msg.style.display = 'block'
-            msg.style.background = '#dbeafe'
-            msg.style.color = '#1e40af'
-            msg.textContent = 'Autenticando...'
+        // Aplicar tema da empresa
+        async function aplicarTema() {
+            if (!companySlug) return; // Sem parâmetro, mantém tema padrão da LIDEL
 
-            // 1. Autenticar
-            var response = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            })
+            // Buscar empresa pelo slug (nome simplificado)
+            const { data: companies, error } = await supabase
+                .from('companies')
+                .select('*')
+                .ilike('name', '%' + companySlug + '%')
+                .limit(1);
 
-            if (response.error) {
-                msg.style.background = '#fee2e2'
-                msg.style.color = '#991b1b'
-                msg.textContent = 'Erro: ' + response.error.message
-                return
+            if (error || !companies || companies.length === 0) return;
+
+            currentCompany = companies[0];
+            const theme = currentCompany.theme_config || {};
+            
+            // Aplicar cores
+            if (theme.primary) {
+                document.body.style.background = `linear-gradient(135deg, ${theme.primary}, ${theme.secondary || theme.primary})`;
+                document.querySelector('button').style.background = theme.primary;
+                document.querySelector('button').onmouseover = function() { this.style.background = theme.secondary || theme.primary; };
+                document.querySelector('button').onmouseout = function() { this.style.background = theme.primary; };
+                document.getElementById('companyTitle').style.color = theme.primary;
             }
-
-            if (response.data && response.data.user) {
-                // 2. Buscar perfil
-                var userResponse = await supabase
-                    .from('users')
-                    .select('company_id, role')
-                    .eq('email', email)
-                    .single()
-
-                // 3. SE NÃO ENCONTRAR, CRIAR O PERFIL AUTOMATICAMENTE
-                if (!userResponse.data) {
-                    var empresaResponse = await supabase
-                        .from('companies')
-                        .select('id')
-                        .limit(1)
-                        .single()
-                    
-                    if (empresaResponse.data) {
-                        await supabase.from('users').insert({
-                            company_id: empresaResponse.data.id,
-                            name: email.split('@')[0],
-                            email: email,
-                            role: 'admin'
-                        })
-                        
-                        userResponse = await supabase
-                            .from('users')
-                            .select('company_id, role')
-                            .eq('email', email)
-                            .single()
-                    }
-                }
-
-                if (userResponse.data) {
-                    localStorage.setItem('lidel_token', response.data.session.access_token)
-                    localStorage.setItem('lidel_company_id', userResponse.data.company_id)
-                    localStorage.setItem('lidel_role', userResponse.data.role)
-
-                    msg.style.background = '#d1fae5'
-                    msg.style.color = '#065f46'
-                    msg.textContent = 'Login realizado! Redirecionando...'
-
-                    setTimeout(function() {
-                        if (userResponse.data.role === 'admin') {
-                             window.location.replace('admin.html');
-                        } else {
-                            window.location.replace('dashboard.html');
-                        }
-                    }, 1000)
-                }
+            
+            // Aplicar nome da empresa
+            document.getElementById('companyTitle').textContent = currentCompany.name;
+            document.getElementById('companySubtitle').textContent = 'Painel da Loja';
+            
+            // Aplicar logo se existir
+            if (theme.logo) {
+                const img = document.createElement('img');
+                img.src = theme.logo;
+                img.style.maxHeight = '80px';
+                img.style.marginBottom = '10px';
+                document.getElementById('logoArea').insertBefore(img, document.getElementById('companyTitle'));
             }
         }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('message');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            msg.className = 'msg loading';
+            msg.textContent = 'Autenticando...';
+
+            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (authError) {
+                msg.className = 'msg error';
+                msg.textContent = 'Erro: ' + authError.message;
+                return;
+            }
+
+            // Buscar perfil do usuário
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('company_id, role')
+                .eq('email', email)
+                .single();
+
+            if (userError || !userData) {
+                msg.className = 'msg error';
+                msg.textContent = 'Usuário não encontrado na base.';
+                return;
+            }
+
+            // Salvar dados na sessão
+            localStorage.setItem('lidel_token', authData.session.access_token);
+            localStorage.setItem('lidel_company_id', userData.company_id);
+            localStorage.setItem('lidel_role', userData.role);
+
+            msg.className = 'msg success';
+            msg.textContent = 'Login realizado! Redirecionando...';
+
+            // Redirecionar conforme o papel
+            setTimeout(() => {
+                if (userData.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            }, 1000);
+        });
+
+        // Aplicar tema ao carregar a página
+        aplicarTema();
     </script>
 </body>
 </html>

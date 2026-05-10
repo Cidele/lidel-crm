@@ -151,7 +151,13 @@
 
             // Buscar vendas (últimos 3 meses)
             var respVendas = await s.from('sales').select('sale_date, total_amount, final_amount, cashback_generated').eq('client_id', id).gte('sale_date', tresMesesAtras.toISOString().split('T')[0]).order('sale_date', { ascending: false });
-
+editId').value = c.id;
+            document.getElementById('editNome').value = c.name;
+            document.getElementById('editTelefone').value = c.phone;
+            document.getElementById('editEmail').value = c.email || '';
+            document.getElementById('editDia').value = c.birthday_day || '';
+            document.getElementById('editMes').value = c.birthday_month || '';
+            document.getElementById('modalEdicao').classList.add('active');
             var html = `<h3>${c.name}</h3>
                 <p><strong>Cashback disponível:</strong> R$${(c.cashback_balance||0).toFixed(2)}</p>
                 <h4>📋 Consumo (últimos 3 meses)</h4>`;
@@ -182,13 +188,7 @@
         function editar(id) {
             var c = clientes.find(function(x) { return x.id === id; });
             if (!c) return;
-            document.getElementById('editId').value = c.id;
-            document.getElementById('editNome').value = c.name;
-            document.getElementById('editTelefone').value = c.phone;
-            document.getElementById('editEmail').value = c.email || '';
-            document.getElementById('editDia').value = c.birthday_day || '';
-            document.getElementById('editMes').value = c.birthday_month || '';
-            document.getElementById('modalEdicao').classList.add('active');
+            document.getElementById('
         }
 
         function fecharModalEdicao() { document.getElementById('modalEdicao').classList.remove('active'); }

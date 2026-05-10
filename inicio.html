@@ -7,267 +7,53 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* =============================================
-           LIDEL CRM - Tema Azul & Branco (CORRIGIDO)
-           ============================================= */
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f5f7fa;
-            color: #1a1a1a;
-            margin: 0;
-            padding: 20px;
-        }
-        .navbar {
-            background: #0033CC;
-            color: white;
-            padding: 14px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: -20px -20px 20px -20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 20px; color: #1a1a1a; }
+        .navbar { background: #0033CC; color: white; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 20px -20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .navbar h1 { font-size: 20px; margin: 0; font-weight: 600; }
-        .navbar a {
-            color: #e0e7ff;
-            text-decoration: none;
-            margin-left: 18px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
+        .navbar a { color: #e0e7ff; text-decoration: none; margin-left: 18px; font-size: 14px; font-weight: 500; }
         .navbar a:hover { color: white; }
-
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-        }
-
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
         h2 { color: #0033CC; margin-top: 0; font-weight: 600; }
-
-        label {
-            font-weight: 600;
-            display: block;
-            margin: 12px 0 4px;
-            color: #333;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 10px 12px;
-            margin: 6px 0;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            background: white;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #0055FF;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0,85,255,0.1);
-        }
-
-        button {
-            background: #0055FF;
-            color: white;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-size: 14px;
-        }
-        button:hover { background: #0033CC; }
-        button:disabled { background: #a5b4fc; cursor: not-allowed; }
-
-        .btn-editar {
-            background: #10b981;
-            color: white;
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 6px;
-            margin-right: 5px;
-        }
-        .btn-editar:hover { background: #059669; }
-
-        .btn-excluir {
-            background: #ec4899;
-            color: white;
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 6px;
-        }
-        .btn-excluir:hover { background: #db2777; }
-
-        .btn-cancelar {
-            background: #e5e7eb;
-            color: #333;
-            margin-top: 5px;
-        }
-        .btn-cancelar:hover { background: #d1d5db; }
-
-        .preview {
-            background: #eef2ff;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 16px 0;
-            border: 1px dashed #0055FF;
-        }
-
-        .msg {
-            padding: 12px;
-            border-radius: 8px;
-            margin: 12px 0;
-            display: none;
-        }
-        .msg.info    { background: #dbeafe; color: #1e40af; display: block; }
-        .msg.sucesso { background: #d1fae5; color: #065f46; display: block; }
-        .msg.erro    { background: #fee2e2; color: #991b1b; display: block; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        th {
-            background: #0033CC;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 13px;
-        }
-        tr:hover td { background: #f8faff; }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
+        .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .card { background: white; padding: 20px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center; }
+        .card .value { font-size: 28px; font-weight: 700; color: #0055FF; }
+        .card .label { color: #666; font-size: 12px; margin-top: 4px; text-transform: uppercase; }
+        .filters { background: white; padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .filters input { padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+        .btn { padding: 8px 16px; background: #0055FF; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .chart-box { background: white; border-radius: 15px; padding: 20px; }
+        .section { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #0033CC; color: white; padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .sac-float, .bday-float { position: fixed; bottom: 24px; z-index: 999; }
+        .sac-float { right: 24px; }
+        .bday-float { left: 24px; }
+        .sac-float button, .bday-float button { width: 56px; height: 56px; border-radius: 28px; background: #0055FF; color: white; font-size: 24px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; }
+        .bday-float button { background: #f59e0b; }
+        .sac-popup, .bday-popup { display: none; position: fixed; bottom: 90px; width: 300px; max-height: 400px; background: white; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); z-index: 1000; flex-direction: column; overflow: hidden; }
+        .sac-popup { right: 24px; }
+        .bday-popup { left: 24px; }
+        .sac-popup.active, .bday-popup.active { display: flex; }
+        .sac-popup-header, .bday-popup-header { background: #0055FF; color: white; padding: 12px 16px; font-weight: 600; display: flex; justify-content: space-between; }
+        .bday-popup-header { background: #f59e0b; }
+        .popup-body { flex: 1; padding: 12px; overflow-y: auto; font-size: 13px; max-height: 250px; }
+        .popup-body .msg-line { margin-bottom: 8px; }
+        .sac-popup-input { display: flex; border-top: 1px solid #eee; padding: 8px; }
+        .sac-popup-input input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 14px; font-size: 13px; }
+        .sac-popup-input button { background: #0055FF; color: white; border: none; border-radius: 20px; padding: 8px 14px; margin-left: 8px; }
+        .alerta-diario { background: #fef3c7; border-left: 5px solid #f59e0b; padding: 14px 20px; border-radius: 0 12px 12px 0; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
         .badge-verde  { background: #d1fae5; color: #065f46; }
         .badge-amarelo{ background: #fef3c7; color: #92400e; }
         .badge-vermelho{ background: #fee2e2; color: #991b1b; }
         .badge-preto  { background: #1e1e1e; color: #e5e7eb; }
-        .badge-ativo  { background: #d1fae5; color: #065f46; }
-        .badge-inativo{ background: #fee2e2; color: #991b1b; }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            text-align: center;
-        }
-        .card .value { font-size: 28px; font-weight: 700; color: #0055FF; }
-        .card .label { color: #666; font-size: 12px; margin-top: 4px; text-transform: uppercase; }
-
-        .alerta-diario {
-            background: #fef3c7;
-            border-left: 5px solid #f59e0b;
-            padding: 14px 20px;
-            border-radius: 0 12px 12px 0;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .alerta-diario button {
-            background: #0055FF;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* Mini SAC flutuante */
-        .sac-float {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 999;
-        }
-        .sac-float button {
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background: #0055FF;
-            color: white;
-            font-size: 24px;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
-        .sac-popup {
-            display: none;
-            position: fixed;
-            bottom: 90px;
-            right: 24px;
-            width: 300px;
-            max-height: 400px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            z-index: 1000;
-        }
-        .sac-popup.active { display: flex; flex-direction: column; }
-        .sac-popup-header {
-            background: #0055FF;
-            color: white;
-            padding: 12px 16px;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-        }
-        .sac-popup-body {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            font-size: 13px;
-            max-height: 250px;
-        }
-        .sac-popup-input {
-            display: flex;
-            border-top: 1px solid #eee;
-            padding: 8px;
-        }
-        .sac-popup-input input {
-            flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 8px 14px;
-            font-size: 13px;
-        }
-        .sac-popup-input button {
-            background: #0055FF;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 14px;
-            margin-left: 8px;
-            font-size: 13px;
-        }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>🏠 Início</h1>
+    <div class="navbar" id="navbar">
+        <h1 id="companyTitle">🏠 Início</h1>
         <div>
             <a href="inicio.html">🏠 Início</a>
             <a href="vendas.html">💰 Vender</a>
@@ -277,87 +63,50 @@
     </div>
 
     <div class="container">
-        <!-- ALERTA DIÁRIO UNIFICADO -->
         <div class="alerta-diario" id="alertaDiario">
             <span id="textoAlerta">🔔 Carregando alertas...</span>
-            <button onclick="abrirModalAlertas()">Ver detalhes</button>
         </div>
-
-        <!-- CARDS -->
-        <div class="cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px;">
+        <div class="cards">
             <div class="card"><div class="value" id="totalClientes">0</div><div class="label">Clientes</div></div>
             <div class="card"><div class="value" id="vendasPeriodo">R$0</div><div class="label">Vendas no Período</div></div>
             <div class="card"><div class="value" id="cashbackAtivo">R$0</div><div class="label">Cashback Ativo</div></div>
             <div class="card"><div class="value" id="totalParceiros">0</div><div class="label">Parceiros</div></div>
         </div>
-
-        <!-- FILTRO DE DATA -->
-        <div class="filters" style="background:white;padding:12px 20px;border-radius:12px;margin-bottom:20px;display:flex;gap:10px;align-items:center;">
+        <div class="filters">
             <label>De:</label><input type="date" id="dataInicio">
             <label>Até:</label><input type="date" id="dataFim">
-            <button class="btn" onclick="atualizarDashboard()" style="padding:8px 16px;">Filtrar</button>
+            <button class="btn" onclick="atualizarDashboard()">Filtrar</button>
         </div>
-
-        <!-- GRÁFICOS -->
-        <div class="charts" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:25px;">
-            <div class="chart-box" style="background:white;border-radius:15px;padding:20px;"><h3>Vendas por Dia</h3><canvas id="graficoVendas" height="200"></canvas></div>
-            <div class="chart-box" style="background:white;border-radius:15px;padding:20px;"><h3>Cashback: Gerado vs Resgatado vs Expirado</h3><canvas id="graficoCashback" height="200"></canvas></div>
+        <div class="charts">
+            <div class="chart-box"><h3>Vendas por Dia</h3><canvas id="graficoVendas" height="200"></canvas></div>
+            <div class="chart-box"><h3>Cashback: Gerado vs Resgatado vs Expirado</h3><canvas id="graficoCashback" height="200"></canvas></div>
         </div>
-
-        <!-- SAÚDE FINANCEIRA (KPIS) -->
-        <div class="section" style="background:white;border-radius:15px;padding:20px;margin-bottom:20px;">
-            <h2>📊 Saúde Financeira</h2>
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:15px;">
-                <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#0055FF;" id="kpiAtivo">R$0</div><small>Cashback Ativo</small></div>
+        <div class="section"><h2>📊 Saúde Financeira</h2>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+                <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#0055FF;" id="kpiAtivo">R$0</div><small>Ativo</small></div>
                 <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#10b981;" id="kpiResgatado">R$0</div><small>Resgatado</small></div>
                 <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#1e1e1e;" id="kpiExpirado">R$0</div><small>Expirado</small></div>
-                <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#f59e0b;" id="kpiTaxa">0%</div><small>Taxa de Resgate</small></div>
-                <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#ec4899;" id="kpiNPS">0</div><small>NPS Médio</small></div>
+                <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#f59e0b;" id="kpiTaxa">0%</div><small>Taxa</small></div>
+                <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;color:#ec4899;" id="kpiNPS">0</div><small>NPS</small></div>
             </div>
         </div>
-
-        <!-- RELATÓRIO PREDITIVO DE RECOMPRA -->
-        <div class="section" style="background:white;border-radius:15px;padding:20px;margin-bottom:20px;">
-            <h2>🔮 Previsão de Recompra</h2>
-            <table id="tabelaPreditiva"><thead><tr><th>Cliente</th><th>Telefone</th><th>Produto</th><th>Previsão</th><th>Status</th></tr></thead><tbody><tr><td colspan="5">Carregando...</td></tr></tbody></table>
-        </div>
-
-        <!-- RANKING DE CLIENTES -->
-        <div class="section" style="background:white;border-radius:15px;padding:20px;margin-bottom:20px;">
-            <h2>🏆 Clientes Mais Ativos</h2>
-            <table id="tabelaRanking"><thead><tr><th>Cliente</th><th>Compras</th><th>Valor Total</th><th>Indicações</th></tr></thead><tbody><tr><td colspan="4">Carregando...</td></tr></tbody></table>
-        </div>
-
-        <!-- RELATÓRIO NPS MENSAL -->
-        <div class="section" style="background:white;border-radius:15px;padding:20px;margin-bottom:20px;">
-            <h2>⭐ NPS Mensal</h2>
-            <div class="chart-box" style="background:white;border-radius:15px;padding:20px;"><canvas id="graficoNPS" height="80"></canvas></div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">
-                <div style="text-align:center;color:#10b981;"><strong id="npsPromotores">0</strong><br>Promotores (9-10)</div>
-                <div style="text-align:center;color:#f59e0b;"><strong id="npsNeutros">0</strong><br>Neutros (7-8)</div>
-                <div style="text-align:center;color:#ef4444;"><strong id="npsDetratores">0</strong><br>Detratores (0-6)</div>
-            </div>
-        </div>
+        <div class="section"><h2>🔮 Previsão de Recompra</h2><table id="tabelaPreditiva"><thead><tr><th>Cliente</th><th>Produto</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+        <div class="section"><h2>🏆 Ranking de Clientes</h2><table id="tabelaRanking"><thead><tr><th>Cliente</th><th>Compras</th><th>Valor</th></tr></thead><tbody></tbody></table></div>
+        <div class="section"><h2>⭐ NPS Mensal</h2><canvas id="graficoNPS" height="80"></canvas></div>
     </div>
 
-    <!-- MODAL DE ALERTAS -->
-    <div class="modal" id="modalAlertas" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
-        <div style="background:white;padding:30px;border-radius:20px;width:90%;max-width:700px;max-height:80vh;overflow-y:auto;">
-            <button onclick="fecharModalAlertas()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;float:right;">✕</button>
-            <h2>🔔 Alertas do Dia</h2>
-            <h3>💰 Cashbacks Expirando Hoje</h3>
-            <table id="tabelaAlertasCashback"><tbody><tr><td>Nenhum cashback expirando hoje.</td></tr></tbody></table>
-            <h3 style="margin-top:20px;">🛒 Recompra Prevista Hoje</h3>
-            <table id="tabelaAlertasRecompra"><tbody><tr><td>Nenhuma recompra prevista para hoje.</td></tr></tbody></table>
-        </div>
-    </div>
-
-    <!-- MINI SAC FLUTUANTE -->
+    <!-- MINI SAC -->
     <div class="sac-float"><button onclick="toggleSAC()">💬</button></div>
     <div class="sac-popup" id="sacPopup">
         <div class="sac-popup-header">💬 Suporte <span onclick="toggleSAC()" style="cursor:pointer;">✕</span></div>
-        <div class="sac-popup-body" id="sacMsgs"><div class="msg-line bot">👋 Olá! Pergunte sobre cashback, indicações ou suporte.</div></div>
-        <div class="sac-popup-input"><input type="text" id="sacInput" placeholder="Digite sua dúvida..." onkeypress="if(event.key==='Enter') enviarSAC()"><button onclick="enviarSAC()">➤</button></div>
+        <div class="popup-body" id="sacMsgs"><div class="msg-line bot">👋 Pergunte sobre cashback, indicações ou suporte.</div></div>
+        <div class="sac-popup-input"><input type="text" id="sacInput" placeholder="Digite..." onkeypress="if(event.key==='Enter') enviarSAC()"><button onclick="enviarSAC()">➤</button></div>
+    </div>
+    <!-- MINI 🎂 -->
+    <div class="bday-float"><button onclick="toggleBday()">🎂</button></div>
+    <div class="bday-popup" id="bdayPopup">
+        <div class="bday-popup-header">🎂 Aniversariantes <span onclick="toggleBday()" style="cursor:pointer;">✕</span></div>
+        <div class="popup-body" id="bdayMsgs">Carregando...</div>
     </div>
 
     <script>
@@ -367,164 +116,117 @@
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         var graficoVendas, graficoCashback, graficoNPS;
 
-        var hoje = new Date();
-        var mesPassado = new Date(); mesPassado.setMonth(hoje.getMonth()-1);
-        document.getElementById('dataInicio').value = mesPassado.toISOString().split('T')[0];
-        document.getElementById('dataFim').value = hoje.toISOString().split('T')[0];
+        // Tema da empresa
+        async function aplicarTema() {
+            const companyId = localStorage.getItem('lidel_company_id');
+            if (!companyId) return;
+            const { data } = await s.from('companies').select('theme_config, name').eq('id', companyId).single();
+            if (!data) return;
+            const theme = data.theme_config || {};
+            if (theme.primary) {
+                document.querySelector('.navbar').style.background = theme.primary;
+                document.querySelectorAll('.btn').forEach(b => b.style.background = theme.primary);
+                document.querySelectorAll('.card .value').forEach(c => c.style.color = theme.primary);
+            }
+            if (data.name) document.getElementById('companyTitle').textContent = data.name;
+        }
 
         async function atualizarDashboard() {
             var inicio = document.getElementById('dataInicio').value;
             var fim = document.getElementById('dataFim').value;
 
-            // Totais
-            var { count: totalCli } = await s.from('clients').select('*',{count:'exact',head:true}).eq('company_id',COMPANY_ID);
-            document.getElementById('totalClientes').textContent = totalCli||0;
-            var { count: totalPar } = await s.from('partners').select('*',{count:'exact',head:true}).eq('company_id',COMPANY_ID);
-            document.getElementById('totalParceiros').textContent = totalPar||0;
+            var respCli = await s.from('clients').select('*',{count:'exact',head:true}).eq('company_id', COMPANY_ID);
+            document.getElementById('totalClientes').textContent = respCli.count || 0;
+            var respPar = await s.from('partners').select('*',{count:'exact',head:true}).eq('company_id', COMPANY_ID);
+            document.getElementById('totalParceiros').textContent = respPar.count || 0;
 
-            // Cashback ativo
-            var respCash = await s.from('clients').select('cashback_balance').eq('company_id',COMPANY_ID).gt('cashback_balance',0);
-            var totalCashAtivo = (respCash.data||[]).reduce(function(a,c){return a+c.cashback_balance;},0);
-            document.getElementById('cashbackAtivo').textContent = 'R$'+totalCashAtivo.toFixed(0);
+            var respCash = await s.from('clients').select('cashback_balance').eq('company_id', COMPANY_ID).gt('cashback_balance', 0);
+            var totalCash = (respCash.data||[]).reduce((a,c) => a + c.cashback_balance, 0);
+            document.getElementById('cashbackAtivo').textContent = 'R$' + totalCash.toFixed(0);
 
-            // Vendas no período
-            var query = s.from('sales').select('total_amount,cashback_generated,sale_date').eq('company_id',COMPANY_ID);
-            if(inicio) query = query.gte('sale_date',inicio);
-            if(fim) query = query.lte('sale_date',fim+'T23:59:59');
-            var { data: vendas } = await query.order('sale_date',{ascending:false});
-            var totalVendas = (vendas||[]).reduce(function(a,v){return a+v.total_amount;},0);
-            document.getElementById('vendasPeriodo').textContent = 'R$'+totalVendas.toFixed(0);
+            var query = s.from('sales').select('total_amount, cashback_generated, sale_date').eq('company_id', COMPANY_ID);
+            if (inicio) query = query.gte('sale_date', inicio);
+            if (fim) query = query.lte('sale_date', fim + 'T23:59:59');
+            var { data: vendas } = await query.order('sale_date', { ascending: false });
+            var totalVendas = (vendas||[]).reduce((a,v) => a + v.total_amount, 0);
+            document.getElementById('vendasPeriodo').textContent = 'R$' + totalVendas.toFixed(0);
 
-            // Gráfico de vendas por dia
+            // Gráfico vendas por dia
             var vendasPorDia = {};
-            (vendas||[]).forEach(function(v){ var dia=v.sale_date.split('T')[0]; vendasPorDia[dia]=(vendasPorDia[dia]||0)+v.total_amount; });
+            (vendas||[]).forEach(v => { var dia = v.sale_date.split('T')[0]; vendasPorDia[dia] = (vendasPorDia[dia]||0) + v.total_amount; });
             var labels = Object.keys(vendasPorDia).sort();
-            if(graficoVendas) graficoVendas.destroy();
-            graficoVendas = new Chart(document.getElementById('graficoVendas'),{
-                type:'line',data:{labels:labels,datasets:[{label:'Vendas (R$)',data:labels.map(function(d){return vendasPorDia[d];}),borderColor:'#0055FF',backgroundColor:'rgba(0,85,255,0.1)',fill:true}]},
-                options:{plugins:{legend:{display:false}}}
+            if (graficoVendas) graficoVendas.destroy();
+            graficoVendas = new Chart(document.getElementById('graficoVendas'), {
+                type: 'line', data: { labels, datasets: [{ label: 'Vendas (R$)', data: labels.map(d => vendasPorDia[d]), borderColor: '#0055FF', backgroundColor: 'rgba(0,85,255,0.1)', fill: true }] },
+                options: { plugins: { legend: { display: false } } }
             });
 
-            // Gráfico de cashback
-            var cashbackGerado = (vendas||[]).reduce(function(a,v){return a+(v.cashback_generated||0);},0);
-            var cashbackResgatado = (vendas||[]).reduce(function(a,v){return a+(v.total_amount-(v.final_amount||v.total_amount));},0);
-            var cashbackExpirado = Math.max(0,cashbackGerado-totalCashAtivo-cashbackResgatado);
-            if(graficoCashback) graficoCashback.destroy();
-            graficoCashback = new Chart(document.getElementById('graficoCashback'),{
-                type:'bar',data:{labels:['Gerado','Resgatado','Expirado'],datasets:[{data:[cashbackGerado,cashbackResgatado,cashbackExpirado],backgroundColor:['#0055FF','#10b981','#1e1e1e']}]},
-                options:{plugins:{legend:{display:false}}}
+            // Gráfico cashback
+            var cashbackGerado = (vendas||[]).reduce((a,v) => a + (v.cashback_generated||0), 0);
+            var cashbackResgatado = (vendas||[]).reduce((a,v) => a + (v.total_amount - (v.final_amount||v.total_amount)), 0);
+            var cashbackExpirado = Math.max(0, cashbackGerado - totalCash - cashbackResgatado);
+            if (graficoCashback) graficoCashback.destroy();
+            graficoCashback = new Chart(document.getElementById('graficoCashback'), {
+                type: 'bar', data: { labels: ['Gerado','Resgatado','Expirado'], datasets: [{ data: [cashbackGerado, cashbackResgatado, cashbackExpirado], backgroundColor: ['#0055FF','#10b981','#1e1e1e'] }] },
+                options: { plugins: { legend: { display: false } } }
             });
 
             // KPIs
-            document.getElementById('kpiAtivo').textContent = 'R$'+totalCashAtivo.toFixed(0);
-            document.getElementById('kpiResgatado').textContent = 'R$'+cashbackResgatado.toFixed(0);
-            document.getElementById('kpiExpirado').textContent = 'R$'+cashbackExpirado.toFixed(0);
-            var taxa = cashbackGerado>0 ? ((cashbackResgatado/cashbackGerado)*100).toFixed(1) : 0;
-            document.getElementById('kpiTaxa').textContent = taxa+'%';
+            document.getElementById('kpiAtivo').textContent = 'R$' + totalCash.toFixed(0);
+            document.getElementById('kpiResgatado').textContent = 'R$' + cashbackResgatado.toFixed(0);
+            document.getElementById('kpiExpirado').textContent = 'R$' + cashbackExpirado.toFixed(0);
+            document.getElementById('kpiTaxa').textContent = (cashbackGerado ? (cashbackResgatado/cashbackGerado*100).toFixed(1) : 0) + '%';
+            var { data: npsData } = await s.from('sales').select('nps_score').eq('company_id', COMPANY_ID).not('nps_score','is',null);
+            document.getElementById('kpiNPS').textContent = ((npsData||[]).reduce((a,v) => a + v.nps_score, 0) / (npsData||[]).length || 0).toFixed(1);
 
-            // NPS médio
-            var { data: npsData } = await s.from('sales').select('nps_score').eq('company_id',COMPANY_ID).not('nps_score','is',null);
-            var mediaNPS = (npsData||[]).length>0 ? ((npsData.reduce(function(a,v){return a+v.nps_score;},0))/npsData.length).toFixed(1) : 0;
-            document.getElementById('kpiNPS').textContent = mediaNPS;
+            // Ranking
+            var { data: clientesRank } = await s.from('clients').select('name, total_purchases, total_spent').eq('company_id', COMPANY_ID).order('total_spent', { ascending: false }).limit(10);
+            document.querySelector('#tabelaRanking tbody').innerHTML = (clientesRank||[]).map(c => `<tr><td>${c.name}</td><td>${c.total_purchases}</td><td>R$${(c.total_spent||0).toFixed(2)}</td></tr>`).join('');
 
-            // Ranking de clientes
-            var { data: clientes } = await s.from('clients').select('id,name,total_purchases,total_spent').eq('company_id',COMPANY_ID).order('total_spent',{ascending:false}).limit(10);
-            var tbodyRanking = document.querySelector('#tabelaRanking tbody');
-            if(clientes && clientes.length>0){
-                tbodyRanking.innerHTML = clientes.map(function(c){ return '<tr><td>'+c.name+'</td><td>'+c.total_purchases+'</td><td>R$'+(c.total_spent||0).toFixed(2)+'</td><td>'+ (0) +'</td></tr>'; }).join('');
-            }
-
-            // Relatório preditivo
-            await carregarPreditivo();
+            // Preditivo
+            var respConsumo = await s.from('consumption_history').select('*, clients!inner(name)').eq('company_id', COMPANY_ID).neq('duration', null);
+            var preditivos = (respConsumo.data||[]).map(h => {
+                var dias = parseInt(h.duration)||0, dataPrev = new Date(h.consumed_at); dataPrev.setDate(dataPrev.getDate() + dias);
+                return { cliente: h.clients?.name, produto: h.product_name, dias: Math.ceil((dataPrev - new Date()) / 86400000) };
+            }).filter(p => p.dias <= 14).sort((a,b) => a.dias - b.dias);
+            document.querySelector('#tabelaPreditiva tbody').innerHTML = preditivos.slice(0,10).map(p => `<tr><td>${p.cliente}</td><td>${p.produto}</td><td>${p.dias < 0 ? 'Atrasado' : p.dias <= 3 ? 'Urgente' : 'Próximo'}</td></tr>`).join('') || '<tr><td colspan="3">Nenhuma previsão</td></tr>';
 
             // Alerta diário
-            await carregarAlertaDiario();
-
-            // NPS mensal
-            await carregarNPSMensal();
-        }
-
-        async function carregarPreditivo() {
-            var resp = await s.from('consumption_history').select('*, clients!inner(name,phone)').eq('company_id',COMPANY_ID).neq('duration',null).order('consumed_at',{ascending:true});
-            var dados = resp.data||[];
-            var previsoes = dados.map(function(h){
-                var dias = parseInt(h.duration)||0;
-                var dataPrevista = new Date(h.consumed_at);
-                dataPrevista.setDate(dataPrevista.getDate()+dias);
-                return {cliente:h.clients?.name||'-', telefone:h.clients?.phone||'-', produto:h.product_name, previsao:dataPrevista.toISOString().split('T')[0], diasRestantes:Math.ceil((dataPrevista-new Date())/(1000*60*60*24))};
-            }).filter(function(p){ return p.diasRestantes<=14; }).sort(function(a,b){ return a.diasRestantes-b.diasRestantes; });
-            var tbody = document.querySelector('#tabelaPreditiva tbody');
-            if(previsoes.length===0){ tbody.innerHTML='<tr><td colspan="5">Nenhuma previsão próxima.</td></tr>'; return; }
-            tbody.innerHTML = previsoes.slice(0,10).map(function(p){
-                var badge = p.diasRestantes<0?'badge-preto':p.diasRestantes<=3?'badge-vermelho':p.diasRestantes<=7?'badge-amarelo':'badge-verde';
-                var status = p.diasRestantes<0?'Atrasado':p.diasRestantes<=3?'Urgente':'Próximo';
-                return '<tr><td>'+p.cliente+'</td><td>'+p.telefone+'</td><td>'+p.produto+'</td><td>'+new Date(p.previsao+'T00:00:00').toLocaleDateString('pt-BR')+'</td><td><span class="badge '+badge+'">'+status+'</span></td></tr>';
-            }).join('');
-        }
-
-        async function carregarAlertaDiario() {
             var hojeStr = new Date().toISOString().split('T')[0];
-            var respCash = await s.from('clients').select('name,phone,cashback_balance').eq('company_id',COMPANY_ID).eq('cashback_expires_at',hojeStr);
-            var respConsumo = await s.from('consumption_history').select('*, clients!inner(name,phone)').eq('company_id',COMPANY_ID).neq('duration',null);
-            var agora = new Date();
-            var recompraHoje = (respConsumo.data||[]).filter(function(h){
-                var dias = parseInt(h.duration)||0;
-                var previsao = new Date(h.consumed_at);
-                previsao.setDate(previsao.getDate()+dias);
-                return previsao.toISOString().split('T')[0] === hojeStr;
-            });
-            var cashbacks = respCash.data||[];
-            var nCash = cashbacks.length, nRec = recompraHoje.length;
-            var texto = '';
-            if(nCash>0) texto += '💰 '+nCash+' cliente(s) com cashback expirando hoje (R$'+cashbacks.reduce(function(a,c){return a+(c.cashback_balance||0);},0).toFixed(2)+'). ';
-            if(nRec>0) texto += '🛒 '+nRec+' cliente(s) na janela de recompra.';
-            if(texto==='') texto = '✅ Nenhum alerta urgente hoje.';
-            document.getElementById('textoAlerta').textContent = texto;
-
-            var tbodyCash = document.querySelector('#tabelaAlertasCashback tbody');
-            tbodyCash.innerHTML = cashbacks.length>0 ? cashbacks.map(function(c){ return '<tr><td>'+c.name+'</td><td>'+c.phone+'</td><td>R$'+(c.cashback_balance||0).toFixed(2)+'</td></tr>'; }).join('') : '<tr><td>Nenhum cashback expirando hoje.</td></tr>';
-            var tbodyRec = document.querySelector('#tabelaAlertasRecompra tbody');
-            tbodyRec.innerHTML = recompraHoje.length>0 ? recompraHoje.map(function(h){ return '<tr><td>'+(h.clients?.name||'-')+'</td><td>'+(h.clients?.phone||'-')+'</td><td>'+h.product_name+'</td></tr>'; }).join('') : '<tr><td>Nenhuma recompra prevista para hoje.</td></tr>';
+            var respExpirando = await s.from('clients').select('cashback_balance').eq('company_id', COMPANY_ID).eq('cashback_expires_at', hojeStr).gt('cashback_balance', 0);
+            var qtdExpirando = (respExpirando.data||[]).length;
+            var recompraHoje = preditivos.filter(p => p.dias === 0).length;
+            document.getElementById('textoAlerta').textContent = qtdExpirando > 0 || recompraHoje > 0 ? `⚠️ ${qtdExpirando} cashbacks expirando hoje. ${recompraHoje} recompra(s) prevista(s).` : '✅ Nenhum alerta urgente hoje.';
         }
-
-        async function carregarNPSMensal() {
-            var resp = await s.from('sales').select('nps_score,sale_date').eq('company_id',COMPANY_ID).not('nps_score','is',null);
-            var dados = resp.data||[];
-            var promotores = dados.filter(function(v){ return v.nps_score>=9; }).length;
-            var neutros = dados.filter(function(v){ return v.nps_score>=7&&v.nps_score<=8; }).length;
-            var detratores = dados.filter(function(v){ return v.nps_score<=6; }).length;
-            document.getElementById('npsPromotores').textContent = promotores;
-            document.getElementById('npsNeutros').textContent = neutros;
-            document.getElementById('npsDetratores').textContent = detratores;
-
-            if(graficoNPS) graficoNPS.destroy();
-            graficoNPS = new Chart(document.getElementById('graficoNPS'),{
-                type:'bar',data:{labels:['Promotores','Neutros','Detratores'],datasets:[{data:[promotores,neutros,detratores],backgroundColor:['#10b981','#f59e0b','#ef4444']}]},
-                options:{plugins:{legend:{display:false}}}
-            });
-        }
-
-        function abrirModalAlertas() { document.getElementById('modalAlertas').style.display = 'flex'; }
-        function fecharModalAlertas() { document.getElementById('modalAlertas').style.display = 'none'; }
 
         function toggleSAC() { document.getElementById('sacPopup').classList.toggle('active'); }
         function enviarSAC() {
-            var input = document.getElementById('sacInput');
-            var msg = input.value.trim();
+            var input = document.getElementById('sacInput'), msg = input.value.trim();
             if (!msg) return;
             var msgs = document.getElementById('sacMsgs');
             msgs.innerHTML += '<div class="msg-line user" style="text-align:right;color:#0055FF;margin-bottom:8px;">' + msg + '</div>';
             input.value = '';
-            setTimeout(function() {
-                var resp = 'No momento, nosso suporte está em horário comercial. Deixe sua mensagem!';
-                if (msg.toLowerCase().includes('cashback')) resp = '💰 Cashback: 14% sobre o valor pago, teto de R$150, válido por 45 dias.';
-                else if (msg.toLowerCase().includes('indicação')) resp = '🎫 Cada código de indicação dá 3% de cashback para você e seu amigo!';
-                msgs.innerHTML += '<div class="msg-line bot" style="text-align:left;color:#333;margin-bottom:8px;">' + resp + '</div>';
+            setTimeout(() => {
+                var resp = msg.toLowerCase().includes('cashback') ? '💰 Cashback: 14% sobre o valor pago, teto de R$150, válido por 45 dias.' : 'No momento, nosso suporte está em horário comercial.';
+                msgs.innerHTML += '<div class="msg-line bot" style="text-align:left;color:#333;">' + resp + '</div>';
                 msgs.scrollTop = msgs.scrollHeight;
             }, 600);
             msgs.scrollTop = msgs.scrollHeight;
         }
+        function toggleBday() { var p = document.getElementById('bdayPopup'); if (!p.classList.contains('active')) carregarAniversariantes(); p.classList.toggle('active'); }
+        async function carregarAniversariantes() {
+            var hoje = new Date(), dia = hoje.getDate(), mes = hoje.getMonth() + 1;
+            var respCli = await s.from('clients').select('name').eq('company_id', COMPANY_ID).eq('birthday_day', dia).eq('birthday_month', mes);
+            var respPar = await s.from('partners').select('name').eq('company_id', COMPANY_ID).eq('birthday_day', dia).eq('birthday_month', mes);
+            var respVend = await s.from('users').select('name').eq('company_id', COMPANY_ID).eq('birthday_day', dia).eq('birthday_month', mes);
+            var html = '';
+            if (respCli.data?.length) { html += '<strong>Clientes</strong><br>'; respCli.data.forEach(c => html += '• ' + c.name + '<br>'); }
+            if (respPar.data?.length) { html += '<strong>Parceiros</strong><br>'; respPar.data.forEach(p => html += '• ' + p.name + '<br>'); }
+            if (respVend.data?.length) { html += '<strong>Vendedores</strong><br>'; respVend.data.forEach(v => html += '• ' + v.name + '<br>'); }
+            document.getElementById('bdayMsgs').innerHTML = html || 'Nenhum aniversariante hoje.';
+        }
 
+        aplicarTema();
         atualizarDashboard();
     </script>
 </body>
