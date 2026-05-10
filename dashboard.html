@@ -124,6 +124,10 @@
         var COMPANY_ID = localStorage.getItem('lidel_company_id') || '428b07fc-0b10-481d-b32f-3d97c9d80ecd'
         var SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co'
         var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc'
+        // Verificar se o usuário está logado
+if (!localStorage.getItem('lidel_token')) {
+    window.location.href = 'index.html';
+}
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
         var graficoVendas, graficoCashback
         var hoje = new Date()
