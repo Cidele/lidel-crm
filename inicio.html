@@ -65,6 +65,7 @@
     <div class="container">
         <div class="alerta-diario" id="alertaDiario">
             <span id="textoAlerta">🔔 Carregando alertas...</span>
+            <button class="btn" onclick="document.getElementById('modalAlertas').style.display='flex'">Ver detalhes</button>
         </div>
         <div class="cards">
             <div class="card"><div class="value" id="totalClientes">0</div><div class="label">Clientes</div></div>
@@ -92,7 +93,29 @@
         </div>
         <div class="section"><h2>🔮 Previsão de Recompra</h2><table id="tabelaPreditiva"><thead><tr><th>Cliente</th><th>Produto</th><th>Status</th></tr></thead><tbody></tbody></table></div>
         <div class="section"><h2>🏆 Ranking de Clientes</h2><table id="tabelaRanking"><thead><tr><th>Cliente</th><th>Compras</th><th>Valor</th></tr></thead><tbody></tbody></table></div>
-        <div class="section"><h2>⭐ NPS Mensal</h2><canvas id="graficoNPS" height="80"></canvas></div>
+        <div class="section"><h2>⭐ NPS</h2>
+            <div style="display:flex;gap:10px;margin-bottom:10px;"><input type="date" id="npsInicio" style="flex:1;"><input type="date" id="npsFim" style="flex:1;"><button class="btn" onclick="carregarNPSMensal()">Filtrar</button></div>
+            <canvas id="graficoNPS" height="80"></canvas>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">
+                <div style="text-align:center;color:#10b981;"><strong id="npsPromotores">0</strong><br>Promotores (9-10)</div>
+                <div style="text-align:center;color:#f59e0b;"><strong id="npsNeutros">0</strong><br>Neutros (7-8)</div>
+                <div style="text-align:center;color:#ef4444;"><strong id="npsDetratores">0</strong><br>Detratores (0-6)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Alertas -->
+    <div id="modalAlertas" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+        <div style="background:white;padding:30px;border-radius:20px;width:90%;max-width:700px;max-height:80vh;overflow-y:auto;">
+            <button onclick="document.getElementById('modalAlertas').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;float:right;">✕</button>
+            <h2>🔔 Alertas do Dia</h2>
+            <h3>💰 Cashbacks Expirando Hoje</h3>
+            <table id="tabelaAlertasCashback"><tbody><tr><td>Nenhum cashback expirando hoje.</td></tr></tbody></table>
+            <h3>🛒 Recompra Prevista Hoje</h3>
+            <table id="tabelaAlertasRecompra"><tbody><tr><td>Nenhuma recompra prevista para hoje.</td></tr></tbody></table>
+            <h3>🎂 Aniversariantes Hoje</h3>
+            <table id="tabelaAlertasAniversario"><tbody><tr><td>Nenhum aniversariante hoje.</td></tr></tbody></table>
+        </div>
     </div>
 
     <!-- MINI SAC -->
@@ -116,7 +139,7 @@
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         var graficoVendas, graficoCashback, graficoNPS;
 
-        // Tema da empresa
+        // Aplicar tema da empresa
         async function aplicarTema() {
             const companyId = localStorage.getItem('lidel_company_id');
             if (!companyId) return;
@@ -176,6 +199,8 @@
             document.getElementById('kpiResgatado').textContent = 'R$' + cashbackResgatado.toFixed(0);
             document.getElementById('kpiExpirado').textContent = 'R$' + cashbackExpirado.toFixed(0);
             document.getElementById('kpiTaxa').textContent = (cashbackGerado ? (cashbackResgatado/cashbackGerado*100).toFixed(1) : 0) + '%';
+
+            // NPS médio
             var { data: npsData } = await s.from('sales').select('nps_score').eq('company_id', COMPANY_ID).not('nps_score','is',null);
             document.getElementById('kpiNPS').textContent = ((npsData||[]).reduce((a,v) => a + v.nps_score, 0) / (npsData||[]).length || 0).toFixed(1);
 
@@ -192,11 +217,63 @@
             document.querySelector('#tabelaPreditiva tbody').innerHTML = preditivos.slice(0,10).map(p => `<tr><td>${p.cliente}</td><td>${p.produto}</td><td>${p.dias < 0 ? 'Atrasado' : p.dias <= 3 ? 'Urgente' : 'Próximo'}</td></tr>`).join('') || '<tr><td colspan="3">Nenhuma previsão</td></tr>';
 
             // Alerta diário
+            await carregarAlertaDiario();
+            // NPS com filtro
+            await carregarNPSMensal();
+        }
+
+        async function carregarAlertaDiario() {
             var hojeStr = new Date().toISOString().split('T')[0];
-            var respExpirando = await s.from('clients').select('cashback_balance').eq('company_id', COMPANY_ID).eq('cashback_expires_at', hojeStr).gt('cashback_balance', 0);
-            var qtdExpirando = (respExpirando.data||[]).length;
-            var recompraHoje = preditivos.filter(p => p.dias === 0).length;
-            document.getElementById('textoAlerta').textContent = qtdExpirando > 0 || recompraHoje > 0 ? `⚠️ ${qtdExpirando} cashbacks expirando hoje. ${recompraHoje} recompra(s) prevista(s).` : '✅ Nenhum alerta urgente hoje.';
+            var hoje = new Date(), dia = hoje.getDate(), mes = hoje.getMonth() + 1;
+            
+            var respCash = await s.from('clients').select('name,cashback_balance').eq('company_id',COMPANY_ID).eq('cashback_expires_at',hojeStr).gt('cashback_balance',0);
+            var qtdCash = (respCash.data||[]).length;
+            
+            var respConsumo = await s.from('consumption_history').select('product_name, clients!inner(name)').eq('company_id',COMPANY_ID).neq('duration',null);
+            var recompraHoje = (respConsumo.data||[]).filter(h => {
+                var dias = parseInt(h.duration)||0;
+                var prev = new Date(h.consumed_at); prev.setDate(prev.getDate()+dias);
+                return prev.toISOString().split('T')[0] === hojeStr;
+            }).length;
+            
+            var respAniv = await s.from('clients').select('name').eq('company_id',COMPANY_ID).eq('birthday_day',dia).eq('birthday_month',mes);
+            var qtdAniv = (respAniv.data||[]).length;
+            
+            var texto = '';
+            if (qtdCash > 0) texto += '💰 ' + qtdCash + ' cashback(s) expirando. ';
+            if (recompraHoje > 0) texto += '🛒 ' + recompraHoje + ' recompra(s) prevista(s). ';
+            if (qtdAniv > 0) texto += '🎂 ' + qtdAniv + ' aniversariante(s) hoje! ';
+            document.getElementById('textoAlerta').textContent = texto || '✅ Nenhum alerta urgente hoje.';
+
+            document.querySelector('#tabelaAlertasCashback tbody').innerHTML = (respCash.data||[]).map(c => `<tr><td>${c.name}</td><td>R$${(c.cashback_balance||0).toFixed(2)}</td></tr>`).join('') || '<tr><td>Nenhum</td></tr>';
+            document.querySelector('#tabelaAlertasRecompra tbody').innerHTML = (respConsumo.data||[]).filter(h => {
+                var dias = parseInt(h.duration)||0;
+                var prev = new Date(h.consumed_at); prev.setDate(prev.getDate()+dias);
+                return prev.toISOString().split('T')[0] === hojeStr;
+            }).map(h => `<tr><td>${h.clients?.name}</td><td>${h.product_name}</td></tr>`).join('') || '<tr><td>Nenhuma</td></tr>';
+            document.querySelector('#tabelaAlertasAniversario tbody').innerHTML = (respAniv.data||[]).map(c => `<tr><td>${c.name}</td></tr>`).join('') || '<tr><td>Nenhum</td></tr>';
+        }
+
+        async function carregarNPSMensal() {
+            var inicio = document.getElementById('npsInicio').value;
+            var fim = document.getElementById('npsFim').value;
+            var query = s.from('sales').select('nps_score,sale_date').eq('company_id', COMPANY_ID).not('nps_score','is',null);
+            if (inicio) query = query.gte('sale_date', inicio);
+            if (fim) query = query.lte('sale_date', fim + 'T23:59:59');
+            var resp = await query;
+            var dados = resp.data || [];
+            var promotores = dados.filter(v => v.nps_score >= 9).length;
+            var neutros = dados.filter(v => v.nps_score >= 7 && v.nps_score <= 8).length;
+            var detratores = dados.filter(v => v.nps_score <= 6).length;
+            document.getElementById('npsPromotores').textContent = promotores;
+            document.getElementById('npsNeutros').textContent = neutros;
+            document.getElementById('npsDetratores').textContent = detratores;
+            if (graficoNPS) graficoNPS.destroy();
+            graficoNPS = new Chart(document.getElementById('graficoNPS'), {
+                type: 'bar',
+                data: { labels: ['Promotores','Neutros','Detratores'], datasets: [{ data: [promotores,neutros,detratores], backgroundColor: ['#10b981','#f59e0b','#ef4444'] }] },
+                options: { plugins: { legend: { display: false } } }
+            });
         }
 
         function toggleSAC() { document.getElementById('sacPopup').classList.toggle('active'); }

@@ -67,6 +67,7 @@
             <button class="tab" onclick="mudarAba('vendedores')">👤 Vendedores</button>
         </div>
 
+        <!-- ABA CLIENTES -->
         <div id="abaClientes">
             <h2>Cadastro de Cliente</h2>
             <input type="text" id="nomeCliente" placeholder="Nome *"><input type="tel" id="telefoneCliente" placeholder="Telefone *"><input type="email" id="emailCliente" placeholder="Email">
@@ -77,6 +78,7 @@
             <table><thead><tr><th>Nome</th><th>Telefone</th><th>Cashback</th><th>Ações</th></tr></thead><tbody id="listaClientes"></tbody></table>
         </div>
 
+        <!-- ABA PARCEIROS -->
         <div id="abaParceiros" style="display:none;">
             <h2>Cadastro de Parceiro</h2>
             <input type="text" id="nomeParceiro" placeholder="Nome *"><input type="text" id="idprofParceiro" placeholder="Identificação Profissional"><input type="tel" id="telefoneParceiro" placeholder="Telefone *"><input type="email" id="emailParceiro" placeholder="Email">
@@ -86,6 +88,7 @@
             <table><thead><tr><th>Nome</th><th>Identificação</th><th>Comissão</th><th>Ações</th></tr></thead><tbody id="listaParceiros"></tbody></table>
         </div>
 
+        <!-- ABA VENDEDORES -->
         <div id="abaVendedores" style="display:none;">
             <h2>Cadastro de Vendedor</h2>
             <input type="text" id="nomeVendedor" placeholder="Nome *"><input type="email" id="emailVendedor" placeholder="Email *"><input type="tel" id="telefoneVendedor" placeholder="Telefone">
@@ -97,8 +100,23 @@
         </div>
     </div>
 
+    <!-- Modal de Histórico -->
     <div class="modal" id="modalHistorico"><div class="modal-content"><h2 id="tituloHistorico"></h2><div id="conteudoHistorico"></div><button onclick="fecharModalHistorico()" style="background:#ccc;margin-top:15px;">Fechar</button></div></div>
 
+    <!-- Modal de Edição Inline (substitui prompt) -->
+    <div class="modal" id="modalEdicao">
+        <div class="modal-content">
+            <h3>Editar</h3>
+            <input type="text" id="editCampo1" placeholder="Nome">
+            <input type="text" id="editCampo2" placeholder="Telefone / Email / Identificação">
+            <input type="hidden" id="editId">
+            <input type="hidden" id="editTipo">
+            <button onclick="salvarEdicaoModal()">💾 Salvar</button>
+            <button onclick="fecharModalEdicao()" style="background:#ccc;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Mini SAC e 🎂 -->
     <div class="sac-float"><button onclick="toggleSAC()">💬</button></div>
     <div class="sac-popup" id="sacPopup"><div class="sac-popup-header">💬 Suporte <span onclick="toggleSAC()" style="cursor:pointer;">✕</span></div><div class="popup-body" id="sacMsgs"><div class="msg-line bot">👋 Pergunte sobre cashback, indicações ou suporte.</div></div><div class="sac-popup-input"><input type="text" id="sacInput" placeholder="Digite..." onkeypress="if(event.key==='Enter') enviarSAC()"><button onclick="enviarSAC()">➤</button></div></div>
     <div class="bday-float"><button onclick="toggleBday()">🎂</button></div>
@@ -111,6 +129,7 @@
         var s = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         var clientes=[], parceiros=[], vendedores=[];
 
+        // Tema da empresa
         async function aplicarTema() {
             const cid = localStorage.getItem('lidel_company_id'); if (!cid) return;
             const { data } = await s.from('companies').select('theme_config, name').eq('id', cid).single(); if (!data) return;
@@ -119,58 +138,209 @@
             if (data.name) document.getElementById('companyTitle').textContent = data.name;
         }
 
-        function mudarAba(aba) { document.querySelectorAll('#abaClientes,#abaParceiros,#abaVendedores').forEach(e=>e.style.display='none'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.getElementById('aba'+aba.charAt(0).toUpperCase()+aba.slice(1)).style.display='block'; event.target.classList.add('active'); }
+        function mudarAba(aba) {
+            document.querySelectorAll('#abaClientes,#abaParceiros,#abaVendedores').forEach(e=>e.style.display='none');
+            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            document.getElementById('aba'+aba.charAt(0).toUpperCase()+aba.slice(1)).style.display='block';
+            event.target.classList.add('active');
+        }
 
-        async function carregarClientes() { var resp = await s.from('clients').select('*').eq('company_id',COMPANY_ID).order('name'); clientes=resp.data||[]; document.getElementById('listaClientes').innerHTML = clientes.map(c=>`<tr><td class="clickable" onclick="verHistoricoCliente('${c.id}')">${c.name}</td><td>${c.phone}</td><td>R$${(c.cashback_balance||0).toFixed(2)}</td><td><button class="btn-editar" onclick="editarCliente('${c.id}')">✏️</button><button class="btn-excluir" onclick="excluirCliente('${c.id}')">🗑️</button></td></tr>`).join(''); }
-        function filtrarClientes() { var t = document.getElementById('buscaCliente').value.toLowerCase(); document.getElementById('listaClientes').innerHTML = clientes.filter(c=>c.name.toLowerCase().includes(t)||c.phone.includes(t)).map(c=>`<tr><td class="clickable" onclick="verHistoricoCliente('${c.id}')">${c.name}</td><td>${c.phone}</td><td>R$${(c.cashback_balance||0).toFixed(2)}</td><td><button class="btn-editar" onclick="editarCliente('${c.id}')">✏️</button><button class="btn-excluir" onclick="excluirCliente('${c.id}')">🗑️</button></td></tr>`).join(''); }
-
+        // ===== CLIENTES =====
+        async function carregarClientes() {
+            var resp = await s.from('clients').select('*').eq('company_id',COMPANY_ID).order('name');
+            clientes=resp.data||[];
+            document.getElementById('listaClientes').innerHTML = clientes.map(c=>`<tr><td class="clickable" onclick="verHistoricoCliente('${c.id}')">${c.name}</td><td>${c.phone}</td><td>R$${(c.cashback_balance||0).toFixed(2)}</td><td><button class="btn-editar" onclick="abrirModalEdicao('${c.id}','cliente','${c.name}','${c.phone}')">✏️</button><button class="btn-excluir" onclick="excluirCliente('${c.id}')">🗑️</button></td></tr>`).join('');
+        }
+        function filtrarClientes() {
+            var t = document.getElementById('buscaCliente').value.toLowerCase();
+            document.getElementById('listaClientes').innerHTML = clientes.filter(c=>c.name.toLowerCase().includes(t)||c.phone.includes(t)).map(c=>`<tr><td class="clickable" onclick="verHistoricoCliente('${c.id}')">${c.name}</td><td>${c.phone}</td><td>R$${(c.cashback_balance||0).toFixed(2)}</td><td><button class="btn-editar" onclick="abrirModalEdicao('${c.id}','cliente','${c.name}','${c.phone}')">✏️</button><button class="btn-excluir" onclick="excluirCliente('${c.id}')">🗑️</button></td></tr>`).join('');
+        }
         async function cadastrarCliente() {
             var nome = document.getElementById('nomeCliente').value.trim(), fone = document.getElementById('telefoneCliente').value.trim();
-            if (!nome||!fone) return;
-            await s.from('clients').insert([{ company_id:COMPANY_ID, name:nome, phone:fone, email:document.getElementById('emailCliente').value.trim()||null, birthday_day:parseInt(document.getElementById('diaCliente').value)||null, birthday_month:parseInt(document.getElementById('mesCliente').value)||null, life_moment:document.getElementById('lifeMomentCliente').value.trim()||null }]);
+            if (!nome||!fone) { mostrarMsg('msgCliente','Nome e telefone obrigatórios.','erro'); return; }
+            var existente = clientes.find(c=>c.phone===fone);
+            if (existente && !confirm('Já existe um cliente com este telefone ('+existente.name+'). Cadastrar mesmo assim?')) return;
+            var resp = await s.from('clients').insert([{ company_id:COMPANY_ID, name:nome, phone:fone, email:document.getElementById('emailCliente').value.trim()||null, birthday_day:parseInt(document.getElementById('diaCliente').value)||null, birthday_month:parseInt(document.getElementById('mesCliente').value)||null, life_moment:document.getElementById('lifeMomentCliente').value.trim()||null }]);
+            if (resp.error) { mostrarMsg('msgCliente',resp.error.message,'erro'); return; }
+            mostrarMsg('msgCliente','Cliente cadastrado!','sucesso');
+            ['nomeCliente','telefoneCliente','emailCliente','diaCliente','mesCliente','lifeMomentCliente'].forEach(id=>document.getElementById(id).value='');
             carregarClientes();
         }
-        async function editarCliente(id) { var c = clientes.find(x=>x.id===id); if (!c) return; var n = prompt('Nome:',c.name)||c.name; var f = prompt('Telefone:',c.phone)||c.phone; await s.from('clients').update({ name:n, phone:f }).eq('id',id); carregarClientes(); }
-        async function excluirCliente(id) { if (confirm('Excluir?')) { await s.from('clients').delete().eq('id',id); carregarClientes(); } }
-        async function verHistoricoCliente(id) { /* mantida */ }
+        async function excluirCliente(id) { if (confirm('Excluir este cliente?')) { await s.from('clients').delete().eq('id',id); carregarClientes(); } }
 
-        async function carregarParceiros() { var resp = await s.from('partners').select('*').eq('company_id',COMPANY_ID).order('name'); parceiros=resp.data||[]; document.getElementById('listaParceiros').innerHTML = parceiros.map(p=>`<tr><td class="clickable" onclick="verHistoricoParceiro('${p.id}')">${p.name}</td><td>${p.professional_identifier||'-'}</td><td>R$${(p.cashback_accumulated||0).toFixed(2)}</td><td><button class="btn-editar" onclick="editarParceiro('${p.id}')">✏️</button><button class="btn-excluir" onclick="excluirParceiro('${p.id}')">🗑️</button></td></tr>`).join(''); }
-        function filtrarParceiros() { var t = document.getElementById('buscaParceiro').value.toLowerCase(); document.getElementById('listaParceiros').innerHTML = parceiros.filter(p=>p.name.toLowerCase().includes(t)).map(p=>`<tr><td class="clickable" onclick="verHistoricoParceiro('${p.id}')">${p.name}</td><td>${p.professional_identifier||'-'}</td><td>R$${(p.cashback_accumulated||0).toFixed(2)}</td><td><button class="btn-editar" onclick="editarParceiro('${p.id}')">✏️</button><button class="btn-excluir" onclick="excluirParceiro('${p.id}')">🗑️</button></td></tr>`).join(''); }
+        // Histórico do cliente (com consumo, vendas, indicações e cashback)
+        async function verHistoricoCliente(id) {
+            var c = clientes.find(x=>x.id===id); if (!c) return;
+            var tresMeses = new Date(); tresMeses.setMonth(tresMeses.getMonth()-3);
+            var respConsumo = await s.from('consumption_history').select('*').eq('client_id',id).gte('consumed_at',tresMeses.toISOString().split('T')[0]).order('consumed_at',{ascending:false});
+            var respVendas = await s.from('sales').select('sale_date,total_amount,final_amount,cashback_generated').eq('client_id',id).gte('sale_date',tresMeses.toISOString().split('T')[0]).order('sale_date',{ascending:false});
+            var respIndicacoes = await s.from('referral_codes').select('code,is_used,created_at').eq('client_id',id).gte('created_at',tresMeses.toISOString().split('T')[0]).order('created_at',{ascending:false});
+            // Histórico de cashback (da nova tabela)
+            var respCashHist = await s.from('cashback_entries').select('amount,used,status,created_at,expires_at').eq('client_id',id).order('created_at',{ascending:false});
+
+            var html = `<h3>${c.name}</h3><p><strong>Cashback disponível:</strong> R$${(c.cashback_balance||0).toFixed(2)}</p>`;
+            // Consumo
+            html += '<h4>📋 Consumo (3 meses)</h4>';
+            if (respConsumo.data?.length) {
+                html += '<table><tr><th>Produto</th><th>Qtd</th><th>Data</th></tr>';
+                respConsumo.data.forEach(h=>html+=`<tr><td>${h.product_name}</td><td>${h.quantity||'-'}</td><td>${new Date(h.consumed_at).toLocaleDateString('pt-BR')}</td></tr>`);
+                html += '</table>';
+            } else html += '<p>Nenhum consumo recente.</p>';
+            // Vendas
+            html += '<h4>💰 Vendas (3 meses)</h4>';
+            if (respVendas.data?.length) {
+                html += '<table><tr><th>Data</th><th>Valor Total</th><th>Valor Pago</th><th>Cashback</th></tr>';
+                respVendas.data.forEach(v=>html+=`<tr><td>${new Date(v.sale_date).toLocaleDateString('pt-BR')}</td><td>R$${v.total_amount.toFixed(2)}</td><td>R$${v.final_amount.toFixed(2)}</td><td style="color:green">R$${(v.cashback_generated||0).toFixed(2)}</td></tr>`);
+                html += '</table>';
+            } else html += '<p>Nenhuma venda recente.</p>';
+            // Indicações
+            html += '<h4>🎫 Indicações (3 meses)</h4>';
+            if (respIndicacoes.data?.length) {
+                html += '<table><tr><th>Código</th><th>Usado?</th><th>Data</th></tr>';
+                respIndicacoes.data.forEach(i=>html+=`<tr><td>${i.code}</td><td>${i.is_used?'Sim':'Não'}</td><td>${new Date(i.created_at).toLocaleDateString('pt-BR')}</td></tr>`);
+                html += '</table>';
+            } else html += '<p>Nenhuma indicação.</p>';
+            // Cashback (histórico detalhado)
+            html += '<h4>💵 Histórico de Cashback</h4>';
+            if (respCashHist.data?.length) {
+                html += '<table><tr><th>Valor</th><th>Usado</th><th>Status</th><th>Criado em</th><th>Expira em</th></tr>';
+                respCashHist.data.forEach(cb=>html+=`<tr><td>R$${cb.amount.toFixed(2)}</td><td>R$${(cb.used||0).toFixed(2)}</td><td>${cb.status}</td><td>${new Date(cb.created_at).toLocaleDateString('pt-BR')}</td><td>${new Date(cb.expires_at).toLocaleDateString('pt-BR')}</td></tr>`);
+                html += '</table>';
+            } else html += '<p>Nenhum registro de cashback.</p>';
+
+            document.getElementById('tituloHistorico').textContent = 'Histórico do Cliente';
+            document.getElementById('conteudoHistorico').innerHTML = html;
+            document.getElementById('modalHistorico').classList.add('active');
+        }
+
+        // ===== PARCEIROS =====
+        async function carregarParceiros() {
+            var resp = await s.from('partners').select('*').eq('company_id',COMPANY_ID).order('name');
+            parceiros=resp.data||[];
+            document.getElementById('listaParceiros').innerHTML = parceiros.map(p=>`<tr><td class="clickable" onclick="verHistoricoParceiro('${p.id}')">${p.name}</td><td>${p.professional_identifier||'-'}</td><td>R$${(p.cashback_accumulated||0).toFixed(2)}</td><td><button class="btn-editar" onclick="abrirModalEdicao('${p.id}','parceiro','${p.name}','${p.phone}')">✏️</button><button class="btn-excluir" onclick="excluirParceiro('${p.id}')">🗑️</button></td></tr>`).join('');
+        }
+        function filtrarParceiros() {
+            var t = document.getElementById('buscaParceiro').value.toLowerCase();
+            document.getElementById('listaParceiros').innerHTML = parceiros.filter(p=>p.name.toLowerCase().includes(t)).map(p=>`<tr><td class="clickable" onclick="verHistoricoParceiro('${p.id}')">${p.name}</td><td>${p.professional_identifier||'-'}</td><td>R$${(p.cashback_accumulated||0).toFixed(2)}</td><td><button class="btn-editar" onclick="abrirModalEdicao('${p.id}','parceiro','${p.name}','${p.phone}')">✏️</button><button class="btn-excluir" onclick="excluirParceiro('${p.id}')">🗑️</button></td></tr>`).join('');
+        }
         async function cadastrarParceiro() {
             var nome = document.getElementById('nomeParceiro').value.trim(), fone = document.getElementById('telefoneParceiro').value.trim();
-            if (!nome||!fone) return;
-            await s.from('partners').insert([{ company_id:COMPANY_ID, name:nome, phone:fone, professional_identifier:document.getElementById('idprofParceiro').value.trim()||null, email:document.getElementById('emailParceiro').value.trim()||null, birthday_day:parseInt(document.getElementById('diaParceiro').value)||null, birthday_month:parseInt(document.getElementById('mesParceiro').value)||null }]);
+            if (!nome||!fone) { mostrarMsg('msgParceiro','Nome e telefone obrigatórios.','erro'); return; }
+            var resp = await s.from('partners').insert([{ company_id:COMPANY_ID, name:nome, phone:fone, professional_identifier:document.getElementById('idprofParceiro').value.trim()||null, email:document.getElementById('emailParceiro').value.trim()||null, birthday_day:parseInt(document.getElementById('diaParceiro').value)||null, birthday_month:parseInt(document.getElementById('mesParceiro').value)||null }]);
+            if (resp.error) { mostrarMsg('msgParceiro',resp.error.message,'erro'); return; }
+mostrarMsg('msgParceiro','Parceiro cadastrado!','sucesso');
+            ['nomeParceiro','idprofParceiro','telefoneParceiro','emailParceiro','diaParceiro','mesParceiro'].forEach(id=>document.getElementById(id).value='');
             carregarParceiros();
         }
-        async function editarParceiro(id) { var p = parceiros.find(x=>x.id===id); if (!p) return; var n = prompt('Nome:',p.name)||p.name; var f = prompt('Telefone:',p.phone)||p.phone; await s.from('partners').update({ name:n, phone:f }).eq('id',id); carregarParceiros(); }
-        async function excluirParceiro(id) { if (confirm('Excluir?')) { await s.from('partners').delete().eq('id',id); carregarParceiros(); } }
-        async function verHistoricoParceiro(id) { /* mantida */ }
+        async function excluirParceiro(id) { if (confirm('Excluir este parceiro?')) { await s.from('partners').delete().eq('id',id); carregarParceiros(); } }
+        async function verHistoricoParceiro(id) {
+            var p = parceiros.find(x=>x.id===id); if (!p) return;
+            var respVendas = await s.from('sales').select('sale_date,total_amount,clients:client_id(name)').eq('partner_id',id).order('sale_date',{ascending:false}).limit(20);
+            var html = `<h3>${p.name}</h3><p><strong>Comissão acumulada:</strong> R$${(p.cashback_accumulated||0).toFixed(2)}</p><h4>📋 Indicações</h4>`;
+            if (respVendas.data?.length) {
+                html += '<table><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Comissão (3%)</th></tr>';
+                respVendas.data.forEach(v=>html+=`<tr><td>${new Date(v.sale_date).toLocaleDateString('pt-BR')}</td><td>${v.clients?.name||'-'}</td><td>R$${v.total_amount.toFixed(2)}</td><td style="color:green">R$${(v.total_amount*0.03).toFixed(2)}</td></tr>`);
+                html += '</table>';
+            } else html += '<p>Nenhuma indicação.</p>';
+            document.getElementById('tituloHistorico').textContent = 'Histórico do Parceiro';
+            document.getElementById('conteudoHistorico').innerHTML = html;
+            document.getElementById('modalHistorico').classList.add('active');
+        }
 
-        async function carregarVendedores() { var resp = await s.from('users').select('*').eq('company_id',COMPANY_ID).order('name'); vendedores=resp.data||[]; document.getElementById('listaVendedores').innerHTML = vendedores.map(v=>`<tr><td class="clickable" onclick="verHistoricoVendedor('${v.id}')">${v.name}</td><td>${v.email}</td><td>${v.phone||'-'}</td><td>${v.role}</td><td><button class="btn-editar" onclick="editarVendedor('${v.id}')">✏️</button><button class="btn-excluir" onclick="excluirVendedor('${v.id}')">🗑️</button></td></tr>`).join(''); }
-        function filtrarVendedores() { var t = document.getElementById('buscaVendedor').value.toLowerCase(); document.getElementById('listaVendedores').innerHTML = vendedores.filter(v=>v.name.toLowerCase().includes(t)).map(v=>`<tr><td class="clickable" onclick="verHistoricoVendedor('${v.id}')">${v.name}</td><td>${v.email}</td><td>${v.phone||'-'}</td><td>${v.role}</td><td><button class="btn-editar" onclick="editarVendedor('${v.id}')">✏️</button><button class="btn-excluir" onclick="excluirVendedor('${v.id}')">🗑️</button></td></tr>`).join(''); }
+        // ===== VENDEDORES =====
+        async function carregarVendedores() {
+            var resp = await s.from('users').select('*').eq('company_id',COMPANY_ID).order('name');
+            vendedores=resp.data||[];
+            document.getElementById('listaVendedores').innerHTML = vendedores.map(v=>`<tr><td class="clickable" onclick="verHistoricoVendedor('${v.id}')">${v.name}</td><td>${v.email}</td><td>${v.phone||'-'}</td><td>${v.role}</td><td><button class="btn-editar" onclick="abrirModalEdicao('${v.id}','vendedor','${v.name}','${v.email}')">✏️</button><button class="btn-excluir" onclick="excluirVendedor('${v.id}')">🗑️</button></td></tr>`).join('');
+        }
+        function filtrarVendedores() {
+            var t = document.getElementById('buscaVendedor').value.toLowerCase();
+            document.getElementById('listaVendedores').innerHTML = vendedores.filter(v=>v.name.toLowerCase().includes(t)).map(v=>`<tr><td class="clickable" onclick="verHistoricoVendedor('${v.id}')">${v.name}</td><td>${v.email}</td><td>${v.phone||'-'}</td><td>${v.role}</td><td><button class="btn-editar" onclick="abrirModalEdicao('${v.id}','vendedor','${v.name}','${v.email}')">✏️</button><button class="btn-excluir" onclick="excluirVendedor('${v.id}')">🗑️</button></td></tr>`).join('');
+        }
         async function cadastrarVendedor() {
             var nome = document.getElementById('nomeVendedor').value.trim(), email = document.getElementById('emailVendedor').value.trim();
-            if (!nome||!email) return;
-            await s.from('users').insert([{ company_id:COMPANY_ID, name:nome, email:email, phone:document.getElementById('telefoneVendedor').value.trim()||null, role:document.getElementById('roleVendedor').value, birthday_day:parseInt(document.getElementById('diaVendedor').value)||null, birthday_month:parseInt(document.getElementById('mesVendedor').value)||null }]);
+            if (!nome||!email) { mostrarMsg('msgVendedor','Nome e email obrigatórios.','erro'); return; }
+            var resp = await s.from('users').insert([{ company_id:COMPANY_ID, name:nome, email:email, phone:document.getElementById('telefoneVendedor').value.trim()||null, role:document.getElementById('roleVendedor').value, birthday_day:parseInt(document.getElementById('diaVendedor').value)||null, birthday_month:parseInt(document.getElementById('mesVendedor').value)||null }]);
+            if (resp.error) { mostrarMsg('msgVendedor',resp.error.message,'erro'); return; }
+            mostrarMsg('msgVendedor','Vendedor cadastrado!','sucesso');
+            ['nomeVendedor','emailVendedor','telefoneVendedor','diaVendedor','mesVendedor'].forEach(id=>document.getElementById(id).value='');
             carregarVendedores();
         }
-        async function editarVendedor(id) { var v = vendedores.find(x=>x.id===id); if (!v) return; var n = prompt('Nome:',v.name)||v.name; var e = prompt('Email:',v.email)||v.email; await s.from('users').update({ name:n, email:e }).eq('id',id); carregarVendedores(); }
-        async function excluirVendedor(id) { if (confirm('Excluir?')) { await s.from('users').delete().eq('id',id); carregarVendedores(); } }
-        async function verHistoricoVendedor(id) { /* mantida */ }
+        async function excluirVendedor(id) { if (confirm('Excluir este vendedor?')) { await s.from('users').delete().eq('id',id); carregarVendedores(); } }
+        async function verHistoricoVendedor(id) {
+            var v = vendedores.find(x=>x.id===id); if (!v) return;
+            var respVendas = await s.from('sales').select('sale_date,total_amount,cashback_generated,clients:client_id(name)').eq('seller_id',id).order('sale_date',{ascending:false}).limit(20);
+            var html = `<h3>${v.name}</h3><h4>💰 Vendas</h4>`;
+            if (respVendas.data?.length) {
+                html += '<table><tr><th>Data</th><th>Cliente</th><th>Valor</th><th>Cashback</th></tr>';
+                respVendas.data.forEach(s=>html+=`<tr><td>${new Date(s.sale_date).toLocaleDateString('pt-BR')}</td><td>${s.clients?.name||'-'}</td><td>R$${s.total_amount.toFixed(2)}</td><td style="color:green">R$${(s.cashback_generated||0).toFixed(2)}</td></tr>`);
+                html += '</table>';
+            } else html += '<p>Nenhuma venda.</p>';
+            document.getElementById('tituloHistorico').textContent = 'Histórico do Vendedor';
+            document.getElementById('conteudoHistorico').innerHTML = html;
+            document.getElementById('modalHistorico').classList.add('active');
+        }
 
+        // ===== MODAL DE EDIÇÃO INLINE =====
+        function abrirModalEdicao(id, tipo, campo1, campo2) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editTipo').value = tipo;
+            document.getElementById('editCampo1').value = campo1;
+            document.getElementById('editCampo2').value = campo2 || '';
+            document.getElementById('modalEdicao').classList.add('active');
+        }
+        function fecharModalEdicao() { document.getElementById('modalEdicao').classList.remove('active'); }
+        async function salvarEdicaoModal() {
+            var id = document.getElementById('editId').value;
+            var tipo = document.getElementById('editTipo').value;
+            var val1 = document.getElementById('editCampo1').value.trim();
+            var val2 = document.getElementById('editCampo2').value.trim();
+            if (!val1) return;
+            if (tipo === 'cliente') {
+                await s.from('clients').update({ name: val1, phone: val2 }).eq('id', id);
+                carregarClientes();
+            } else if (tipo === 'parceiro') {
+                await s.from('partners').update({ name: val1, phone: val2 }).eq('id', id);
+                carregarParceiros();
+            } else if (tipo === 'vendedor') {
+                await s.from('users').update({ name: val1, email: val2 }).eq('id', id);
+                carregarVendedores();
+            }
+            fecharModalEdicao();
+        }
+
+        // ===== UTILITÁRIOS =====
+        function mostrarMsg(id, texto, tipo) { var m = document.getElementById(id); m.className = 'msg ' + tipo; m.textContent = texto; }
+        function fecharModalHistorico() { document.getElementById('modalHistorico').classList.remove('active'); }
         function toggleSAC() { document.getElementById('sacPopup').classList.toggle('active'); }
-        function enviarSAC() { var input = document.getElementById('sacInput'), msg = input.value.trim(); if (!msg) return; var msgs = document.getElementById('sacMsgs'); msgs.innerHTML += '<div class="msg-line user" style="text-align:right;color:#0055FF;margin-bottom:8px;">'+msg+'</div>'; input.value=''; setTimeout(()=>{ msgs.innerHTML += '<div class="msg-line bot" style="text-align:left;color:#333;">'+(msg.includes('cashback')?'💰 Cashback: 14% sobre o valor pago, teto R$150, 45 dias.':'Estamos em horário comercial.')+'</div>'; msgs.scrollTop=msgs.scrollHeight; },600); msgs.scrollTop=msgs.scrollHeight; }
+        function enviarSAC() {
+            var input = document.getElementById('sacInput'), msg = input.value.trim();
+            if (!msg) return;
+            var msgs = document.getElementById('sacMsgs');
+            msgs.innerHTML += '<div class="msg-line user" style="text-align:right;color:#0055FF;margin-bottom:8px;">'+msg+'</div>';
+            input.value='';
+            setTimeout(()=>{
+                var resp = msg.includes('cashback') ? '💰 Cashback: 14% sobre o valor pago, teto R$150, 45 dias.' : 'Estamos em horário comercial.';
+                msgs.innerHTML += '<div class="msg-line bot" style="text-align:left;color:#333;">'+resp+'</div>';
+                msgs.scrollTop=msgs.scrollHeight;
+            },600);
+            msgs.scrollTop=msgs.scrollHeight;
+        }
         function toggleBday() { var p=document.getElementById('bdayPopup'); if (!p.classList.contains('active')) carregarAniversariantes(); p.classList.toggle('active'); }
         async function carregarAniversariantes() {
             var hoje=new Date(), dia=hoje.getDate(), mes=hoje.getMonth()+1;
             var respCli=await s.from('clients').select('name').eq('company_id',COMPANY_ID).eq('birthday_day',dia).eq('birthday_month',mes);
             var respPar=await s.from('partners').select('name').eq('company_id',COMPANY_ID).eq('birthday_day',dia).eq('birthday_month',mes);
             var respVend=await s.from('users').select('name').eq('company_id',COMPANY_ID).eq('birthday_day',dia).eq('birthday_month',mes);
-            var html=''; if (respCli.data?.length) { html+='<strong>Clientes</strong><br>'; respCli.data.forEach(c=>html+='• '+c.name+'<br>'); } if (respPar.data?.length) { html+='<strong>Parceiros</strong><br>'; respPar.data.forEach(p=>html+='• '+p.name+'<br>'); } if (respVend.data?.length) { html+='<strong>Vendedores</strong><br>'; respVend.data.forEach(v=>html+='• '+v.name+'<br>'); }
+            var html='';
+            if (respCli.data?.length) { html+='<strong>Clientes</strong><br>'; respCli.data.forEach(c=>html+='• '+c.name+'<br>'); }
+            if (respPar.data?.length) { html+='<strong>Parceiros</strong><br>'; respPar.data.forEach(p=>html+='• '+p.name+'<br>'); }
+            if (respVend.data?.length) { html+='<strong>Vendedores</strong><br>'; respVend.data.forEach(v=>html+='• '+v.name+'<br>'); }
             document.getElementById('bdayMsgs').innerHTML = html||'Nenhum aniversariante hoje.';
         }
 
-        aplicarTema(); carregarClientes(); carregarParceiros(); carregarVendedores();
+        aplicarTema();
+        carregarClientes(); carregarParceiros(); carregarVendedores();
     </script>
 </body>
 </html>
