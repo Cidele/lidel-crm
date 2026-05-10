@@ -80,7 +80,6 @@
     </div>
 
     <script>
-        // Configuração do Supabase
         const SUPABASE_URL = 'https://uqnxckjhmdkviouoivyy.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -92,34 +91,21 @@
 
         // Aplicar tema da empresa
         async function aplicarTema() {
-            if (!companySlug) return; // Sem parâmetro, mantém tema padrão da LIDEL
-
-            // Buscar empresa pelo slug (nome simplificado)
+            if (!companySlug) return;
             const { data: companies, error } = await supabase
                 .from('companies')
                 .select('*')
                 .ilike('name', '%' + companySlug + '%')
                 .limit(1);
-
             if (error || !companies || companies.length === 0) return;
-
             currentCompany = companies[0];
             const theme = currentCompany.theme_config || {};
-            
-            // Aplicar cores
             if (theme.primary) {
                 document.body.style.background = `linear-gradient(135deg, ${theme.primary}, ${theme.secondary || theme.primary})`;
                 document.querySelector('button').style.background = theme.primary;
-                document.querySelector('button').onmouseover = function() { this.style.background = theme.secondary || theme.primary; };
-                document.querySelector('button').onmouseout = function() { this.style.background = theme.primary; };
-                document.getElementById('companyTitle').style.color = theme.primary;
             }
-            
-            // Aplicar nome da empresa
             document.getElementById('companyTitle').textContent = currentCompany.name;
             document.getElementById('companySubtitle').textContent = 'Painel da Loja';
-            
-            // Aplicar logo se existir
             if (theme.logo) {
                 const img = document.createElement('img');
                 img.src = theme.logo;
@@ -129,56 +115,61 @@
             }
         }
 
-        // Login
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const msg = document.getElementById('message');
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
+        // Função de login CORRIGIDA
+        async function fazerLogin(email, password) {
+            var msg = document.getElementById('message');
             msg.className = 'msg loading';
             msg.textContent = 'Autenticando...';
 
-            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+            // 1. Autenticar
+            var response = await supabase.auth.signInWithPassword({ email: email, password: password });
 
-            if (authError) {
+            if (response.error) {
                 msg.className = 'msg error';
-                msg.textContent = 'Erro: ' + authError.message;
+                msg.textContent = 'Erro: ' + response.error.message;
                 return;
             }
 
-            // Buscar perfil do usuário
-            const { data: userData, error: userError } = await supabase
+            // 2. Buscar perfil do usuário
+            var userResponse = await supabase
                 .from('users')
                 .select('company_id, role')
                 .eq('email', email)
                 .single();
 
-            if (userError || !userData) {
+            if (!userResponse.data) {
                 msg.className = 'msg error';
                 msg.textContent = 'Usuário não encontrado na base.';
                 return;
             }
 
-            // Salvar dados na sessão
-            localStorage.setItem('lidel_token', authData.session.access_token);
-            localStorage.setItem('lidel_company_id', userData.company_id);
-            localStorage.setItem('lidel_role', userData.role);
+            // 3. Salvar dados
+            localStorage.setItem('lidel_token', response.data.session.access_token);
+            localStorage.setItem('lidel_company_id', userResponse.data.company_id);
+            localStorage.setItem('lidel_role', userResponse.data.role);
 
             msg.className = 'msg success';
             msg.textContent = 'Login realizado! Redirecionando...';
 
-            // Redirecionar conforme o papel
-            setTimeout(() => {
-                if (userData.role === 'admin') {
+            // 4. Redirecionar
+            setTimeout(function() {
+                if (userResponse.data.role === 'admin') {
                     window.location.href = 'admin.html';
                 } else {
                     window.location.href = 'dashboard.html';
                 }
             }, 1000);
+        }
+
+        // Evento do formulário
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            fazerLogin(email, password);
         });
 
-        // Aplicar tema ao carregar a página
+        // Aplicar tema ao carregar
         aplicarTema();
     </script>
 </body>
