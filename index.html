@@ -14,7 +14,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.5s;
         }
         .login-box {
             background: white;
@@ -24,11 +23,7 @@
             max-width: 400px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo img { max-height: 80px; margin-bottom: 10px; }
+        .logo { text-align: center; margin-bottom: 30px; }
         .logo h1 { color: #0033CC; font-size: 28px; }
         .logo p { color: #666; font-size: 14px; }
         input {
@@ -50,7 +45,6 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            transition: background 0.3s;
         }
         button:hover { background: #001F7F; }
         .msg {
@@ -67,9 +61,9 @@
 </head>
 <body>
     <div class="login-box">
-        <div class="logo" id="logoArea">
-            <h1 id="companyTitle">LIDEL</h1>
-            <p id="companySubtitle">CRM & Pós-Venda Inteligente</p>
+        <div class="logo">
+            <h1>LIDEL</h1>
+            <p>CRM & Pós-Venda Inteligente</p>
         </div>
         <form id="loginForm">
             <input type="email" id="email" placeholder="Email" required>
@@ -84,44 +78,11 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxbnhja2pobWRrdmlvdW9pdnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MDk4NTAsImV4cCI6MjA5MzE4NTg1MH0.eXz3MU1PCxxQ5Yz0HzWIgqJhdyBAcQfT78rUDGdzVQc';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Obter parâmetro da URL (ex: ?company=gnc)
-        const urlParams = new URLSearchParams(window.location.search);
-        const companySlug = urlParams.get('company');
-        let currentCompany = null;
-
-        // Aplicar tema da empresa
-        async function aplicarTema() {
-            if (!companySlug) return;
-            const { data: companies, error } = await supabase
-                .from('companies')
-                .select('*')
-                .ilike('name', '%' + companySlug + '%')
-                .limit(1);
-            if (error || !companies || companies.length === 0) return;
-            currentCompany = companies[0];
-            const theme = currentCompany.theme_config || {};
-            if (theme.primary) {
-                document.body.style.background = `linear-gradient(135deg, ${theme.primary}, ${theme.secondary || theme.primary})`;
-                document.querySelector('button').style.background = theme.primary;
-            }
-            document.getElementById('companyTitle').textContent = currentCompany.name;
-            document.getElementById('companySubtitle').textContent = 'Painel da Loja';
-            if (theme.logo) {
-                const img = document.createElement('img');
-                img.src = theme.logo;
-                img.style.maxHeight = '80px';
-                img.style.marginBottom = '10px';
-                document.getElementById('logoArea').insertBefore(img, document.getElementById('companyTitle'));
-            }
-        }
-
-        // Função de login CORRIGIDA
         async function fazerLogin(email, password) {
             var msg = document.getElementById('message');
             msg.className = 'msg loading';
             msg.textContent = 'Autenticando...';
 
-            // 1. Autenticar
             var response = await supabase.auth.signInWithPassword({ email: email, password: password });
 
             if (response.error) {
@@ -130,7 +91,6 @@
                 return;
             }
 
-            // 2. Buscar perfil do usuário
             var userResponse = await supabase
                 .from('users')
                 .select('company_id, role')
@@ -143,7 +103,6 @@
                 return;
             }
 
-            // 3. Salvar dados
             localStorage.setItem('lidel_token', response.data.session.access_token);
             localStorage.setItem('lidel_company_id', userResponse.data.company_id);
             localStorage.setItem('lidel_role', userResponse.data.role);
@@ -151,7 +110,6 @@
             msg.className = 'msg success';
             msg.textContent = 'Login realizado! Redirecionando...';
 
-            // 4. Redirecionar
             setTimeout(function() {
                 if (userResponse.data.role === 'admin') {
                     window.location.href = 'admin.html';
@@ -161,16 +119,12 @@
             }, 1000);
         }
 
-        // Evento do formulário
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             var email = document.getElementById('email').value;
             var password = document.getElementById('password').value;
             fazerLogin(email, password);
         });
-
-        // Aplicar tema ao carregar
-        aplicarTema();
     </script>
 </body>
 </html>
