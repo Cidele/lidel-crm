@@ -45,6 +45,15 @@
         .sac-popup-input { display: flex; border-top: 1px solid #eee; padding: 8px; }
         .sac-popup-input input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 14px; }
         .sac-popup-input button { background: #0055FF; color: white; border: none; border-radius: 20px; padding: 8px 14px; margin-left: 8px; }
+        
+        /* Modal de Mensagem */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 500px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+        .modal-content h2 { margin-top: 0; }
+        .modal-content textarea { width: 100%; font-family: 'Segoe UI', Arial, sans-serif; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; resize: vertical; font-size: 14px; line-height: 1.5; box-sizing: border-box; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 12px; }
+        .modal-buttons button { flex: 1; }
     </style>
 </head>
 <body>
@@ -97,7 +106,19 @@
         <table><thead><tr><th>Código</th><th>Valor</th><th>Data</th><th>Cliente</th></tr></thead><tbody id="listaGiftCardsUsados"></tbody></table>
     </div>
 
-    <!-- MINI SAC -->
+    <!-- MODAL DE MENSAGEM PÓS-VENDA -->
+    <div class="modal" id="modalMensagem">
+        <div class="modal-content">
+            <h2>📨 Mensagem para o Cliente</h2>
+            <textarea id="mensagemGerada" readonly rows="8"></textarea>
+            <div class="modal-buttons">
+                <button onclick="copiarMensagem()">📋 Copiar Mensagem</button>
+                <button onclick="fecharModalMensagem()" style="background:#6b7280;">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+   <!-- MINI SAC -->
     <div class="sac-float"><button onclick="toggleSAC()">💬</button></div>
     <div class="sac-popup" id="sacPopup">
         <div class="sac-popup-header">💬 Suporte <span onclick="toggleSAC()" style="cursor:pointer;">✕</span></div>
@@ -255,6 +276,89 @@
             document.getElementById('valor').value = ''; document.getElementById('cashback').textContent = 'R$ 0,00';
             limparCliente(); btn.disabled = false; btn.textContent = '💾 Salvar Venda';
             carregarVendas(); carregarSelects(); carregarGiftCardsUsados();
+
+            // 🆕 GERAR MENSAGEM PÓS-VENDA
+            await gerarMensagemPosVenda(cli, respVenda.data.id, valorFinal, cashbackGerado);
+        }
+
+        // 🆕 FUNÇÃO PARA GERAR MENSAGEM PÓS-VENDA
+        async function gerarMensagemPosVenda(clientId, saleId, valorPago, cashbackGerado) {
+            try {
+                // Buscar dados do cliente
+                const { data: client } = await s.from('clients').select('name').eq('id', clientId).single();
+                
+                // Buscar dados da empresa
+                const { data: company } = await s.from('companies').select('name, google_review_url').eq('id', COMPANY_ID).single();
+                
+                // Buscar nível do cliente
+                const { data: levelData } = await s.from('client_levels').select('level').eq('client_id', clientId).single();
+                
+                // Buscar código de indicação mais recente
+                const { data: referralData } = await s.from('referral_codes').select('code').eq('client_id', clientId).eq('is_used', false).order('created_at', { ascending: false }).limit(1).single();
+                
+                // Buscar regras de cashback
+                const { data: rules } = await s.from('company_reward_rules').select('*').eq('company_id', COMPANY_ID).single();
+                
+                const nomeCliente = client?.name || 'Cliente';
+                const nomeEmpresa = company?.name || 'Nossa Loja';
+                const linkGoogle = company?.google_review_url || 'Link não cadastrado';
+                const nivelCliente = levelData?.level || 'Iniciante';
+                const codigoIndicacao = referralData?.code || 'Ainda não gerado';
+                const validadeDias = rules?.cashback_validity_days || 45;
+                
+                // Calcular valor mínimo para uso (4x o cashback)
+                const valorMinimoUso = (cashbackGerado * 4).toFixed(2);
+                
+                // Calcular data de expiração
+                const dataExpiracao = new Date();
+                dataExpiracao.setDate(dataExpiracao.getDate() + validadeDias);
+                const dataFormatada = dataExpiracao.toLocaleDateString('pt-BR');
+
+           // Montar a mensagem
+                const mensagem = `🎉 Olá, ${nomeCliente}!\n\nSua compra na ${nomeEmpresa} gerou R$ ${cashbackGerado.toFixed(2)} de cashback,\npara sua próxima compra a partir de R$ ${valorMinimoUso}.\n\n💡 Seu cashback expira em ${dataFormatada}.\n\n🎫 Seu código de indicação: ${codigoIndicacao}\nCompartilhe e ganhe mais cashback!\n\nSeu nível atual é: ${nivelCliente}\n\n⭐ Avalie a gente no Google:\n${linkGoogle}`;
+                
+                // Salvar na fila de mensagens
+                const { data: templateData } = await s.from('message_templates').select('id').eq('type', 'cashback').eq('is_active', true).limit(1).single();
+                
+                await s.from('message_queue').insert([{
+                    company_id: COMPANY_ID,
+                    client_id: clientId,
+                    sale_id: saleId,
+                    template_id: templateData?.id || null,
+                    type: 'cashback',
+                    content: mensagem,
+                    status: 'pending'
+                }]);
+                
+                // Exibir no modal
+                document.getElementById('mensagemGerada').value = mensagem;
+                document.getElementById('modalMensagem').classList.add('active');
+                
+            } catch (err) {
+                console.error('Erro ao gerar mensagem:', err);
+                // Se falhar, ainda assim exibe uma mensagem básica
+                const mensagemBasica = `🎉 Olá, Cliente!\n\nSua compra gerou R$ ${cashbackGerado.toFixed(2)} de cashback.\n\n💡 Use em sua próxima compra.`;
+                document.getElementById('mensagemGerada').value = mensagemBasica;
+                document.getElementById('modalMensagem').classList.add('active');
+            }
+        }
+
+        // 🆕 FUNÇÃO PARA COPIAR MENSAGEM
+        function copiarMensagem() {
+            const msg = document.getElementById('mensagemGerada').value;
+            navigator.clipboard.writeText(msg).then(() => {
+                alert('✅ Mensagem copiada! Cole no WhatsApp do cliente.');
+            }).catch(() => {
+                // Fallback para navegadores que não suportam clipboard API
+                document.getElementById('mensagemGerada').select();
+                document.execCommand('copy');
+                alert('✅ Mensagem copiada! Cole no WhatsApp do cliente.');
+            });
+        }
+
+        // 🆕 FUNÇÃO PARA FECHAR MODAL
+        function fecharModalMensagem() {
+            document.getElementById('modalMensagem').classList.remove('active');
         }
 
         async function carregarVendas() {
@@ -311,6 +415,23 @@ document.getElementById('listaVendas').innerHTML = (resp.data||[]).map(v => `<tr
             if (pontos >= 5) return 0.03;
             if (pontos >= 3) return 0.02;
             return 0;
+        }
+
+        async function aplicarGiftCard() {
+            var code = document.getElementById('giftCardCode').value.trim();
+            if (!code) return;
+            var { data } = await s.from('giftcards').select('*').eq('code', code).eq('company_id', COMPANY_ID).eq('is_used', false).single();
+            if (!data) { alert('Gift card inválido ou já utilizado.'); return; }
+            currentGiftCard = data;
+            document.getElementById('giftCardInfo').style.display = 'block';
+            document.getElementById('giftCardInfo').innerHTML = `✅ Gift Card: R$ ${data.value.toFixed(2)} - ${data.message||''}`;
+            atualizar();
+        }
+
+        function mostrarFormParceiro() {
+            var nome = prompt('Nome do parceiro:');
+            if (!nome) return;
+            s.from('partners').insert([{ company_id: COMPANY_ID, name: nome }]).then(() => carregarSelects());
         }
 
         aplicarTema(); carregarSelects();
